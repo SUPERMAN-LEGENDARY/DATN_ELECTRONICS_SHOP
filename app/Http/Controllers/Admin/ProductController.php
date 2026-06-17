@@ -35,11 +35,85 @@ class ProductController extends Controller
             $query->where('is_active', $request->status === 'active');
         }
 
-        $products   = $query->latest()->paginate(20)->withQueryString();
-        $categories = Category::categories()->active()->get();
-        $brands     = Category::brands()->active()->get();
+        $products      = $query->latest()->paginate(20)->withQueryString();
+        $categories    = Category::categories()->active()->get();
+        $brands        = Category::brands()->active()->get();
+        $trashedCount  = Product::onlyTrashed()->count();
 
-        return view('admin.products.index', compact('products', 'categories', 'brands'));
+        return view('admin.products.index', compact('products', 'categories', 'brands', 'trashedCount'));
+    }
+
+    // ─── Thùng rác ───────────────────────────────────────────────
+
+    public function trash(Request $request)
+    {
+        $query = Product::onlyTrashed()->with(['category', 'brand']);
+
+        if ($request->filled('q')) {
+            $query->where('name', 'like', '%' . $request->q . '%');
+        }
+
+        $products = $query->latest('deleted_at')->paginate(20)->withQueryString();
+
+        return view('admin.products.trash', compact('products'));
+    }
+
+    // ─── Khôi phục 1 sản phẩm ────────────────────────────────────
+
+    public function restore(int $id)
+    {
+        $product = Product::onlyTrashed()->findOrFail($id);
+        $product->restore();
+
+        return redirect()->route('admin.products.trash')
+        ->with('success', "Đã khôi phục sản phẩm \"{$product->name}\".");          
+    }
+
+    // ─── Khôi phục tất cả ────────────────────────────────────────
+
+    public function restoreAll()
+    {
+        $count = Product::onlyTrashed()->count();
+        Product::onlyTrashed()->restore();
+
+        return redirect()->route('admin.products.trash')
+            ->with('success', "Đã khôi phục {$count} sản phẩm.");
+    }
+
+    // ─── Xóa vĩnh viễn 1 sản phẩm ───────────────────────────────
+
+    public function forceDelete(int $id)
+    {
+        $product = Product::onlyTrashed()->findOrFail($id);
+
+        // Xóa ảnh khỏi storage
+        foreach ($product->images ?? [] as $img) {
+            $path = str_replace('/storage/', '', $img);
+            Storage::disk('public')->delete($path);
+        }
+
+        $product->forceDelete();
+
+        return redirect()->route('admin.products.trash')
+            ->with('success', 'Đã xóa vĩnh viễn sản phẩm.');
+    }
+
+    // ─── Xóa vĩnh viễn tất cả trong thùng rác ───────────────────
+
+    public function emptyTrash()
+    {
+        $trashed = Product::onlyTrashed()->get();
+
+        foreach ($trashed as $product) {
+            foreach ($product->images ?? [] as $img) {
+                $path = str_replace('/storage/', '', $img);
+                Storage::disk('public')->delete($path);
+            }
+            $product->forceDelete();
+        }
+
+        return redirect()->route('admin.products.trash')
+            ->with('success', 'Đã dọn sạch thùng rác.');
     }
 
     // ─── Form tạo mới ────────────────────────────────────────────
@@ -60,7 +134,6 @@ class ProductController extends Controller
         DB::transaction(function () use ($request) {
             $data = $request->validated();
 
-            // Xử lý upload ảnh
             $images = [];
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $file) {
@@ -73,7 +146,6 @@ class ProductController extends Controller
 
             $product = Product::create($data);
 
-            // Lưu thuộc tính
             $this->syncAttributes($product, $request->input('attributes', []));
         });
 
@@ -85,10 +157,10 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        $categories    = Category::categories()->active()->get();
-        $brands        = Category::brands()->active()->get();
-        $attributes    = Attribute::orderBy('name')->get();
-        $productAttrs  = $product->attributes->keyBy('attribute_id');
+        $categories   = Category::categories()->active()->get();
+        $brands       = Category::brands()->active()->get();
+        $attributes   = Attribute::orderBy('name')->get();
+        $productAttrs = $product->attributes->keyBy('attribute_id');
 
         return view('admin.products.edit', compact(
             'product', 'categories', 'brands', 'attributes', 'productAttrs'
@@ -102,9 +174,7 @@ class ProductController extends Controller
         DB::transaction(function () use ($request, $product) {
             $data = $request->validated();
 
-            // Xử lý upload ảnh mới (nếu có)
             if ($request->hasFile('images')) {
-                // Xóa ảnh cũ
                 foreach ($product->images ?? [] as $old) {
                     $path = str_replace('/storage/', '', $old);
                     Storage::disk('public')->delete($path);
@@ -116,13 +186,12 @@ class ProductController extends Controller
                 }
                 $data['images'] = $images;
             } else {
-                unset($data['images']); // giữ nguyên ảnh cũ
+                unset($data['images']);
             }
 
             $data['slug'] = Str::slug($data['name']);
             $product->update($data);
 
-            // Đồng bộ thuộc tính
             $this->syncAttributes($product, $request->input('attributes', []));
         });
 
@@ -130,20 +199,14 @@ class ProductController extends Controller
             ->with('success', 'Cập nhật sản phẩm thành công!');
     }
 
-    // ─── Xóa sản phẩm ────────────────────────────────────────────
+    // ─── Xóa mềm sản phẩm ────────────────────────────────────────
 
     public function destroy(Product $product)
     {
-        // Xóa ảnh trên storage
-        foreach ($product->images ?? [] as $img) {
-            $path = str_replace('/storage/', '', $img);
-            Storage::disk('public')->delete($path);
-        }
-
-        $product->delete();
+        $product->delete(); // ghi deleted_at, chuyển vào thùng rác
 
         return redirect()->route('admin.products.index')
-            ->with('success', 'Đã xóa sản phẩm.');
+            ->with('success', 'Đã chuyển sản phẩm vào thùng rác.');
     }
 
     // ─── Bật / tắt trạng thái hiển thị (AJAX) ───────────────────
@@ -158,11 +221,22 @@ class ProductController extends Controller
         ]);
     }
 
+    // ─── Thêm số lượng (AJAX) ────────────────────────────────────
+
+    public function addStock(Request $request, Product $product)
+    {
+        $request->validate(['quantity' => 'required|integer|min:1']);
+        $product->increment('stock', $request->quantity);
+
+        return response()->json([
+            'stock' => $product->fresh()->stock,
+        ]);
+    }
+
     // ─── Helper: đồng bộ thuộc tính ─────────────────────────────
 
     private function syncAttributes(Product $product, array $attrs): void
     {
-        // Xóa thuộc tính cũ rồi tạo lại
         $product->attributes()->delete();
 
         foreach ($attrs as $attrId => $value) {

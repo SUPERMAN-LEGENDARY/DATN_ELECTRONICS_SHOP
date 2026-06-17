@@ -9,6 +9,9 @@
 .btn-primary:hover { background:#0D47A1; }
 .btn-danger  { background:#E53935; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-size:12px; font-weight:600; cursor:pointer; }
 .btn-warning { background:#F57C00; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-size:12px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; }
+.btn-trash   { background:#fff; color:#757575; border:1px solid #e0e0e0; padding:9px 18px; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; position:relative; }
+.btn-trash:hover { background:#fafafa; border-color:#bdbdbd; }
+.trash-badge { background:#E53935; color:#fff; border-radius:10px; font-size:11px; font-weight:700; padding:1px 7px; margin-left:4px; }
 .filter-bar { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
 .filter-bar input, .filter-bar select { border:1px solid #e0e0e0; border-radius:6px; padding:8px 12px; font-size:13px; outline:none; }
 .filter-bar button { background:#1565C0; color:#fff; border:none; border-radius:6px; padding:8px 16px; font-size:13px; cursor:pointer; }
@@ -29,9 +32,17 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
 @section('content')
 <div class="admin-header">
     <h1><i class="fas fa-box"></i> Quản lý sản phẩm</h1>
-    <a href="{{ route('admin.products.create') }}" class="btn-primary">
-        <i class="fas fa-plus"></i> Thêm sản phẩm
-    </a>
+    <div style="display:flex;gap:10px;align-items:center">
+        <a href="{{ route('admin.products.trash') }}" class="btn-trash">
+            <i class="fas fa-trash-alt"></i> Thùng rác
+            @if($trashedCount > 0)
+                <span class="trash-badge">{{ $trashedCount }}</span>
+            @endif
+        </a>
+        <a href="{{ route('admin.products.create') }}" class="btn-primary">
+            <i class="fas fa-plus"></i> Thêm sản phẩm
+        </a>
+    </div>
 </div>
 
 @if(session('success'))
@@ -74,7 +85,7 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
                 <th>Thương hiệu</th>
                 <th>Giá (đ)</th>
                 <th>Giảm</th>
-                <th>Tồn kho</th>
+                <th>Số lượng</th>
                 <th>ĐG</th>
                 <th>Hiển thị</th>
                 <th>Thao tác</th>
@@ -102,8 +113,12 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
                 <td>{{ number_format($product->price) }}</td>
                 <td>{{ $product->discount_percent > 0 ? $product->discount_percent.'%' : '—' }}</td>
                 <td>
-                    <span style="{{ $product->stock <= 5 ? 'color:#E53935;font-weight:600' : '' }}">
-                        {{ number_format($product->stock) }}
+                    <span class="stock-wrap" style="{{ $product->stock <= 5 ? 'color:#E53935;font-weight:600' : '' }}">
+                        <span class="stock-val">{{ number_format($product->stock) }}</span>
+                        <button class="btn-add-stock" data-id="{{ $product->id }}" title="Thêm số lượng"
+                            style="background:none;border:1px solid #1565C0;color:#1565C0;border-radius:4px;padding:1px 6px;font-size:11px;cursor:pointer;margin-left:4px">
+                            +
+                        </button>
                     </span>
                 </td>
                 <td>
@@ -129,7 +144,7 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
                             <i class="fas fa-edit"></i>
                         </a>
                         <form action="{{ route('admin.products.destroy', $product) }}" method="POST"
-                              onsubmit="return confirm('Xóa sản phẩm này?')">
+                              onsubmit="return confirm('Chuyển sản phẩm này vào thùng rác?')">
                             @csrf @method('DELETE')
                             <button type="submit" class="btn-danger"><i class="fas fa-trash"></i></button>
                         </form>
@@ -152,6 +167,7 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
 
 @push('scripts')
 <script>
+// Toggle hiển thị / ẩn sản phẩm
 document.querySelectorAll('.toggle-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         const id = this.dataset.id;
@@ -171,6 +187,33 @@ document.querySelectorAll('.toggle-btn').forEach(btn => {
             } else {
                 badge.className = 'status-badge status-off';
                 badge.textContent = 'Đã ẩn';
+            }
+        });
+    });
+});
+
+// Thêm số lượng
+document.querySelectorAll('.btn-add-stock').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const id = this.dataset.id;
+        const qty = prompt('Nhập số lượng cần thêm:', '');
+        if (!qty || isNaN(qty) || parseInt(qty) <= 0) return;
+        fetch(`/admin/san-pham/${id}/them-so-luong`, {
+            method: 'PATCH',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ quantity: parseInt(qty) })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.stock !== undefined) {
+                const wrap = this.closest('.stock-wrap');
+                wrap.querySelector('.stock-val').textContent = data.stock.toLocaleString('vi-VN');
+                wrap.style = data.stock <= 5 ? 'color:#E53935;font-weight:600' : '';
             }
         });
     });

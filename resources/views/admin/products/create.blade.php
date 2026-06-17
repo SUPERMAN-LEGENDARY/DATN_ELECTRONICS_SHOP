@@ -122,7 +122,7 @@
                 @error('discount_percent')<div class="error">{{ $message }}</div>@enderror
             </div>
             <div class="form-group">
-                <label>Tồn kho</label>
+                <label>Số Lượng</label>
                 <input type="number" name="stock"
                        value="{{ old('stock', $product->stock ?? 0) }}" min="0">
             </div>

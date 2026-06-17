@@ -61,8 +61,12 @@
 
         <div class="nav-section">Quản lý</div>
         <a href="{{ route('admin.products.index') }}"
-           class="nav-item {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
+        class="nav-item {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
             <i class="fas fa-box"></i> Sản phẩm
+        </a>
+        <a href="{{ route('admin.categories.index', ['type' => 'category']) }}"
+            class="nav-item {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
+            <i class="fas fa-layer-group"></i> Danh mục / Thương hiệu
         </a>
         {{-- Thêm menu khác sau --}}
     </nav>
