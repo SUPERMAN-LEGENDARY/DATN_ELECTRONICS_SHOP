@@ -249,7 +249,7 @@
             <div class="nav-section">Hệ thống</div>
             <a href="{{ route('admin.users.index') }}"
                 class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                <i class="fas fa-user-shield"></i> Phân quyền tài khoản
+                <i class="fas fa-user-shield"></i> Quản lý tài khoản
             </a>
             @endif
         </nav>
