@@ -21,7 +21,9 @@ class CategoryController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.categories.index', compact('items', 'type', 'search'));
+        $trashedCount = Category::onlyTrashed()->where('type', $type)->count();
+
+        return view('admin.categories.index', compact('items', 'type', 'search', 'trashedCount'));
     }
 
     // ─── Form tạo mới ─────────────────────────────────────────────
@@ -93,7 +95,7 @@ class CategoryController extends Controller
             ->with('success', 'Đã cập nhật thành công.');
     }
 
-    // ─── Xóa ──────────────────────────────────────────────────────
+    // ─── Xóa mềm (chuyển vào thùng rác) ────────────────────────────
     public function destroy(Category $category)
     {
         // Kiểm tra xem có sản phẩm đang dùng không
@@ -105,16 +107,114 @@ class CategoryController extends Controller
             return back()->with('error', "Không thể xóa: còn {$count} sản phẩm đang dùng.");
         }
 
-        if ($category->logo) {
-            \Storage::disk('public')->delete($category->logo);
-        }
-
         $type = $category->type;
-        $category->delete();
+        $category->delete(); // ghi deleted_at, chuyển vào thùng rác
 
         return redirect()
             ->route('admin.categories.index', ['type' => $type])
-            ->with('success', 'Đã xóa thành công.');
+            ->with('success', 'Đã chuyển vào thùng rác.');
+    }
+
+    // ─── Thùng rác ──────────────────────────────────────────────────
+    public function trash(Request $request)
+    {
+        $type   = $request->get('type', 'category');
+        $search = $request->get('search');
+
+        $items = Category::onlyTrashed()
+            ->where('type', $type)
+            ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%"))
+            ->orderByDesc('deleted_at')
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('admin.categories.trash', compact('items', 'type', 'search'));
+    }
+
+    // ─── Khôi phục 1 mục ─────────────────────────────────────────────
+    public function restore(int $id)
+    {
+        $category = Category::onlyTrashed()->findOrFail($id);
+        $category->restore();
+
+        return redirect()
+            ->route('admin.categories.trash', ['type' => $category->type])
+            ->with('success', "Đã khôi phục \"{$category->name}\".");
+    }
+
+    // ─── Khôi phục tất cả ────────────────────────────────────────────
+    public function restoreAll(Request $request)
+    {
+        $type  = $request->get('type', 'category');
+        $count = Category::onlyTrashed()->where('type', $type)->count();
+        Category::onlyTrashed()->where('type', $type)->restore();
+
+        return redirect()
+            ->route('admin.categories.trash', ['type' => $type])
+            ->with('success', "Đã khôi phục {$count} mục.");
+    }
+
+    // ─── Xóa vĩnh viễn 1 mục ─────────────────────────────────────────
+    public function forceDelete(int $id)
+    {
+        $category = Category::onlyTrashed()->findOrFail($id);
+        $type = $category->type;
+
+        // Kiểm tra ràng buộc khóa ngoại — kể cả sản phẩm đã ở thùng rác
+        $count = $type === 'brand'
+            ? $category->brandProducts()->withTrashed()->count()
+            : $category->products()->withTrashed()->count();
+
+        if ($count > 0) {
+            return redirect()
+                ->route('admin.categories.trash', ['type' => $type])
+                ->with('error', "Không thể xóa vĩnh viễn: còn {$count} sản phẩm (kể cả trong thùng rác) đang tham chiếu.");
+        }
+
+        if ($category->logo) {
+            \Storage::disk('public')->delete($category->logo);
+        }
+        $category->forceDelete();
+
+        return redirect()
+            ->route('admin.categories.trash', ['type' => $type])
+            ->with('success', 'Đã xóa vĩnh viễn.');
+    }
+
+    // ─── Dọn sạch thùng rác ──────────────────────────────────────────
+    public function emptyTrash(Request $request)
+    {
+        $type    = $request->get('type', 'category');
+        $trashed = Category::onlyTrashed()->where('type', $type)->get();
+
+        $deleted = 0;
+        $skipped = 0;
+
+        foreach ($trashed as $category) {
+            $count = $type === 'brand'
+                ? $category->brandProducts()->withTrashed()->count()
+                : $category->products()->withTrashed()->count();
+
+            if ($count > 0) {
+                $skipped++;
+                continue;
+            }
+
+            if ($category->logo) {
+                \Storage::disk('public')->delete($category->logo);
+            }
+            $category->forceDelete();
+            $deleted++;
+        }
+
+        $message = "Đã xóa vĩnh viễn {$deleted} mục.";
+        if ($skipped > 0) {
+            $message .= " Bỏ qua {$skipped} mục còn sản phẩm tham chiếu.";
+        }
+
+        return redirect()
+            ->route('admin.categories.trash', ['type' => $type])
+            ->with('success', $message);
     }
 
     // ─── Bật/tắt trạng thái ───────────────────────────────────────
@@ -122,7 +222,8 @@ class CategoryController extends Controller
     {
         $category->update(['is_active' => !$category->is_active]);
 
-        return back()->with('success',
+        return back()->with(
+            'success',
             $category->is_active ? 'Đã kích hoạt.' : 'Đã tắt kích hoạt.'
         );
     }
@@ -135,9 +236,9 @@ class CategoryController extends Controller
         $i    = 1;
 
         while (
-            Category::where('slug', $slug)
-                ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
-                ->exists()
+            Category::withTrashed()->where('slug', $slug)
+            ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
+            ->exists()
         ) {
             $slug = "{$base}-{$i}";
             $i++;

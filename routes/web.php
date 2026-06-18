@@ -3,7 +3,10 @@
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\NewsController as AdminNewsController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CartController;
 use Illuminate\Support\Facades\Route;
 
 // ─── TRANG CHỦ ────────────────────────────────────────────────────
@@ -30,52 +33,90 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-
-use App\Http\Controllers\CartController;
-
 // ─── GIỎ HÀNG ─────────────────────────────────────────────────────
 Route::prefix('gio-hang')->name('cart.')->group(function () {
-    Route::get('/',                    [CartController::class, 'index'])->name('index');
-    Route::post('/them',               [CartController::class, 'add'])->name('add');
-    Route::post('/mua-ngay',           [CartController::class, 'buyNow'])->name('buy-now');
-    Route::patch('/{productId}',       [CartController::class, 'update'])->name('update');
-    Route::delete('/{productId}',      [CartController::class, 'remove'])->name('remove');
-    Route::delete('/',                 [CartController::class, 'clear'])->name('clear');
+    Route::get('/',               [CartController::class, 'index'])->name('index');
+    Route::post('/them',          [CartController::class, 'add'])->name('add');
+    Route::post('/mua-ngay',      [CartController::class, 'buyNow'])->name('buy-now');
+    Route::patch('/{productId}',  [CartController::class, 'update'])->name('update');
+    Route::delete('/{productId}', [CartController::class, 'remove'])->name('remove');
+    Route::delete('/',            [CartController::class, 'clear'])->name('clear');
 });
 
-// ─── ADMIN: QUẢN LÝ SẢN PHẨM ─────────────────────────────────────
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+// ─── ADMIN ────────────────────────────────────────────────────────
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])->group(function () {
+
+    // ── Sản phẩm (admin + staff) ──────────────────────────────────
     Route::prefix('san-pham')->name('products.')->group(function () {
-        // Danh sách & CRUD thông thường
         Route::get('/',                          [AdminProductController::class, 'index'])->name('index');
         Route::get('/them',                      [AdminProductController::class, 'create'])->name('create');
         Route::post('/',                         [AdminProductController::class, 'store'])->name('store');
+        Route::get('/thung-rac',                 [AdminProductController::class, 'trash'])->name('trash');
+        Route::patch('/khoi-phuc-tat-ca',        [AdminProductController::class, 'restoreAll'])->name('restore-all');
+        Route::delete('/don-thung-rac',          [AdminProductController::class, 'emptyTrash'])->name('empty-trash');
         Route::get('/{product}/sua',             [AdminProductController::class, 'edit'])->name('edit');
         Route::put('/{product}',                 [AdminProductController::class, 'update'])->name('update');
         Route::delete('/{product}',              [AdminProductController::class, 'destroy'])->name('destroy');
         Route::patch('/{product}/toggle-active', [AdminProductController::class, 'toggleActive'])->name('toggle-active');
         Route::patch('/{product}/them-so-luong', [AdminProductController::class, 'addStock'])->name('add-stock');
-
-        // ─── THÙNG RÁC ──────────────────────────────────────────
-        Route::get('/thung-rac',                 [AdminProductController::class, 'trash'])->name('trash');
         Route::patch('/{id}/khoi-phuc',          [AdminProductController::class, 'restore'])->name('restore');
-        Route::patch('/khoi-phuc-tat-ca',        [AdminProductController::class, 'restoreAll'])->name('restore-all');
         Route::delete('/{id}/xoa-vinh-vien',     [AdminProductController::class, 'forceDelete'])->name('force-delete');
-        Route::delete('/don-thung-rac',          [AdminProductController::class, 'emptyTrash'])->name('empty-trash');
     });
+
+    // ── Danh mục (admin + staff) ──────────────────────────────────
     Route::prefix('danh-muc')->name('categories.')->group(function () {
-    Route::get('/',                          [AdminCategoryController::class, 'index'])->name('index');
-    Route::get('/them',                      [AdminCategoryController::class, 'create'])->name('create');
-    Route::post('/',                         [AdminCategoryController::class, 'store'])->name('store');
-    Route::get('/{category}/sua',            [AdminCategoryController::class, 'edit'])->name('edit');
-    Route::put('/{category}',                [AdminCategoryController::class, 'update'])->name('update');
-    Route::delete('/{category}',             [AdminCategoryController::class, 'destroy'])->name('destroy');
-    Route::patch('/{category}/toggle-active',[AdminCategoryController::class, 'toggleActive'])->name('toggle-active');
-});
+        Route::get('/',                          [AdminCategoryController::class, 'index'])->name('index');
+        Route::get('/them',                      [AdminCategoryController::class, 'create'])->name('create');
+        Route::post('/',                         [AdminCategoryController::class, 'store'])->name('store');
+        Route::get('/thung-rac',                 [AdminCategoryController::class, 'trash'])->name('trash');
+        Route::patch('/khoi-phuc-tat-ca',        [AdminCategoryController::class, 'restoreAll'])->name('restore-all');
+        Route::delete('/don-thung-rac',          [AdminCategoryController::class, 'emptyTrash'])->name('empty-trash');
+        Route::get('/{category}/sua',            [AdminCategoryController::class, 'edit'])->name('edit');
+        Route::put('/{category}',                [AdminCategoryController::class, 'update'])->name('update');
+        Route::delete('/{category}',             [AdminCategoryController::class, 'destroy'])->name('destroy');
+        Route::patch('/{category}/toggle-active', [AdminCategoryController::class, 'toggleActive'])->name('toggle-active');
+        Route::patch('/{id}/khoi-phuc',          [AdminCategoryController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/xoa-vinh-vien',     [AdminCategoryController::class, 'forceDelete'])->name('force-delete');
+    });
+
+    // ── Tin tức (admin + staff) ───────────────────────────────────
+    Route::prefix('tin-tuc')->name('news.')->group(function () {
+        Route::get('/',                              [AdminNewsController::class, 'index'])->name('index');
+        Route::get('/them',                          [AdminNewsController::class, 'create'])->name('create');
+        Route::post('/',                             [AdminNewsController::class, 'store'])->name('store');
+        Route::get('/thung-rac',                      [AdminNewsController::class, 'trash'])->name('trash');
+        Route::patch('/khoi-phuc-tat-ca',             [AdminNewsController::class, 'restoreAll'])->name('restore-all');
+        Route::delete('/don-thung-rac',               [AdminNewsController::class, 'emptyTrash'])->name('empty-trash');
+
+        // Danh mục tin tức
+        Route::get('/danh-muc',                     [AdminNewsController::class, 'categories'])->name('categories');
+        Route::post('/danh-muc',                    [AdminNewsController::class, 'storeCategory'])->name('categories.store');
+        Route::get('/danh-muc/thung-rac',            [AdminNewsController::class, 'categoriesTrash'])->name('categories.trash');
+        Route::patch('/danh-muc/khoi-phuc-tat-ca',   [AdminNewsController::class, 'restoreAllCategories'])->name('categories.restore-all');
+        Route::delete('/danh-muc/don-thung-rac',     [AdminNewsController::class, 'emptyTrashCategories'])->name('categories.empty-trash');
+        Route::put('/danh-muc/{newsCategory}',      [AdminNewsController::class, 'updateCategory'])->name('categories.update');
+        Route::delete('/danh-muc/{newsCategory}',   [AdminNewsController::class, 'destroyCategory'])->name('categories.destroy');
+        Route::patch('/danh-muc/{id}/khoi-phuc',     [AdminNewsController::class, 'restoreCategory'])->name('categories.restore');
+        Route::delete('/danh-muc/{id}/xoa-vinh-vien', [AdminNewsController::class, 'forceDeleteCategory'])->name('categories.force-delete');
+
+        Route::get('/{news}/sua',                    [AdminNewsController::class, 'edit'])->name('edit');
+        Route::put('/{news}',                        [AdminNewsController::class, 'update'])->name('update');
+        Route::delete('/{news}',                     [AdminNewsController::class, 'destroy'])->name('destroy');
+        Route::patch('/{news}/toggle-active',        [AdminNewsController::class, 'toggleActive'])->name('toggle-active');
+        Route::patch('/{id}/khoi-phuc',               [AdminNewsController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/xoa-vinh-vien',          [AdminNewsController::class, 'forceDelete'])->name('force-delete');
+    });
+
+    // ── Phân quyền (chỉ admin) ────────────────────────────────────
+    Route::middleware('role:admin')->prefix('nguoi-dung')->name('users.')->group(function () {
+        Route::get('/',                            [AdminUserController::class, 'index'])->name('index');
+        Route::patch('/{user}/role',               [AdminUserController::class, 'updateRole'])->name('update-role');
+        Route::patch('/{user}/toggle-active',      [AdminUserController::class, 'toggleActive'])->name('toggle-active');
+    });
 });
 
-// Thêm vào web.php trước require auth.php
+// ─── TIN TỨC STOREFRONT (placeholder) ────────────────────────────
 Route::get('/tin-tuc', fn() => redirect('/'))->name('news.index');
 Route::get('/tin-tuc/{slug}', fn() => redirect('/'))->name('news.show');
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
