@@ -231,6 +231,12 @@
                 <i class="fas fa-store"></i> Xem cửa hàng
             </a>
 
+            <div class="nav-section">Bán hàng</div>
+            <a href="{{ route('dashboard') }}"
+                class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <i class="fas fa-chart-pie"></i> Thống kê
+            </a>
+
             <div class="nav-section">Quản lý</div>
             <a href="{{ route('admin.products.index') }}"
                 class="nav-item {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
@@ -240,6 +246,17 @@
                 class="nav-item {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
                 <i class="fas fa-layer-group"></i> Danh mục / Thương hiệu
             </a>
+            
+            <a href="{{ route('admin.vouchers.index') }}"
+                class="nav-item {{ request()->routeIs('admin.vouchers.*') ? 'active' : '' }}">
+                <i class="fas fa-ticket-alt"></i> Mã giảm giá
+            </a>
+
+             <a href="{{ route('admin.orders.index') }}"
+                class="nav-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+                <i class="fas fa-shopping-cart"></i> Đơn hàng
+            </a>
+            
             <a href="{{ route('admin.news.index') }}"
                 class="nav-item {{ request()->routeIs('admin.news.*') ? 'active' : '' }}">
                 <i class="fas fa-newspaper"></i> Tin tức
@@ -290,5 +307,4 @@
 
     @stack('scripts')
 </body>
-
 </html>

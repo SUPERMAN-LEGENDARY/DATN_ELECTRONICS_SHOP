@@ -5,12 +5,19 @@ use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\NewsController as AdminNewsController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\VoucherController as AdminVoucherController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CartController;
 use Illuminate\Support\Facades\Route;
 
 // ─── TRANG CHỦ ────────────────────────────────────────────────────
 Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+// ── Dashboard admin ────────────────────────────────────────────
+Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 // ─── STOREFRONT: SẢN PHẨM ────────────────────────────────────────
 Route::prefix('san-pham')->name('products.')->group(function () {
@@ -20,11 +27,6 @@ Route::prefix('san-pham')->name('products.')->group(function () {
         ->name('review')
         ->middleware('auth');
 });
-
-// ─── DASHBOARD ────────────────────────────────────────────────────
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 // ─── PROFILE ──────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
@@ -106,6 +108,49 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
         Route::patch('/{id}/khoi-phuc',               [AdminNewsController::class, 'restore'])->name('restore');
         Route::delete('/{id}/xoa-vinh-vien',          [AdminNewsController::class, 'forceDelete'])->name('force-delete');
     });
+
+   // ── Quản lý đơn hàng (admin + staff) ──────────────────────────
+Route::prefix('don-hang')->name('orders.')->group(function () {
+    // ── Route tĩnh ──
+    Route::get('/',                            [AdminOrderController::class, 'index'])->name('index');
+    Route::get('/thung-rac',              [AdminOrderController::class, 'trash'])->name('trash');
+    Route::patch('/khoi-phuc-tat-ca',     [AdminOrderController::class, 'restoreAll'])->name('restore-all');
+    Route::delete('/don-thung-rac',       [AdminOrderController::class, 'emptyTrash'])->name('empty-trash');
+
+    // ── Route động ──
+    Route::get('/{order}',                     [AdminOrderController::class, 'show'])->name('show');
+    Route::get('/{order}/sua',                 [AdminOrderController::class, 'edit'])->name('edit');
+    Route::put('/{order}',                     [AdminOrderController::class, 'update'])->name('update');
+    Route::patch('/{order}/status',            [AdminOrderController::class, 'updateStatus'])->name('update-status');
+    Route::patch('/{order}/cancel',            [AdminOrderController::class, 'cancel'])->name('cancel');
+    Route::delete('/{order}',                  [AdminOrderController::class, 'destroy'])->name('destroy');
+
+    // ── Route thùng rác có tham số động ──
+    Route::patch('/{id}/khoi-phuc',       [AdminOrderController::class, 'restore'])->name('restore');
+    Route::delete('/{id}/xoa-vinh-vien',  [AdminOrderController::class, 'forceDelete'])->name('force-delete');
+});
+// ── Quản lý voucher (admin + staff) ──────────────────────────
+Route::prefix('voucher')->name('vouchers.')->group(function () {
+    // ── Các route tĩnh (không có tham số) ──
+    Route::get('/',                            [AdminVoucherController::class, 'index'])->name('index');
+    Route::get('/them',                        [AdminVoucherController::class, 'create'])->name('create');
+    Route::post('/',                           [AdminVoucherController::class, 'store'])->name('store');
+
+    // ── Thùng rác (route tĩnh) ──
+    Route::get('/thung-rac',              [AdminVoucherController::class, 'trash'])->name('trash');
+    Route::patch('/khoi-phuc-tat-ca',     [AdminVoucherController::class, 'restoreAll'])->name('restore-all');
+    Route::delete('/don-thung-rac',       [AdminVoucherController::class, 'emptyTrash'])->name('empty-trash');
+
+    // ── Các route có tham số động (đặt xuống dưới) ──
+    Route::get('/{voucher}/sua',          [AdminVoucherController::class, 'edit'])->name('edit');
+    Route::put('/{voucher}',              [AdminVoucherController::class, 'update'])->name('update');
+    Route::delete('/{voucher}',           [AdminVoucherController::class, 'destroy'])->name('destroy');
+    Route::patch('/{voucher}/toggle',     [AdminVoucherController::class, 'toggleActive'])->name('toggle-active');
+
+    // ── Route thùng rác có tham số động (đặt cuối) ──
+    Route::patch('/{id}/khoi-phuc',       [AdminVoucherController::class, 'restore'])->name('restore');
+    Route::delete('/{id}/xoa-vinh-vien',  [AdminVoucherController::class, 'forceDelete'])->name('force-delete');
+});
 
     // ── Phân quyền (chỉ admin) ────────────────────────────────────
     Route::middleware('role:admin')->prefix('nguoi-dung')->name('users.')->group(function () {
