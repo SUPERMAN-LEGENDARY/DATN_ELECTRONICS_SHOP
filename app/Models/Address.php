@@ -4,33 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Address extends Model
+class Attribute extends Model
 {
-    protected $table = 'addresses';
-    
-    // Không dùng cột updated_at, created_at (bảng addresses không có các cột này)
     public $timestamps = false;
 
-    protected $fillable = [
-        'user_id',
-        'full_name',
-        'phone',
-        'province',
-        'district',
-        'ward',
-        'street',
-        'is_default'
-    ];
+    protected $fillable = ['name'];
 
-    // Quan hệ với User (1 địa chỉ thuộc 1 user)
-    public function user()
+    public function productAttributes()
     {
-        return $this->belongsTo(User::class);
-    }
-
-    // Quan hệ với Order (1 địa chỉ có nhiều đơn hàng)
-    public function orders()
-    {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(ProductAttribute::class);
     }
 }

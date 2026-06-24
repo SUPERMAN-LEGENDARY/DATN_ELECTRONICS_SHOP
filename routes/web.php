@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\NewsController as AdminNewsController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\VoucherController as AdminVoucherController;
+use App\Http\Controllers\Admin\AttributeController as AdminAttributeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CartController;
 use Illuminate\Support\Facades\Route;
@@ -79,6 +80,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
         Route::patch('/{category}/toggle-active', [AdminCategoryController::class, 'toggleActive'])->name('toggle-active');
         Route::patch('/{id}/khoi-phuc',          [AdminCategoryController::class, 'restore'])->name('restore');
         Route::delete('/{id}/xoa-vinh-vien',     [AdminCategoryController::class, 'forceDelete'])->name('force-delete');
+    });
+
+     // ── Thuộc tính sản phẩm ───────────────────────────────────────
+    Route::prefix('thuoc-tinh')->name('attributes.')->group(function () {
+        Route::get('/list',            [AdminAttributeController::class, 'list'])->name('list');
+        Route::post('/',               [AdminAttributeController::class, 'store'])->name('store');
+        Route::delete('/{attribute}',  [AdminAttributeController::class, 'destroy'])->name('destroy');
     });
 
     // ── Tin tức (admin + staff) ───────────────────────────────────
