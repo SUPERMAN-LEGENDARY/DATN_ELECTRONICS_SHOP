@@ -4,107 +4,414 @@
 
 @push('styles')
 <style>
-/* ===== HERO SLIDER ===== */
-.hero { position: relative; overflow: hidden; background: #EBF3FF; }
-.hero-inner { display: grid; grid-template-columns: 1fr 1fr; min-height: 320px; max-width: 1200px; margin: 0 auto; }
-.hero-content { padding: 48px 40px; display: flex; flex-direction: column; justify-content: center; }
-.hero-label { font-size: 12px; font-weight: 700; color: #1565C0; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
-.hero-title { font-size: 36px; font-weight: 800; line-height: 1.2; color: #0D1B2A; margin-bottom: 14px; }
-.hero-desc { font-size: 15px; color: #555; margin-bottom: 14px; }
-.hero-price { font-size: 22px; font-weight: 800; color: #E53935; margin-bottom: 20px; }
-.hero-img { background: #dce8f5; display: flex; align-items: center; justify-content: center; }
-.hero-img img { width: 100%; height: 100%; object-fit: cover; }
-.hero-img-placeholder { width: 100%; height: 320px; background: #d8e6f3; display: flex; align-items: center; justify-content: center; color: #aaa; }
-.hero-dots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
-.hero-dot { width: 8px; height: 8px; border-radius: 50%; background: #bbb; cursor: pointer; }
-.hero-dot.active { background: #1565C0; width: 20px; border-radius: 4px; }
-.hero-arrow {
-    position: absolute; top: 50%; transform: translateY(-50%);
-    background: rgba(255,255,255,.85); border: none; width: 36px; height: 36px;
-    border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,.15); z-index: 2; font-size: 14px; color: #333;
-}
-.hero-arrow.left { left: 12px; }
-.hero-arrow.right { right: 12px; }
+    /* ===== HERO SLIDER ===== */
+    .hero {
+        position: relative;
+        overflow: hidden;
+        background: #EBF3FF;
+    }
 
-/* ===== TRUST BAR ===== */
-.trust-bar { border-bottom: 1px solid #e0e0e0; }
-.trust-bar .inner { display: flex; justify-content: space-around; padding: 16px; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; gap: 8px; }
-.trust-bar-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-.trust-bar-item i { color: #1565C0; font-size: 18px; }
-.trust-bar-item b { display: block; font-weight: 600; font-size: 13px; }
-.trust-bar-item span { font-size: 11px; color: #888; }
+    .hero-inner {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: 320px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
 
-/* ===== PRODUCTS GRID ===== */
-.section { padding: 32px 0; }
-.products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .hero-content {
+        padding: 48px 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
 
-/* ===== PROMO BANNERS ===== */
-.promo-banners { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 8px 0 32px; }
-.promo-banner {
-    border-radius: 10px; padding: 20px; display: flex; align-items: center; justify-content: space-between;
-    min-height: 110px; position: relative; overflow: hidden;
-}
-.promo-banner.apple { background: #EBF3FF; }
-.promo-banner.samsung { background: #F3E8FF; }
-.promo-banner.phu-kien { background: #FFF3E8; }
-.promo-banner .content .tag { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
-.promo-banner.apple .tag { color: #1565C0; }
-.promo-banner.samsung .tag { color: #7B1FA2; }
-.promo-banner.phu-kien .tag { color: #E65100; }
-.promo-banner .content h3 { font-size: 18px; font-weight: 800; margin: 4px 0 10px; }
-.promo-banner .content .btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 5px; border: none; cursor: pointer; font-weight: 700; }
-.promo-banner.apple .btn-sm { background: #1565C0; color: #fff; }
-.promo-banner.samsung .btn-sm { background: #7B1FA2; color: #fff; }
-.promo-banner.phu-kien .btn-sm { background: #E65100; color: #fff; }
-.promo-img { width: 90px; height: 80px; object-fit: cover; border-radius: 8px; background: rgba(255,255,255,.5); display: flex; align-items: center; justify-content: center; color: #ccc; }
+    .hero-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #1565C0;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
 
-/* ===== NEWS ===== */
-.news-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.news-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
-.news-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.1); }
-.news-card-img { height: 160px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #ccc; }
-.news-card-img img { width: 100%; height: 100%; object-fit: cover; }
-.news-card-body { padding: 12px; }
-.news-card-title { font-size: 13px; font-weight: 600; line-height: 1.45; margin-bottom: 6px; }
-.news-card-excerpt { font-size: 12px; color: #777; line-height: 1.5; margin-bottom: 8px; }
-.news-card-meta { font-size: 11px; color: #aaa; }
+    .hero-title {
+        font-size: 36px;
+        font-weight: 800;
+        line-height: 1.2;
+        color: #0D1B2A;
+        margin-bottom: 14px;
+    }
+
+    .hero-desc {
+        font-size: 15px;
+        color: #555;
+        margin-bottom: 14px;
+    }
+
+    .hero-price {
+        font-size: 22px;
+        font-weight: 800;
+        color: #E53935;
+        margin-bottom: 20px;
+    }
+
+    .hero-img {
+        background: #dce8f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .hero-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .hero-img-placeholder {
+        width: 100%;
+        height: 320px;
+        background: #d8e6f3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #aaa;
+    }
+
+    .hero-dots {
+        position: absolute;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 6px;
+    }
+
+    .hero-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #bbb;
+        cursor: pointer;
+    }
+
+    .hero-dot.active {
+        background: #1565C0;
+        width: 20px;
+        border-radius: 4px;
+    }
+
+    .hero-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, .85);
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
+        z-index: 2;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .hero-arrow.left {
+        left: 12px;
+    }
+
+    .hero-arrow.right {
+        right: 12px;
+    }
+
+    /* ===== TRUST BAR ===== */
+    .trust-bar {
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .trust-bar .inner {
+        display: flex;
+        justify-content: space-around;
+        padding: 16px;
+        max-width: 1200px;
+        margin: 0 auto;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .trust-bar-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+    }
+
+    .trust-bar-item i {
+        color: #1565C0;
+        font-size: 18px;
+    }
+
+    .trust-bar-item b {
+        display: block;
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .trust-bar-item span {
+        font-size: 11px;
+        color: #888;
+    }
+
+    /* ===== PRODUCTS GRID ===== */
+    .section {
+        padding: 32px 0;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+    }
+
+    /* ===== PROMO BANNERS ===== */
+    .promo-banners {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin: 8px 0 32px;
+    }
+
+    .promo-banner {
+        border-radius: 10px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 110px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .promo-banner.apple {
+        background: #EBF3FF;
+    }
+
+    .promo-banner.samsung {
+        background: #F3E8FF;
+    }
+
+    .promo-banner.phu-kien {
+        background: #FFF3E8;
+    }
+
+    .promo-banner .content .tag {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .promo-banner.apple .tag {
+        color: #1565C0;
+    }
+
+    .promo-banner.samsung .tag {
+        color: #7B1FA2;
+    }
+
+    .promo-banner.phu-kien .tag {
+        color: #E65100;
+    }
+
+    .promo-banner .content h3 {
+        font-size: 18px;
+        font-weight: 800;
+        margin: 4px 0 10px;
+    }
+
+    .promo-banner .content .btn-sm {
+        padding: 6px 14px;
+        font-size: 12px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    .promo-banner.apple .btn-sm {
+        background: #1565C0;
+        color: #fff;
+    }
+
+    .promo-banner.samsung .btn-sm {
+        background: #7B1FA2;
+        color: #fff;
+    }
+
+    .promo-banner.phu-kien .btn-sm {
+        background: #E65100;
+        color: #fff;
+    }
+
+    .promo-img {
+        width: 90px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, .5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ccc;
+    }
+
+    /* ===== NEWS ===== */
+    .news-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+    }
+
+    .news-card {
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .news-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+    }
+
+    .news-card-img {
+        height: 160px;
+        background: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ccc;
+    }
+
+    .news-card-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .news-card-body {
+        padding: 12px;
+    }
+
+    .news-card-title {
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.45;
+        margin-bottom: 6px;
+    }
+
+    .news-card-excerpt {
+        font-size: 12px;
+        color: #777;
+        line-height: 1.5;
+        margin-bottom: 8px;
+    }
+
+    .news-card-meta {
+        font-size: 11px;
+        color: #aaa;
+    }
 </style>
 @endpush
 
 @section('content')
 
 {{-- HERO SLIDER --}}
+@if($banners->isNotEmpty())
 <section class="hero">
-    <button class="hero-arrow left"><i class="fas fa-chevron-left"></i></button>
-    <div class="hero-inner">
-        <div class="hero-content">
-            <div class="hero-label">SIÊU PHẨM MỚI 2024</div>
-            <h1 class="hero-title">iPhone 15 Pro Max<br>Titan Tự Nhiên</h1>
-            <p class="hero-desc">Thiết kế titan bền bỉ, chip A17 Pro đột phá. Trải nghiệm đỉnh cao công nghệ trong tầm tay.</p>
-            <div class="hero-price">Giá từ 29.990.000đ</div>
-            <a href="{{ route('products.show', 'iphone-15-pro-max') }}" class="btn btn-primary" style="width:fit-content">MUA NGAY</a>
+    @if($banners->count() > 1)
+    <button class="hero-arrow left" id="heroPrev"><i class="fas fa-chevron-left"></i></button>
+    @endif
+
+    @foreach($banners as $i => $banner)
+    @if($banner->isImageOnly())
+    <div class="hero-inner hero-slide hero-slide-image {{ $i === 0 ? 'active' : '' }}" data-slide="{{ $i }}" style="{{ $i === 0 ? '' : 'display:none' }}">
+        @if($banner->button_link)
+        <a href="{{ $banner->button_link }}" style="display:block;width:100%;height:100%">
+            @endif
+            @if($banner->image)
+            <img src="{{ $banner->image }}" alt="banner" style="width:100%;height:100%;object-fit:cover;display:block">
+            @else
+            <div class="hero-img-placeholder" style="width:100%;height:100%"><i class="fas fa-image fa-2x"></i></div>
+            @endif
+            @if($banner->button_link)
+        </a>
+        @endif
+    </div>
+    @else
+    <div class="hero-inner hero-slide {{ $i === 0 ? 'active' : '' }}" data-slide="{{ $i }}"
+        style="{{ $i === 0 ? '' : 'display:none' }}{{ $banner->bg_color ? ' background:'.$banner->bg_color.';' : '' }}">
+        <div class="hero-content" style="{{ $banner->text_color ? 'color:'.$banner->text_color.';' : '' }}">
+            @if($banner->label)
+            <div class="hero-label" style="{{ $banner->text_color ? 'color:'.$banner->text_color.';opacity:.85;' : '' }}">{{ $banner->label }}</div>
+            @endif
+            @if($banner->title)
+            <h1 class="hero-title">{!! nl2br(e($banner->title)) !!}</h1>
+            @endif
+            @if($banner->description)
+            <p class="hero-desc" style="{{ $banner->text_color ? 'color:'.$banner->text_color.';opacity:.8;' : '' }}">{{ $banner->description }}</p>
+            @endif
+            @if($banner->price_text)
+            <div class="hero-price">{{ $banner->price_text }}</div>
+            @endif
+            @if($banner->button_text)
+            <a href="{{ $banner->button_link ?: '#' }}" class="btn btn-primary" style="width:fit-content">{{ $banner->button_text }}</a>
+            @endif
         </div>
         <div class="hero-img">
+            @if($banner->image)
+            <img src="{{ $banner->image }}" alt="{{ $banner->title }}">
+            @else
             <div class="hero-img-placeholder"><i class="fas fa-image fa-2x"></i></div>
+            @endif
         </div>
     </div>
-    <button class="hero-arrow right"><i class="fas fa-chevron-right"></i></button>
+    @endif
+    @endforeach
+
+    @if($banners->count() > 1)
+    <button class="hero-arrow right" id="heroNext"><i class="fas fa-chevron-right"></i></button>
     <div class="hero-dots">
-        <div class="hero-dot active"></div>
-        <div class="hero-dot"></div>
-        <div class="hero-dot"></div>
+        @foreach($banners as $i => $banner)
+        <div class="hero-dot {{ $i === 0 ? 'active' : '' }}" data-slide="{{ $i }}"></div>
+        @endforeach
     </div>
+    @endif
 </section>
+@endif
 
 {{-- TRUST BAR --}}
 <div class="trust-bar">
     <div class="inner">
-        <div class="trust-bar-item"><i class="fas fa-truck"></i><div><b>Giao hàng miễn phí</b><span>Đơn hàng từ 500k</span></div></div>
-        <div class="trust-bar-item"><i class="fas fa-shield-alt"></i><div><b>Chính hãng 100%</b><span>Bảo hành toàn quốc</span></div></div>
-        <div class="trust-bar-item"><i class="fas fa-sync-alt"></i><div><b>Đổi trả dễ dàng</b><span>Trong vòng 30 ngày</span></div></div>
-        <div class="trust-bar-item"><i class="fas fa-credit-card"></i><div><b>Trả góp 0%</b><span>Thủ tục nhanh chóng</span></div></div>
-        <div class="trust-bar-item"><i class="fas fa-headset"></i><div><b>Hỗ trợ 24/7</b><span>Hotline: 1900 1234</span></div></div>
+        <div class="trust-bar-item"><i class="fas fa-truck"></i>
+            <div><b>Giao hàng miễn phí</b><span>Đơn hàng từ 500k</span></div>
+        </div>
+        <div class="trust-bar-item"><i class="fas fa-shield-alt"></i>
+            <div><b>Chính hãng 100%</b><span>Bảo hành toàn quốc</span></div>
+        </div>
+        <div class="trust-bar-item"><i class="fas fa-sync-alt"></i>
+            <div><b>Đổi trả dễ dàng</b><span>Trong vòng 30 ngày</span></div>
+        </div>
+        <div class="trust-bar-item"><i class="fas fa-credit-card"></i>
+            <div><b>Trả góp 0%</b><span>Thủ tục nhanh chóng</span></div>
+        </div>
+        <div class="trust-bar-item"><i class="fas fa-headset"></i>
+            <div><b>Hỗ trợ 24/7</b><span>Hotline: 1900 1234</span></div>
+        </div>
     </div>
 </div>
 
@@ -133,10 +440,10 @@
             </a>
             @empty
             @foreach([
-                ['iPhone 15 Pro Max 256GB Titan','29.990.000','45'],
-                ['Samsung Galaxy S24 Ultra 5G','26.490.000','32'],
-                ['Xiaomi 14 Pro Leica','18.990.000','27'],
-                ['MacBook Air M3 2024','27.890.000','78'],
+            ['iPhone 15 Pro Max 256GB Titan','29.990.000','45'],
+            ['Samsung Galaxy S24 Ultra 5G','26.490.000','32'],
+            ['Xiaomi 14 Pro Leica','18.990.000','27'],
+            ['MacBook Air M3 2024','27.890.000','78'],
             ] as $i => $p)
             <a href="#" class="product-card">
                 @if($i === 0)<span class="badge-tag">MỚI</span>@endif
@@ -202,10 +509,10 @@
             </a>
             @empty
             @foreach([
-                ['Đánh giá chi tiết iPhone 15 Pro Max: Titan thực sự khác biệt?','Sau một tháng sử dụng, khung viền titan mang lại cảm giác nhẹ hơn hẳn...','2 giờ trước · 343 lượt xem'],
-                ['Samsung Galaxy S24 ra mắt: Trí tuệ nhân tạo Galaxy AI là tâm điểm','Những tính năng dịch thuật trực tiếp và chỉnh sửa ảnh bằng AI gây ấn tượng...','5 giờ trước · 1.2k lượt xem'],
-                ['Lộ diện thiết kế iPad Pro M3 với màn hình OLED siêu mỏng','Các báo cáo mới nhất cho thấy Apple sẽ nâng cấp màn hình OLED cho dòng Pro...','1 ngày trước · 890 lượt xem'],
-                ['5 mẹo tiết kiệm pin cực hay cho Android 14 bạn nên biết','Tối ưu hóa cài đặt hệ thống giúp điện thoại của bạn duy trì thời lượng pin...','2 ngày trước · 3.4k lượt xem'],
+            ['Đánh giá chi tiết iPhone 15 Pro Max: Titan thực sự khác biệt?','Sau một tháng sử dụng, khung viền titan mang lại cảm giác nhẹ hơn hẳn...','2 giờ trước · 343 lượt xem'],
+            ['Samsung Galaxy S24 ra mắt: Trí tuệ nhân tạo Galaxy AI là tâm điểm','Những tính năng dịch thuật trực tiếp và chỉnh sửa ảnh bằng AI gây ấn tượng...','5 giờ trước · 1.2k lượt xem'],
+            ['Lộ diện thiết kế iPad Pro M3 với màn hình OLED siêu mỏng','Các báo cáo mới nhất cho thấy Apple sẽ nâng cấp màn hình OLED cho dòng Pro...','1 ngày trước · 890 lượt xem'],
+            ['5 mẹo tiết kiệm pin cực hay cho Android 14 bạn nên biết','Tối ưu hóa cài đặt hệ thống giúp điện thoại của bạn duy trì thời lượng pin...','2 ngày trước · 3.4k lượt xem'],
             ] as $n)
             <a href="#" class="news-card">
                 <div class="news-card-img img-placeholder"><i class="fas fa-image fa-2x"></i></div>
@@ -224,12 +531,48 @@
 
 @push('scripts')
 <script>
-// Simple hero dots
-document.querySelectorAll('.hero-dot').forEach((dot, i, dots) => {
-    dot.addEventListener('click', () => {
-        dots.forEach(d => d.classList.remove('active'));
-        dot.classList.add('active');
-    });
-});
+    // Hero slider (banner trang chủ)
+    (function() {
+        const slides = document.querySelectorAll('.hero-slide');
+        const dots = document.querySelectorAll('.hero-dot');
+        if (slides.length <= 1) return;
+
+        let current = 0;
+        let autoTimer;
+
+        function showSlide(index) {
+            slides.forEach((s, i) => s.style.display = i === index ? '' : 'none');
+            dots.forEach((d, i) => d.classList.toggle('active', i === index));
+            current = index;
+        }
+
+        function nextSlide() {
+            showSlide((current + 1) % slides.length);
+        }
+
+        function prevSlide() {
+            showSlide((current - 1 + slides.length) % slides.length);
+        }
+
+        function resetAutoplay() {
+            clearInterval(autoTimer);
+            autoTimer = setInterval(nextSlide, 5000);
+        }
+
+        document.getElementById('heroNext')?.addEventListener('click', () => {
+            nextSlide();
+            resetAutoplay();
+        });
+        document.getElementById('heroPrev')?.addEventListener('click', () => {
+            prevSlide();
+            resetAutoplay();
+        });
+        dots.forEach((dot, i) => dot.addEventListener('click', () => {
+            showSlide(i);
+            resetAutoplay();
+        }));
+
+        resetAutoplay();
+    })();
 </script>
 @endpush

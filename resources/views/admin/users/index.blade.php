@@ -408,6 +408,9 @@
                                 @if($user->id === auth()->id())
                                 <span style="font-size:11px;background:#E3F2FD;color:#1565C0;padding:1px 6px;border-radius:10px;margin-left:4px">Bạn</span>
                                 @endif
+                                @if($user->isFirstAdmin())
+                                <span style="font-size:11px;background:#FFF3E0;color:#E65100;padding:1px 6px;border-radius:10px;margin-left:4px"><i class="fas fa-shield-alt"></i>Supper Admin</span>
+                                @endif
                             </div>
                             <div class="user-meta">
                                 <span class="badge badge-{{ $user->role }}">
@@ -427,7 +430,7 @@
                     @endif
                 </td>
                 <td>
-                    @if($user->id !== auth()->id())
+                    @if($user->id !== auth()->id() && ! $user->isFirstAdmin())
                     <form method="POST" action="{{ route('admin.users.update-role', $user) }}" class="role-form">
                         @csrf @method('PATCH')
                         <select name="role" class="role-select">
@@ -437,23 +440,34 @@
                         </select>
                         <button type="submit" class="btn-sm btn-primary-sm">Lưu</button>
                     </form>
+                    @elseif($user->isFirstAdmin())
+                    <span style="font-size:12px;color:#aaa" title="Quản trị viên cấp cao nhất"><i class="fas fa-shield-alt"></i>Supper Admin</span>
                     @else
                     <span style="font-size:12px;color:#aaa">—</span>
                     @endif
                 </td>
                 <td>
-                    @if($user->id !== auth()->id())
-                    <form method="POST" action="{{ route('admin.users.toggle-active', $user) }}" style="display:inline"
-                        onsubmit="return confirm('{{ $user->is_active ? 'Khoá tài khoản này?' : 'Mở khoá tài khoản này?' }}')">
-                        @csrf @method('PATCH')
-                        <button type="submit" class="btn-sm {{ $user->is_active ? 'btn-danger-sm' : 'btn-success-sm' }}">
-                            <i class="fas {{ $user->is_active ? 'fa-lock' : 'fa-lock-open' }}"></i>
-                            {{ $user->is_active ? 'Khoá' : 'Mở khoá' }}
-                        </button>
-                    </form>
-                    @else
-                    <span style="font-size:12px;color:#aaa">—</span>
-                    @endif
+                    <div style="display:flex;gap:6px;flex-wrap:wrap">
+                        @if($user->isFirstAdmin() && $user->id !== auth()->id())
+                        <span style="font-size:12px;color:#aaa">Không có quyền</span>
+                        @else
+                        <a href="{{ route('admin.users.edit', $user) }}" class="btn-sm btn-primary-sm" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+                            <i class="fas fa-edit"></i> Sửa
+                        </a>
+                        @if($user->id !== auth()->id())
+                        <form method="POST" action="{{ route('admin.users.toggle-active', $user) }}" style="display:inline"
+                            onsubmit="return confirm('{{ $user->is_active ? 'Khoá tài khoản này?' : 'Mở khoá tài khoản này?' }}')">
+                            @csrf @method('PATCH')
+                            <button type="submit" class="btn-sm {{ $user->is_active ? 'btn-danger-sm' : 'btn-success-sm' }}">
+                                <i class="fas {{ $user->is_active ? 'fa-lock' : 'fa-lock-open' }}"></i>
+                                {{ $user->is_active ? 'Khoá' : 'Mở khoá' }}
+                            </button>
+                        </form>
+                        @else
+                        <span style="font-size:12px;color:#aaa">—</span>
+                        @endif
+                        @endif
+                    </div>
                 </td>
             </tr>
             @endforeach

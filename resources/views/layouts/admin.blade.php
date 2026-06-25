@@ -246,17 +246,22 @@
                 class="nav-item {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
                 <i class="fas fa-layer-group"></i> Danh mục / Thương hiệu
             </a>
-            
+
+            <a href="{{ route('admin.banners.index') }}"
+                class="nav-item {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
+                <i class="fas fa-images"></i> Banner trang chủ
+            </a>
+
             <a href="{{ route('admin.vouchers.index') }}"
                 class="nav-item {{ request()->routeIs('admin.vouchers.*') ? 'active' : '' }}">
                 <i class="fas fa-ticket-alt"></i> Mã giảm giá
             </a>
 
-             <a href="{{ route('admin.orders.index') }}"
+            <a href="{{ route('admin.orders.index') }}"
                 class="nav-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
                 <i class="fas fa-shopping-cart"></i> Đơn hàng
             </a>
-            
+
             <a href="{{ route('admin.news.index') }}"
                 class="nav-item {{ request()->routeIs('admin.news.*') ? 'active' : '' }}">
                 <i class="fas fa-newspaper"></i> Tin tức
@@ -307,4 +312,5 @@
 
     @stack('scripts')
 </body>
+
 </html>
