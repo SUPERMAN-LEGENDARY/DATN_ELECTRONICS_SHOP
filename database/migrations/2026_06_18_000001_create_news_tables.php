@@ -13,19 +13,21 @@ return new class extends Migration
             $table->string('name', 100);
             $table->string('slug', 120)->unique();
             $table->boolean('is_active')->default(true);
+            $table->softDeletes();
         });
 
         Schema::create('news', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->restrictOnDelete();
+            $table->foreignId('user_id')->constrained('users')->restrictOnDelete();
             $table->foreignId('news_category_id')->constrained('news_categories')->restrictOnDelete();
-            $table->string('title', 255);
+            $table->string('title');
             $table->string('slug', 270)->unique();
             $table->longText('content');
-            $table->string('thumbnail', 255)->nullable();
+            $table->string('thumbnail')->nullable();
             $table->unsignedInteger('views')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamp('published_at')->nullable();
+            $table->softDeletes();
         });
     }
 
