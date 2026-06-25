@@ -11,11 +11,13 @@ class Review extends Model
 
     public $timestamps = false;
 
-    // created_at tự quản lý
     const CREATED_AT = 'created_at';
     const UPDATED_AT = null;
 
-    protected $fillable = ['product_id', 'user_id', 'rating', 'content', 'is_visible'];
+    protected $fillable = [
+        'product_id', 'user_id', 'rating',
+        'content', 'is_visible', 'admin_reply',
+    ];
 
     protected $casts = [
         'is_visible'  => 'boolean',

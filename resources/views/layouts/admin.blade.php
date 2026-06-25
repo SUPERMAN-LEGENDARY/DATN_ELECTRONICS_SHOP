@@ -242,6 +242,10 @@
                 class="nav-item {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
                 <i class="fas fa-box"></i> Sản phẩm
             </a>
+            <a href="{{ route('admin.reviews.index') }}"
+                class="nav-item {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
+                <i class="fas fa-star"></i> Đánh giá
+            </a>
             <a href="{{ route('admin.categories.index', ['type' => 'category']) }}"
                 class="nav-item {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
                 <i class="fas fa-layer-group"></i> Danh mục / Thương hiệu

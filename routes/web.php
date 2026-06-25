@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\VoucherController as AdminVoucherController;
 use App\Http\Controllers\Admin\AttributeController as AdminAttributeController;
 use App\Http\Controllers\Admin\BannerController as AdminBannerController;
+use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CartController;
 use Illuminate\Support\Facades\Route;
@@ -105,6 +106,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
         Route::patch('/{id}/khoi-phuc',          [AdminBannerController::class, 'restore'])->name('restore');
         Route::delete('/{id}/xoa-vinh-vien',     [AdminBannerController::class, 'forceDelete'])->name('force-delete');
     });
+
+    // ── Đánh giá (admin + staff) ──────────────────────────────────
+Route::prefix('danh-gia')->name('reviews.')->group(function () {
+    Route::get('/',                          [AdminReviewController::class, 'index'])->name('index');
+    Route::patch('/{review}/toggle-visible', [AdminReviewController::class, 'toggleVisible'])->name('toggle-visible');
+    Route::post('/{review}/reply',           [AdminReviewController::class, 'reply'])->name('reply');
+    Route::delete('/{review}/reply',         [AdminReviewController::class, 'deleteReply'])->name('delete-reply');
+    Route::delete('/{review}',               [AdminReviewController::class, 'destroy'])->name('destroy');
+    Route::post('/bulk-toggle',              [AdminReviewController::class, 'bulkToggle'])->name('bulk-toggle');
+});
 
     // ── Tin tức (admin + staff) ───────────────────────────────────
     Route::prefix('tin-tuc')->name('news.')->group(function () {
