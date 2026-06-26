@@ -362,12 +362,30 @@
             </div>
         </div>
 
+        {{-- Đổi mật khẩu (tuỳ chọn) --}}
+        <div class="section-divider">
+            <div class="section-label"><i class="fas fa-key"></i> Đổi mật khẩu <span style="font-size:11px;color:#aaa;font-weight:400">(để trống nếu không muốn thay đổi)</span></div>
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+            <div class="form-group" style="flex:1;min-width:200px">
+                <label style="display:block;font-size:13px;font-weight:600;color:#444;margin-bottom:6px">Mật khẩu mới</label>
+                <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
+                    placeholder="Tối thiểu 8 ký tự" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box">
+                @error('password')<div class="invalid-feedback" style="color:#C62828;font-size:12px;margin-top:4px">{{ $message }}</div>@enderror
+            </div>
+            <div class="form-group" style="flex:1;min-width:200px">
+                <label style="display:block;font-size:13px;font-weight:600;color:#444;margin-bottom:6px">Xác nhận mật khẩu mới</label>
+                <input type="password" name="password_confirmation" class="form-control"
+                    placeholder="Nhập lại mật khẩu mới" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box">
+            </div>
+        </div>
+
         {{-- Nút --}}
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">
                 <i class="fas fa-save"></i> Cập nhật
             </button>
-            <a href="{{ route('admin.users.index') }}" class="btn btn-outline">
+            <a href="{{ route('admin.users.index', ['tab' => $user->role === 'customer' ? 'customer' : 'staff']) }}" class="btn btn-outline">
                 <i class="fas fa-arrow-left"></i> Quay lại
             </a>
         </div>

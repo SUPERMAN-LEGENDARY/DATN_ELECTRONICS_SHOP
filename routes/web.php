@@ -206,11 +206,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
 
     // ── Phân quyền (chỉ admin) ────────────────────────────────────
     Route::middleware('role:admin')->prefix('nguoi-dung')->name('users.')->group(function () {
-        Route::get('/',                            [AdminUserController::class, 'index'])->name('index');
-        Route::get('/{user}/sua',                  [AdminUserController::class, 'edit'])->name('edit');
-        Route::put('/{user}',                      [AdminUserController::class, 'update'])->name('update');
-        Route::patch('/{user}/role',               [AdminUserController::class, 'updateRole'])->name('update-role');
-        Route::patch('/{user}/toggle-active',      [AdminUserController::class, 'toggleActive'])->name('toggle-active');
+        Route::get('/',                              [AdminUserController::class, 'index'])->name('index');
+        Route::get('/tao-moi',                       [AdminUserController::class, 'create'])->name('create');
+        Route::post('/',                             [AdminUserController::class, 'store'])->name('store');
+        Route::get('/{user}/sua',                    [AdminUserController::class, 'edit'])->name('edit');
+        Route::put('/{user}',                        [AdminUserController::class, 'update'])->name('update');
+        Route::patch('/{user}/role',                 [AdminUserController::class, 'updateRole'])->name('update-role');
+        Route::patch('/{user}/toggle-active',        [AdminUserController::class, 'toggleActive'])->name('toggle-active');
+        Route::delete('/{user}',                     [AdminUserController::class, 'destroy'])->name('destroy');
+        Route::patch('/trash/{id}/restore',          [AdminUserController::class, 'restore'])->name('restore');
+        Route::delete('/trash/{id}/xoa-vinh-vien',  [AdminUserController::class, 'forceDelete'])->name('force-delete');
     });
 });
 
