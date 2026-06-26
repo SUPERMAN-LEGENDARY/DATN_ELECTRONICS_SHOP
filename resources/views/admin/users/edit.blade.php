@@ -249,25 +249,25 @@
     </div>
     @endif
 
-    <form method="POST" action="{{ route('admin.users.update', $user) }}">
+    <form method="POST" action="{{ route('admin.users.update', $user) }}" id="userEditForm" novalidate>
         @csrf
         @method('PUT')
 
         {{-- Họ tên --}}
         <div class="form-group">
             <label>Họ tên <span class="req">*</span></label>
-            <input type="text" name="name" value="{{ old('name', $user->name) }}"
+            <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}"
                 class="form-control @error('name') is-invalid @enderror" placeholder="Nguyễn Văn A">
-            @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <div class="invalid-feedback" id="name-error">@error('name'){{ $message }}@enderror</div>
         </div>
 
         <div class="form-row">
             {{-- Email --}}
             <div class="form-group">
                 <label>Email <span class="req">*</span></label>
-                <input type="email" name="email" value="{{ old('email', $user->email) }}"
+                <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}"
                     class="form-control @error('email') is-invalid @enderror" placeholder="email@vidu.com">
-                @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                <div class="invalid-feedback" id="email-error">@error('email'){{ $message }}@enderror</div>
             </div>
 
             {{-- SĐT --}}
@@ -375,3 +375,64 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+    (function() {
+        const form = document.getElementById('userEditForm');
+
+        function setError(inputId, message) {
+            const input = document.getElementById(inputId);
+            const errorDiv = document.getElementById(inputId + '-error');
+            if (input) input.classList.add('is-invalid');
+            if (errorDiv) {
+                errorDiv.textContent = message;
+            }
+        }
+
+        function clearError(inputId) {
+            const input = document.getElementById(inputId);
+            const errorDiv = document.getElementById(inputId + '-error');
+            if (input) input.classList.remove('is-invalid');
+            if (errorDiv) errorDiv.textContent = '';
+        }
+
+        ['name', 'email'].forEach(id => {
+            document.getElementById(id)?.addEventListener('input', () => clearError(id));
+        });
+
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+
+            // Họ tên
+            const name = document.getElementById('name');
+            if (!name || !name.value.trim()) {
+                setError('name', 'Vui lòng nhập họ tên.');
+                isValid = false;
+            } else {
+                clearError('name');
+            }
+
+            // Email
+            const email = document.getElementById('email');
+            if (!email || !email.value.trim()) {
+                setError('email', 'Vui lòng nhập địa chỉ email.');
+                isValid = false;
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+                setError('email', 'Địa chỉ email không hợp lệ.');
+                isValid = false;
+            } else {
+                clearError('email');
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                form.querySelector('.is-invalid')?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+        });
+    })();
+</script>
+@endpush

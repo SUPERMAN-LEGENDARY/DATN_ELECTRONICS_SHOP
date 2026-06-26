@@ -445,7 +445,8 @@
                     <label>Tiêu đề</label>
                     <input type="text" name="title" id="f_title" value="{{ old('title', $banner->title) }}"
                         class="form-control @error('title') is-invalid @enderror" placeholder="Tiêu đề chính của banner">
-                    @error('title')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    @error('title')<div class="invalid-feedback" id="f_title-error">{{ $message }}</div>@enderror
+                    @unless($errors->has('title'))<div class="invalid-feedback" id="f_title-error"></div>@endunless
                 </div>
 
                 <div class="form-group">
@@ -497,7 +498,8 @@
             <div class="form-group">
                 <label>Ảnh banner</label>
                 <input type="file" name="image" id="f_image" accept="image/*" class="form-control @error('image') is-invalid @enderror">
-                @error('image')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                @error('image')<div class="invalid-feedback" id="f_image-error">{{ $message }}</div>@enderror
+                @unless($errors->has('image'))<div class="invalid-feedback" id="f_image-error"></div>@endunless
                 @if($banner->image)
                 <div class="form-hint">Để trống nếu không muốn thay ảnh hiện tại.</div>
                 @endif
@@ -652,5 +654,63 @@
     }
 
     syncLayoutUI();
+
+    // ── Validate form ─────────────────────────────────────────────
+    (function() {
+        const form = document.getElementById('bannerForm');
+        const existingImageVal = document.getElementById('existingImageUrl').value;
+
+        function setError(inputId, message) {
+            const input = document.getElementById(inputId);
+            const errorDiv = document.getElementById(inputId + '-error');
+            if (input) input.classList.add('is-invalid');
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function clearError(inputId) {
+            const input = document.getElementById(inputId);
+            const errorDiv = document.getElementById(inputId + '-error');
+            if (input) input.classList.remove('is-invalid');
+            if (errorDiv) {
+                errorDiv.textContent = '';
+                errorDiv.style.display = 'none';
+            }
+        }
+
+        document.getElementById('f_title')?.addEventListener('input', () => clearError('f_title'));
+        document.getElementById('f_image')?.addEventListener('change', () => clearError('f_image'));
+
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            const layout = getLayout();
+
+            if (layout === 'split') {
+                // Tiêu đề bắt buộc khi dạng split
+                const title = document.getElementById('f_title');
+                if (!title || !title.value.trim()) {
+                    setError('f_title', 'Vui lòng nhập tiêu đề banner.');
+                    isValid = false;
+                } else {
+                    clearError('f_title');
+                }
+            } else {
+                clearError('f_title');
+            }
+
+            // Ảnh bắt buộc khi thêm mới (chưa có ảnh cũ)
+            const imageInput = document.getElementById('f_image');
+            if (!existingImageVal && (!imageInput || !imageInput.files.length)) {
+                setError('f_image', 'Vui lòng chọn ảnh cho banner.');
+                isValid = false;
+            } else {
+                clearError('f_image');
+            }
+
+            if (!isValid) e.preventDefault();
+        });
+    })();
 </script>
 @endpush

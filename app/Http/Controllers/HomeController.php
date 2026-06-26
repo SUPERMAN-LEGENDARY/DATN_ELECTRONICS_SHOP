@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Banner;
 use App\Models\Category;
+use App\Models\Event;
 use App\Models\Product;
 
 class HomeController extends Controller
@@ -11,6 +12,7 @@ class HomeController extends Controller
     public function index()
     {
         $banners = Banner::active()->ordered()->get();
+        $events  = Event::active()->ongoing()->ordered()->get();
 
         $newProducts = Product::with(['brand'])
             ->withCount('visibleReviews as reviews_count')
@@ -25,6 +27,6 @@ class HomeController extends Controller
         // Nếu sau này có model News thì gán vào đây
         $latestNews = collect();
 
-        return view('home', compact('newProducts', 'latestNews', 'categories', 'brands', 'banners'));
+        return view('home', compact('newProducts', 'latestNews', 'categories', 'brands', 'banners', 'events'));
     }
 }

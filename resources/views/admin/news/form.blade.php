@@ -221,7 +221,7 @@
 
 <form method="POST"
     action="{{ isset($news) ? route('admin.news.update', $news) : route('admin.news.store') }}"
-    enctype="multipart/form-data">
+    enctype="multipart/form-data" id="newsForm" novalidate>
     @csrf
     @if(isset($news)) @method('PUT') @endif
 
@@ -236,14 +236,22 @@
                     <input type="text" id="title" name="title" class="form-control"
                         value="{{ old('title', $news->title ?? '') }}"
                         placeholder="Nhập tiêu đề bài viết…" required>
-                    @error('title')<div class="error-msg">{{ $message }}</div>@enderror
+                    <div class="error-msg" id="title-error">@error('title'){{ $message }}@enderror</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="excerpt">Mô tả ngắn</label>
+                    <textarea id="excerpt" name="excerpt" class="form-control" rows="3"
+                        placeholder="Tóm tắt ngắn gọn nội dung bài viết, hiển thị ở danh sách tin tức…">{{ old('excerpt', $news->excerpt ?? '') }}</textarea>
+                    <div class="hint">Hiển thị ở trang danh sách tin tức / preview, không cần quá dài.</div>
+                    <div class="error-msg" id="excerpt-error">@error('excerpt'){{ $message }}@enderror</div>
                 </div>
 
                 <div class="form-group">
                     <label for="content">Nội dung <span style="color:red">*</span></label>
                     <textarea id="content" name="content" class="form-control"
                         placeholder="Nhập nội dung bài viết…" required>{{ old('content', $news->content ?? '') }}</textarea>
-                    @error('content')<div class="error-msg">{{ $message }}</div>@enderror
+                    <div class="error-msg" id="content-error">@error('content'){{ $message }}@enderror</div>
                 </div>
             </div>
         </div>
@@ -264,7 +272,7 @@
                         </option>
                         @endforeach
                     </select>
-                    @error('news_category_id')<div class="error-msg">{{ $message }}</div>@enderror
+                    <div class="error-msg" id="news_category_id-error">@error('news_category_id'){{ $message }}@enderror</div>
                 </div>
 
                 <div class="form-group">
@@ -316,7 +324,30 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 <script>
+    // Khởi tạo CKEditor cho ô Mô tả ngắn (toolbar gọn) và Nội dung (đầy đủ)
+    CKEDITOR.replace('excerpt', {
+        height: 130,
+        toolbar: [{
+                name: 'basicstyles',
+                items: ['Bold', 'Italic', 'Underline']
+            },
+            {
+                name: 'paragraph',
+                items: ['NumberedList', 'BulletedList']
+            },
+            {
+                name: 'links',
+                items: ['Link', 'Unlink']
+            },
+        ],
+    });
+
+    CKEDITOR.replace('content', {
+        height: 420,
+    });
+
     function previewThumb(input) {
         const preview = document.getElementById('thumb-preview');
         if (input.files && input.files[0]) {
@@ -328,5 +359,81 @@
             reader.readAsDataURL(input.files[0]);
         }
     }
+
+    // ── Validate form ─────────────────────────────────────────────
+    (function() {
+        const form = document.getElementById('newsForm');
+
+        function setError(inputId, message) {
+            const input = document.getElementById(inputId);
+            const errorDiv = document.getElementById(inputId + '-error');
+            if (input) input.style.borderColor = '#C62828';
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function clearError(inputId) {
+            const input = document.getElementById(inputId);
+            const errorDiv = document.getElementById(inputId + '-error');
+            if (input) input.style.borderColor = '';
+            if (errorDiv) {
+                errorDiv.textContent = '';
+                errorDiv.style.display = 'none';
+            }
+        }
+
+        ['title', 'content', 'news_category_id'].forEach(id => {
+            document.getElementById(id)?.addEventListener('input', () => clearError(id));
+            document.getElementById(id)?.addEventListener('change', () => clearError(id));
+        });
+
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+
+            // Đồng bộ dữ liệu từ CKEditor về <textarea> gốc trước khi kiểm tra
+            if (typeof CKEDITOR !== 'undefined') {
+                if (CKEDITOR.instances.content) CKEDITOR.instances.content.updateElement();
+                if (CKEDITOR.instances.excerpt) CKEDITOR.instances.excerpt.updateElement();
+            }
+
+            // Tiêu đề
+            const title = document.getElementById('title');
+            if (!title || !title.value.trim()) {
+                setError('title', 'Vui lòng nhập tiêu đề bài viết.');
+                isValid = false;
+            } else {
+                clearError('title');
+            }
+
+            // Nội dung
+            const content = document.getElementById('content');
+            if (!content || !content.value.trim()) {
+                setError('content', 'Vui lòng nhập nội dung bài viết.');
+                isValid = false;
+            } else {
+                clearError('content');
+            }
+
+            // Danh mục
+            const category = document.getElementById('news_category_id');
+            if (!category || !category.value) {
+                setError('news_category_id', 'Vui lòng chọn danh mục.');
+                isValid = false;
+            } else {
+                clearError('news_category_id');
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                const firstError = form.querySelector('[style*="border-color: rgb(198, 40, 40)"], [style*="border-color:#C62828"]');
+                if (firstError) firstError.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+        });
+    })();
 </script>
 @endpush

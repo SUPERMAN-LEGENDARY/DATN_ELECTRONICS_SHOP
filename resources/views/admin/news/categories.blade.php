@@ -316,13 +316,13 @@
     {{-- Form thêm danh mục --}}
     <div class="card">
         <div class="card-title"><i class="fas fa-plus-circle" style="color:#1E88E5"></i> Thêm danh mục mới</div>
-        <form method="POST" action="{{ route('admin.news.categories.store') }}">
+        <form method="POST" action="{{ route('admin.news.categories.store') }}" id="addCatForm" novalidate>
             @csrf
             <div class="form-group">
                 <label>Tên danh mục <span style="color:red">*</span></label>
-                <input type="text" name="name" class="form-control"
-                    value="{{ old('name') }}" placeholder="VD: Tin tức công nghệ" required>
-                @error('name')<div class="error-msg">{{ $message }}</div>@enderror
+                <input type="text" name="name" id="cat_name" class="form-control"
+                    value="{{ old('name') }}" placeholder="VD: Tin tức công nghệ">
+                <div class="error-msg" id="cat_name-error">@error('name'){{ $message }}@enderror</div>
             </div>
             <div class="form-group">
                 <label>Trạng thái</label>
@@ -413,5 +413,47 @@
         const row = document.getElementById('edit-row-' + id);
         row.classList.toggle('open');
     }
+
+    // ── Validate form thêm danh mục ───────────────────────────────
+    (function() {
+        const form = document.getElementById('addCatForm');
+        const input = document.getElementById('cat_name');
+        const errorDiv = document.getElementById('cat_name-error');
+
+        input?.addEventListener('input', function() {
+            input.style.borderColor = '';
+            if (errorDiv) errorDiv.textContent = '';
+        });
+
+        form?.addEventListener('submit', function(e) {
+            if (!input.value.trim()) {
+                e.preventDefault();
+                input.style.borderColor = '#C62828';
+                if (errorDiv) errorDiv.textContent = 'Vui lòng nhập tên danh mục.';
+                input.focus();
+            } else {
+                input.style.borderColor = '';
+                if (errorDiv) errorDiv.textContent = '';
+            }
+        });
+    })();
+
+    // ── Validate inline edit forms ────────────────────────────────
+    document.addEventListener('submit', function(e) {
+        const form = e.target;
+        if (!form.classList.contains('inline-form')) return;
+        const input = form.querySelector('input[name="name"]');
+        if (!input) return;
+        if (!input.value.trim()) {
+            e.preventDefault();
+            input.style.borderColor = '#C62828';
+            input.focus();
+            input.addEventListener('input', function() {
+                input.style.borderColor = '';
+            }, {
+                once: true
+            });
+        }
+    });
 </script>
 @endpush

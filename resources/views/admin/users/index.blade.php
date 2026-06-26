@@ -409,7 +409,7 @@
                                 <span style="font-size:11px;background:#E3F2FD;color:#1565C0;padding:1px 6px;border-radius:10px;margin-left:4px">Bạn</span>
                                 @endif
                                 @if($user->isFirstAdmin())
-                                <span style="font-size:11px;background:#FFF3E0;color:#E65100;padding:1px 6px;border-radius:10px;margin-left:4px"><i class="fas fa-shield-alt"></i>Supper Admin</span>
+                                <span style="font-size:11px;background:#FFF3E0;color:#E65100;padding:1px 6px;border-radius:10px;margin-left:4px"><i class="fas fa-shield-alt"></i> Supper Admin</span>
                                 @endif
                             </div>
                             <div class="user-meta">
@@ -441,7 +441,7 @@
                         <button type="submit" class="btn-sm btn-primary-sm">Lưu</button>
                     </form>
                     @elseif($user->isFirstAdmin())
-                    <span style="font-size:12px;color:#aaa" title="Quản trị viên cấp cao nhất"><i class="fas fa-shield-alt"></i>Supper Admin</span>
+                    <span style="font-size:12px;color:#aaa" title="Quản trị viên cấp cao nhất"><i class="fas fa-shield-alt"></i> Supper Admin</span>
                     @else
                     <span style="font-size:12px;color:#aaa">—</span>
                     @endif

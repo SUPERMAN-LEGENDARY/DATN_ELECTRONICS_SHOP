@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\VoucherController as AdminVoucherController;
 use App\Http\Controllers\Admin\AttributeController as AdminAttributeController;
 use App\Http\Controllers\Admin\BannerController as AdminBannerController;
+use App\Http\Controllers\Admin\EventController as AdminEventController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CartController;
@@ -16,11 +17,6 @@ use Illuminate\Support\Facades\Route;
 
 // ─── TRANG CHỦ ────────────────────────────────────────────────────
 Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
-// ── Dashboard admin ────────────────────────────────────────────
-Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
 
 // ─── STOREFRONT: SẢN PHẨM ────────────────────────────────────────
 Route::prefix('san-pham')->name('products.')->group(function () {
@@ -50,6 +46,9 @@ Route::prefix('gio-hang')->name('cart.')->group(function () {
 
 // ─── ADMIN ────────────────────────────────────────────────────────
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])->group(function () {
+
+    // ── Thống kê / Dashboard (admin + staff) ────────────────────────
+    Route::get('/', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
     // ── Sản phẩm (admin + staff) ──────────────────────────────────
     Route::prefix('san-pham')->name('products.')->group(function () {
@@ -107,15 +106,32 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
         Route::delete('/{id}/xoa-vinh-vien',     [AdminBannerController::class, 'forceDelete'])->name('force-delete');
     });
 
+    // ── Sự kiện / Khuyến mãi theo mùa (admin + staff) ──────────────
+    Route::prefix('su-kien')->name('events.')->group(function () {
+        Route::get('/',                          [AdminEventController::class, 'index'])->name('index');
+        Route::get('/them',                      [AdminEventController::class, 'create'])->name('create');
+        Route::post('/',                         [AdminEventController::class, 'store'])->name('store');
+        Route::get('/thung-rac',                 [AdminEventController::class, 'trash'])->name('trash');
+        Route::patch('/khoi-phuc-tat-ca',        [AdminEventController::class, 'restoreAll'])->name('restore-all');
+        Route::delete('/don-thung-rac',          [AdminEventController::class, 'emptyTrash'])->name('empty-trash');
+        Route::get('/{event}/sua',               [AdminEventController::class, 'edit'])->name('edit');
+        Route::put('/{event}',                   [AdminEventController::class, 'update'])->name('update');
+        Route::delete('/{event}',                [AdminEventController::class, 'destroy'])->name('destroy');
+        Route::patch('/{event}/toggle-active',   [AdminEventController::class, 'toggleActive'])->name('toggle-active');
+        Route::post('/bulk-toggle',               [AdminEventController::class, 'bulkToggle'])->name('bulk-toggle');
+        Route::patch('/{id}/khoi-phuc',          [AdminEventController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/xoa-vinh-vien',     [AdminEventController::class, 'forceDelete'])->name('force-delete');
+    });
+
     // ── Đánh giá (admin + staff) ──────────────────────────────────
-Route::prefix('danh-gia')->name('reviews.')->group(function () {
-    Route::get('/',                          [AdminReviewController::class, 'index'])->name('index');
-    Route::patch('/{review}/toggle-visible', [AdminReviewController::class, 'toggleVisible'])->name('toggle-visible');
-    Route::post('/{review}/reply',           [AdminReviewController::class, 'reply'])->name('reply');
-    Route::delete('/{review}/reply',         [AdminReviewController::class, 'deleteReply'])->name('delete-reply');
-    Route::delete('/{review}',               [AdminReviewController::class, 'destroy'])->name('destroy');
-    Route::post('/bulk-toggle',              [AdminReviewController::class, 'bulkToggle'])->name('bulk-toggle');
-});
+    Route::prefix('danh-gia')->name('reviews.')->group(function () {
+        Route::get('/',                          [AdminReviewController::class, 'index'])->name('index');
+        Route::patch('/{review}/toggle-visible', [AdminReviewController::class, 'toggleVisible'])->name('toggle-visible');
+        Route::post('/{review}/reply',           [AdminReviewController::class, 'reply'])->name('reply');
+        Route::delete('/{review}/reply',         [AdminReviewController::class, 'deleteReply'])->name('delete-reply');
+        Route::delete('/{review}',               [AdminReviewController::class, 'destroy'])->name('destroy');
+        Route::post('/bulk-toggle',              [AdminReviewController::class, 'bulkToggle'])->name('bulk-toggle');
+    });
 
     // ── Tin tức (admin + staff) ───────────────────────────────────
     Route::prefix('tin-tuc')->name('news.')->group(function () {
