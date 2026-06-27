@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 // ─── TRANG CHỦ ────────────────────────────────────────────────────
 Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-// ── Dashboard admin ────────────────────────────────────────────
+// ── Dashboard admin ────────────────────────────────────────────  
 Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
@@ -43,8 +43,8 @@ Route::prefix('gio-hang')->name('cart.')->group(function () {
     Route::get('/',               [CartController::class, 'index'])->name('index');
     Route::post('/them',          [CartController::class, 'add'])->name('add');
     Route::post('/mua-ngay',      [CartController::class, 'buyNow'])->name('buy-now');
-    Route::patch('/{productId}',  [CartController::class, 'update'])->name('update');
-    Route::delete('/{productId}', [CartController::class, 'remove'])->name('remove');
+    Route::patch('/{key}',  [CartController::class, 'update'])->name('update');
+    Route::delete('/{key}', [CartController::class, 'remove'])->name('remove');
     Route::delete('/',            [CartController::class, 'clear'])->name('clear');
 });
 

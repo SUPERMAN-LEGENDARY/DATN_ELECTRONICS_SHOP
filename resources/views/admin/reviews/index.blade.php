@@ -30,14 +30,19 @@
 .reviews-table td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid #f5f5f5; vertical-align: top; }
 .reviews-table tr:hover td { background: #fafbff; }
 
+/* Row highlight khi có từ xấu */
+.reviews-table tr.row-bad-words td { background: #FFF8F0; }
+.reviews-table tr.row-bad-words:hover td { background: #FFF3E0; }
+
 /* Stars */
 .stars-row { color: #FFA000; font-size: 14px; letter-spacing: 1px; }
 .stars-row.grey { color: #ddd; }
 
 /* Badges */
 .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
-.badge-visible { background: #E8F5E9; color: #2E7D32; }
-.badge-hidden  { background: #FFEBEE; color: #C62828; }
+.badge-visible   { background: #E8F5E9; color: #2E7D32; }
+.badge-hidden    { background: #FFEBEE; color: #C62828; }
+.badge-badwords  { background: #FFF3E0; color: #E65100; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; }
 
 /* Review content */
 .review-content-cell { max-width: 280px; }
@@ -45,6 +50,16 @@
 .review-content-cell .no-content { color: #bbb; font-style: italic; }
 .admin-reply-box { margin-top: 8px; background: #F3F8FF; border-left: 3px solid #1565C0; padding: 8px 10px; border-radius: 0 6px 6px 0; font-size: 12px; color: #1565C0; }
 .admin-reply-box .reply-label { font-weight: 700; margin-bottom: 3px; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+
+/* Tooltip từ xấu */
+.badwords-tooltip { position: relative; display: inline-block; }
+.badwords-tooltip .tooltip-box {
+    display: none; position: absolute; top: calc(100% + 6px); left: 0; z-index: 99;
+    background: #333; color: #fff; font-size: 11px; border-radius: 6px;
+    padding: 6px 10px; white-space: nowrap; max-width: 260px; white-space: normal; line-height: 1.4;
+    box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
+.badwords-tooltip:hover .tooltip-box { display: block; }
 
 /* Reply form */
 .reply-form-wrap { margin-top: 10px; }
@@ -72,6 +87,15 @@
 /* Empty */
 .empty-state { text-align: center; padding: 60px 20px; color: #999; }
 .empty-state i { font-size: 40px; margin-bottom: 12px; display: block; }
+
+/* Alert bad-words summary bar */
+.alert-badwords {
+    display: flex; align-items: center; gap: 10px;
+    background: #FFF3E0; border: 1px solid #FFB74D; border-radius: 8px;
+    padding: 10px 16px; margin-bottom: 16px; font-size: 13px; color: #E65100;
+}
+.alert-badwords i { font-size: 16px; }
+.alert-badwords a { color: #E65100; font-weight: 700; }
 </style>
 @endpush
 
@@ -96,6 +120,18 @@
         </div>
     @endif
 
+    {{-- Cảnh báo đánh giá chứa từ không chuẩn mực đang bị ẩn --}}
+    @php
+        $badWordsCount = \App\Models\Review::where('bad_words_flag', true)->where('is_visible', false)->count();
+    @endphp
+    @if($badWordsCount > 0 && !request('bad_words'))
+    <div class="alert-badwords">
+        <i class="fas fa-exclamation-triangle"></i>
+        Có <strong>{{ $badWordsCount }}</strong> đánh giá bị ẩn tự động do chứa từ ngữ không chuẩn mực.
+        <a href="{{ route('admin.reviews.index', ['bad_words' => '1', 'status' => 'hidden']) }}">Xem ngay →</a>
+    </div>
+    @endif
+
     {{-- Filter --}}
     <form method="GET" action="{{ route('admin.reviews.index') }}" id="filterForm">
         <div class="filter-bar">
@@ -110,6 +146,12 @@
                 @for($i=5;$i>=1;$i--)
                 <option value="{{ $i }}" {{ request('rating')==$i ? 'selected' : '' }}>{{ $i }} ★</option>
                 @endfor
+            </select>
+            {{-- Filter từ không chuẩn mực --}}
+            <select name="bad_words">
+                <option value="">-- Từ không chuẩn mực --</option>
+                <option value="1" {{ request('bad_words')==='1' ? 'selected' : '' }}>⚠ Có từ không chuẩn mực</option>
+                <option value="0" {{ request('bad_words')==='0' ? 'selected' : '' }}>✓ Bình thường</option>
             </select>
             <button type="submit" class="btn-filter"><i class="fas fa-search"></i> Lọc</button>
             <a href="{{ route('admin.reviews.index') }}" class="btn-reset"><i class="fas fa-times"></i> Xoá lọc</a>
@@ -145,13 +187,13 @@
                     <th width="100">Sao</th>
                     <th>Nội dung / Phản hồi</th>
                     <th width="90">Ngày</th>
-                    <th width="80">Trạng thái</th>
+                    <th width="110">Trạng thái</th>
                     <th width="110">Thao tác</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($reviews as $review)
-                <tr>
+                <tr class="{{ $review->bad_words_flag ? 'row-bad-words' : '' }}">
                     {{-- Checkbox --}}
                     <td><input type="checkbox" name="ids[]" value="{{ $review->id }}" class="row-check"></td>
 
@@ -231,6 +273,19 @@
                         <span class="badge {{ $review->is_visible ? 'badge-visible' : 'badge-hidden' }}">
                             {{ $review->is_visible ? 'Hiển thị' : 'Ẩn' }}
                         </span>
+
+                        {{-- Badge từ không chuẩn mực --}}
+                        @if($review->bad_words_flag)
+                        <div class="badwords-tooltip">
+                            <span class="badge badge-badwords">
+                                <i class="fas fa-ban" style="font-size:10px"></i> Từ không chuẩn mực
+                            </span>
+                            <div class="tooltip-box">
+                                <strong>Tự động ẩn</strong> do phát hiện từ ngữ không phù hợp.<br>
+                                Admin có thể kiểm tra và hiện lại nếu cần.
+                            </div>
+                        </div>
+                        @endif
                     </td>
 
                     {{-- Thao tác --}}
