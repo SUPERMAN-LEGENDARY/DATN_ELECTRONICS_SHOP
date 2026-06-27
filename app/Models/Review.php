@@ -17,11 +17,13 @@ class Review extends Model
     protected $fillable = [
         'product_id', 'user_id', 'rating',
         'content', 'is_visible', 'admin_reply',
+        'bad_words_flag',   // ← thêm mới
     ];
 
     protected $casts = [
-        'is_visible'  => 'boolean',
-        'created_at'  => 'datetime',
+        'is_visible'     => 'boolean',
+        'bad_words_flag' => 'boolean',   // ← thêm mới
+        'created_at'     => 'datetime',
     ];
 
     public function product()

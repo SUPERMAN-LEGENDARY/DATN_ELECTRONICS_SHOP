@@ -168,7 +168,7 @@
     }
 
     tbody td {
-        padding: 12px 16px;
+        padding: 4px 6px;
         border-bottom: 1px solid #f4f4f4;
         vertical-align: middle
     }

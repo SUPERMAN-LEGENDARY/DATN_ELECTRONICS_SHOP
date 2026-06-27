@@ -178,6 +178,82 @@
         gap: 16px;
     }
 
+    /* ===== EVENTS / KHUYẾN MÃI THEO MÙA ===== */
+    .event-strip {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+        margin: 20px 0 8px;
+    }
+
+    .event-card {
+        position: relative;
+        display: block;
+        border-radius: 14px;
+        min-height: 130px;
+        padding: 22px 24px;
+        overflow: hidden;
+        text-decoration: none;
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
+        transition: transform .2s, box-shadow .2s;
+    }
+
+    .event-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, .18);
+    }
+
+    .event-card-bg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: .32;
+        z-index: 0;
+    }
+
+    .event-card-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .event-card-tag {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+        opacity: .9;
+        margin-bottom: 6px;
+    }
+
+    .event-card-title {
+        font-size: 20px;
+        font-weight: 800;
+        margin-bottom: 6px;
+        line-height: 1.25;
+    }
+
+    .event-card-offer {
+        font-size: 14px;
+        font-weight: 700;
+        color: #FFD54F;
+        margin-bottom: 10px;
+    }
+
+    .event-card-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 700;
+        background: rgba(255, 255, 255, .18);
+        padding: 6px 14px;
+        border-radius: 20px;
+    }
+
     /* ===== PROMO BANNERS ===== */
     .promo-banners {
         display: grid;
@@ -392,6 +468,34 @@
     </div>
     @endif
 </section>
+@endif
+
+{{-- EVENTS / KHUYẾN MÃI THEO MÙA --}}
+@if(isset($events) && $events->isNotEmpty())
+<div class="container">
+    <div class="event-strip">
+        @foreach($events as $event)
+        <a href="{{ $event->button_link ?: '#' }}" class="event-card"
+            style="background:{{ $event->bg_color ?: '#C62828' }};color:{{ $event->text_color ?: '#FFFFFF' }}">
+            @if($event->image)
+            <img src="{{ $event->image }}" class="event-card-bg" alt="{{ $event->title }}">
+            @endif
+            <div class="event-card-content">
+                @if($event->tag)
+                <span class="event-card-tag">{{ $event->tag }}</span>
+                @endif
+                <h3 class="event-card-title">{{ $event->title }}</h3>
+                @if($event->offer_text)
+                <div class="event-card-offer">{{ $event->offer_text }}</div>
+                @endif
+                @if($event->button_text)
+                <span class="event-card-btn">{{ $event->button_text }} <i class="fas fa-arrow-right"></i></span>
+                @endif
+            </div>
+        </a>
+        @endforeach
+    </div>
+</div>
 @endif
 
 {{-- TRUST BAR --}}

@@ -127,23 +127,52 @@
         <span style="color:#333">{{ $product->name }}</span>
     </div>
 
+    {{-- Flash messages --}}
+    @if(session('success'))
+        <div style="background:#E8F5E9;color:#2E7D32;padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:14px">
+            <i class="fas fa-check-circle"></i> {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div style="background:#FFEBEE;color:#C62828;padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:14px">
+            <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+        </div>
+    @endif
+    @if($errors->any())
+        <div style="background:#FFEBEE;color:#C62828;padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:14px">
+            <i class="fas fa-exclamation-circle"></i> {{ $errors->first() }}
+        </div>
+    @endif
+
     {{-- PRODUCT MAIN --}}
     <div class="product-main">
 
         {{-- Gallery --}}
+        @php
+            // Gộp thumbnail + album, thumbnail luôn đứng đầu
+            $galleryImages = collect();
+            if ($product->thumbnail) {
+                $galleryImages->push($product->thumbnail);
+            }
+            foreach ($product->images ?? [] as $img) {
+                if ($img !== $product->thumbnail) {
+                    $galleryImages->push($img);
+                }
+            }
+        @endphp
         <div class="gallery">
             <div class="gallery-main">
                 @if($product->discount_percent > 0)
                     <span class="discount-tag">-{{ $product->discount_percent }}%</span>
                 @endif
-                @if($product->first_image)
-                    <img src="{{ $product->first_image }}" alt="{{ $product->name }}" id="mainImg">
+                @if($galleryImages->isNotEmpty())
+                    <img src="{{ $galleryImages->first() }}" alt="{{ $product->name }}" id="mainImg">
                 @else
                     <i class="fas fa-image fa-3x" style="color:#ccc"></i>
                 @endif
             </div>
             <div class="gallery-thumbs">
-                @foreach($product->images ?? [] as $img)
+                @foreach($galleryImages as $img)
                 <div class="thumb {{ $loop->first ? 'active' : '' }}"
                      onclick="switchImage(this, '{{ $img }}')">
                     <img src="{{ $img }}" alt="">
@@ -166,54 +195,70 @@
                 <span>{{ $product->avg_rating }}/5</span>
                 <span style="color:#ddd">|</span>
                 <span>{{ $product->reviews_count }} đánh giá</span>
+                @if($product->variants->isEmpty())
                 <span style="color:#ddd">|</span>
                 <span style="color:#888">{{ number_format($product->stock) }} còn lại</span>
-            </div>
-
-            <div class="price-block">
-                <span class="price-current">{{ number_format($product->sale_price) }}đ</span>
-                @if($product->discount_percent > 0)
-                    <span class="price-old">{{ number_format($product->price) }}đ</span>
-                    <span class="price-pct">-{{ $product->discount_percent }}%</span>
                 @endif
             </div>
 
-            @if($product->stock > 0)
-                <div class="in-stock"><i class="fas fa-check-circle"></i> Còn hàng ({{ $product->stock }})</div>
-            @else
-                <div class="out-of-stock"><i class="fas fa-times-circle"></i> Hết hàng</div>
-            @endif
+            {{-- Giá & tồn kho (cập nhật theo variant) --}}
+            <div class="price-block" id="priceBlock">
+                <span class="price-current" id="priceDisplay">{{ number_format($product->sale_price) }}đ</span>
+                @if($product->discount_percent > 0)
+                <span class="price-old" id="priceOldDisplay">{{ number_format($product->price) }}đ</span>
+                <span class="price-pct" id="pricePctDisplay">-{{ $product->discount_percent }}%</span>
+                @else
+                <span class="price-old" id="priceOldDisplay" style="display:none"></span>
+                <span class="price-pct" id="pricePctDisplay" style="display:none"></span>
+                @endif
+            </div>
 
-            {{-- Thuộc tính nhóm (vd: Dung lượng, Màu sắc) --}}
-            @php
-                $storageAttrs = $product->attributes->filter(fn($a) => Str::contains(strtolower($a->attribute->name ?? ''), ['dung lượng','storage','bộ nhớ']));
-                $colorAttrs   = $product->attributes->filter(fn($a) => Str::contains(strtolower($a->attribute->name ?? ''), ['màu','color']));
-            @endphp
+            <div id="stockDisplay" style="margin:8px 0 16px">
+                @if($product->stock > 0)
+                    <div class="in-stock"><i class="fas fa-check-circle"></i> Còn hàng ({{ $product->stock }})</div>
+                @else
+                    <div class="out-of-stock"><i class="fas fa-times-circle"></i> Hết hàng</div>
+                @endif
+            </div>
 
-            @if($storageAttrs->isNotEmpty())
-            <div class="option-group">
-                <div class="option-label">Dung lượng: <strong>{{ $storageAttrs->first()->value }}</strong></div>
-                <div class="option-btns">
-                    @foreach($storageAttrs as $attr)
-                    <button class="opt-btn {{ $loop->first ? 'active' : '' }}">{{ $attr->value }}</button>
-                    @endforeach
-                </div>
+
+            {{-- Chọn biến thể theo từng thuộc tính --}}
+            @if($product->variants->isNotEmpty())
+            <div id="variantSelector">
+                {{-- Nhóm nút sẽ được render bởi JS --}}
+            </div>
+
+            {{-- Thông báo nếu không tìm được variant --}}
+            <div id="variantAlert" style="display:none;color:#E53935;font-size:13px;margin-bottom:10px">
+                <i class="fas fa-exclamation-triangle"></i> Phiên bản này hiện không có sẵn.
             </div>
             @endif
 
-            @if($colorAttrs->isNotEmpty())
-            <div class="option-group">
-                <div class="option-label">Màu sắc: <strong>{{ $colorAttrs->first()->value }}</strong></div>
-                <div class="option-btns">
-                    @foreach($colorAttrs as $attr)
-                    <button class="opt-btn {{ $loop->first ? 'active' : '' }}">{{ $attr->value }}</button>
-                    @endforeach
-                </div>
+            {{-- Nút thêm giỏ / mua ngay --}}
+            <div class="action-btns" id="actionBtns" style="display:none">
+                <form action="{{ route('cart.add') }}" method="POST" style="flex:1" id="formAddCart">
+                    @csrf
+                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                    <input type="hidden" name="variant_id" id="inputVariantId" value="">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" class="btn-add-cart" style="width:100%" id="btnAddCart">
+                        <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                    </button>
+                </form>
+                <form action="{{ route('cart.buy-now') }}" method="POST" style="flex:1" id="formBuyNow">
+                    @csrf
+                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                    <input type="hidden" name="variant_id" id="inputVariantIdBuy" value="">
+                    <button type="submit" class="btn-buy-now" style="width:100%" id="btnBuyNow">
+                        <i class="fas fa-bolt"></i> Mua ngay
+                    </button>
+                </form>
             </div>
-            @endif
 
-            @if($product->stock > 0)
+            {{-- Sản phẩm đơn giản (không có variant): hiển thị nút trực tiếp --}}
+            @if($product->variants->isEmpty())
             <div class="action-btns">
+                @if($product->stock > 0)
                 <form action="{{ route('cart.add') }}" method="POST" style="flex:1">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
@@ -229,6 +274,11 @@
                         <i class="fas fa-bolt"></i> Mua ngay
                     </button>
                 </form>
+                @else
+                <button class="btn-add-cart" style="width:100%;opacity:.5;cursor:not-allowed" disabled>
+                    <i class="fas fa-ban"></i> Hết hàng
+                </button>
+                @endif
             </div>
             @endif
         </div>
@@ -460,11 +510,202 @@ function switchImage(thumb, src) {
     const img = document.getElementById('mainImg');
     if (img) img.src = src;
 }
-document.querySelectorAll('.opt-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        this.closest('.option-btns').querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-    });
+
+// ══════════════════════════════════════════════════════
+// VARIANT SELECTION — chọn biến thể theo thuộc tính
+// ══════════════════════════════════════════════════════
+
+@php
+$variantsForJs = $product->variants->map(function($v) {
+    return [
+        'id'               => $v->id,
+        'price'            => (float) $v->price,
+        'discount_percent' => (int)   $v->discount_percent,
+        'stock'            => (int)   $v->stock,
+        'is_active'        => (bool)  $v->is_active,
+        'attrs'            => $v->variantAttributes->mapWithKeys(function($va) {
+            return [$va->attribute->name => $va->value];
+        })->toArray(),
+    ];
+})->values()->toArray();
+@endphp
+
+@if($product->variants->isNotEmpty())
+(function() {
+
+// Dữ liệu variants từ PHP
+const VARIANTS = {!! json_encode($variantsForJs, JSON_UNESCAPED_UNICODE) !!};
+
+// Thông số kỹ thuật gốc của sản phẩm (product_attributes)
+const BASE_ATTRS = @json(
+    $product->attributes->mapWithKeys(fn($pa) => [$pa->attribute->name => $pa->value])
+);
+
+// Sản phẩm gốc (fallback khi chưa chọn variant)
+const BASE_PRICE    = {{ (float)$product->price }};
+const BASE_DISCOUNT = {{ (int)$product->discount_percent }};
+const BASE_STOCK    = {{ (int)$product->stock }};
+
+// Thu thập tất cả attr names có trong variants
+const attrNames  = [];
+const attrValues = {};
+
+VARIANTS.forEach(v => {
+    for (const [name, val] of Object.entries(v.attrs)) {
+        if (!attrValues[name]) { attrNames.push(name); attrValues[name] = new Set(); }
+        attrValues[name].add(val);
+    }
 });
+
+// Format tiền VNĐ
+function fmt(n) {
+    return Math.round(n).toLocaleString('vi-VN') + 'đ';
+}
+
+// Tính các attr khác nhau giữa tất cả options (base + variants)
+// → chỉ những attr này mới đưa vào label button
+function getDiffKeys() {
+    const allOptions = [BASE_ATTRS, ...VARIANTS.map(v => v.attrs)];
+    const keys = Object.keys(BASE_ATTRS);
+    return keys.filter(key => {
+        const vals = allOptions.map(o => o[key] ?? '');
+        return new Set(vals).size > 1; // có ít nhất 2 giá trị khác nhau
+    });
+}
+const DIFF_KEYS = getDiffKeys();
+
+// Tạo label từ attrs, chỉ dùng các key khác nhau
+function buildLabel(attrs) {
+    const parts = DIFF_KEYS.map(k => attrs[k]).filter(Boolean);
+    // fallback nếu không có key khác nhau
+    return parts.length ? parts.join(' - ') : (Object.values(attrs).join(' - ') || 'Mặc định');
+}
+
+// Áp dụng lên UI (price, stock, variant_id)
+function applyOption(price, discount, stock, variantId) {
+    const alertEl    = document.getElementById('variantAlert');
+    const actionBtns = document.getElementById('actionBtns');
+
+    if (alertEl) alertEl.style.display = 'none';
+    if (actionBtns) actionBtns.style.display = '';
+
+    ['inputVariantId', 'inputVariantIdBuy'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = variantId ?? '';
+    });
+
+    const addBtn  = document.getElementById('btnAddCart');
+    const buyBtn  = document.getElementById('btnBuyNow');
+    const soldOut = stock <= 0;
+    if (addBtn) { addBtn.disabled = soldOut; addBtn.style.opacity = soldOut ? '.5' : '1'; }
+    if (buyBtn) { buyBtn.disabled = soldOut; buyBtn.style.opacity = soldOut ? '.5' : '1'; }
+
+    renderPrice(price, discount);
+    renderStock(stock);
+}
+
+// Build UI selector
+const selector = document.getElementById('variantSelector');
+
+if (selector) {
+    const lblRow = document.createElement('div');
+    lblRow.className = 'option-label';
+    lblRow.style.marginBottom = '8px';
+    lblRow.innerHTML = 'Phiên bản: <strong id="lbl-selected-variant"></strong>';
+    selector.appendChild(lblRow);
+
+    const btnWrap = document.createElement('div');
+    btnWrap.className = 'option-btns';
+    btnWrap.style.cssText = 'flex-wrap:wrap;gap:8px';
+
+    // ── Option gốc (product_attributes, giá gốc sản phẩm) ──────
+    const baseLabel = buildLabel(BASE_ATTRS);
+    const baseBtn   = document.createElement('button');
+    baseBtn.type      = 'button';
+    baseBtn.className = 'opt-btn active';
+    baseBtn.textContent = baseLabel || 'Mặc định';
+    baseBtn.addEventListener('click', function () {
+        btnWrap.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById('lbl-selected-variant').textContent = this.textContent;
+        applyOption(BASE_PRICE, BASE_DISCOUNT, BASE_STOCK, null);
+    });
+    btnWrap.appendChild(baseBtn);
+
+    // ── Các biến thể ────────────────────────────────────────────
+    VARIANTS.forEach(v => {
+        const label = buildLabel(v.attrs);
+        const btn   = document.createElement('button');
+        btn.type      = 'button';
+        btn.className = 'opt-btn';
+        btn.textContent = label;
+
+        if (!v.is_active || v.stock <= 0) {
+            btn.style.opacity = '0.45';
+            btn.style.textDecoration = 'line-through';
+            btn.title = v.stock <= 0 ? 'Hết hàng' : 'Không khả dụng';
+        }
+
+        btn.addEventListener('click', function () {
+            btnWrap.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('lbl-selected-variant').textContent = label;
+            applyOption(v.price, v.discount_percent, v.stock, v.id);
+        });
+
+        btnWrap.appendChild(btn);
+    });
+
+    selector.appendChild(btnWrap);
+}
+
+
+// updateVariant() đã được thay bằng applyVariant() ở trên
+
+function renderPrice(price, discount) {
+    const salePrice = price * (1 - discount / 100);
+    document.getElementById('priceDisplay').textContent    = fmt(salePrice);
+    const oldEl = document.getElementById('priceOldDisplay');
+    const pctEl = document.getElementById('pricePctDisplay');
+    if (discount > 0) {
+        oldEl.textContent = fmt(price);
+        pctEl.textContent = `-${discount}%`;
+        oldEl.style.display = '';
+        pctEl.style.display = '';
+    } else {
+        oldEl.textContent = '';
+        pctEl.textContent = '';
+        oldEl.style.display = 'none';
+        pctEl.style.display = 'none';
+    }
+}
+
+function renderStock(stock) {
+    const el = document.getElementById('stockDisplay');
+    if (!el) return;
+    if (stock > 0) {
+        el.innerHTML = `<div class="in-stock"><i class="fas fa-check-circle"></i> Còn hàng (${stock})</div>`;
+    } else {
+        el.innerHTML = `<div class="out-of-stock"><i class="fas fa-times-circle"></i> Hết hàng</div>`;
+    }
+}
+
+function esc(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Khởi tạo: chọn và highlight variant đầu tiên active
+(function initVariant() {
+    // Khởi tạo: option gốc active, hiện giá gốc
+    const lbl = document.getElementById('lbl-selected-variant');
+    const baseBtn = selector ? selector.querySelector('.opt-btn') : null;
+    if (lbl && baseBtn) lbl.textContent = baseBtn.textContent;
+    applyOption(BASE_PRICE, BASE_DISCOUNT, BASE_STOCK, null);
+})();
+
+
+})(); // IIFE
+@endif
+
 </script>
 @endpush

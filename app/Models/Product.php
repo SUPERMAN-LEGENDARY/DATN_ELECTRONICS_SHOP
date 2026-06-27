@@ -15,7 +15,7 @@ use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name', 'slug', 'category_id', 'brand_id',
-        'description', 'images', 'price',
+        'description', 'thumbnail', 'images', 'price',
         'discount_percent', 'stock', 'is_active',
     ];
 
@@ -60,6 +60,11 @@ use HasFactory, SoftDeletes;
         return $this->hasMany(ProductAttribute::class);
     }
 
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class)->orderBy('sort_order');
+    }
+
     public function reviews()
     {
         return $this->hasMany(Review::class);
@@ -90,10 +95,10 @@ use HasFactory, SoftDeletes;
         return round($this->visibleReviews()->avg('rating') ?? 0, 1);
     }
 
-    /** Thumbnail đầu tiên */
+    /** Thumbnail đầu tiên (ưu tiên thumbnail, fallback ảnh album đầu) */
     public function getFirstImageAttribute(): ?string
     {
-        return $this->images[0] ?? null;
+        return $this->thumbnail ?? ($this->images[0] ?? null);
     }
 
     // ─── Scopes ───────────────────────────────────────────────────

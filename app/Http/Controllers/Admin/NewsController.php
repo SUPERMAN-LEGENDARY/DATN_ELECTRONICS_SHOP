@@ -47,14 +47,17 @@ class NewsController extends Controller
         $data = $request->validate([
             'title'            => ['required', 'string', 'max:255'],
             'news_category_id' => ['required', 'exists:news_categories,id'],
+            'excerpt'          => ['nullable', 'string', 'max:500'],
             'content'          => ['required', 'string'],
             'thumbnail'        => ['nullable', 'image', 'max:2048'],
             'is_active'        => ['boolean'],
             'published_at'     => ['nullable', 'date'],
+        ], [
+            'excerpt.max' => 'Mô tả ngắn không vượt quá :max ký tự.',
         ]);
 
-        $data['slug']    = News::generateSlug($data['title']);
-        $data['user_id'] = auth()->id();
+        $data['slug']      = News::generateSlug($data['title']);
+        $data['user_id']   = auth()->id();
         $data['is_active'] = $request->boolean('is_active');
 
         if ($request->hasFile('thumbnail')) {
@@ -78,10 +81,13 @@ class NewsController extends Controller
         $data = $request->validate([
             'title'            => ['required', 'string', 'max:255'],
             'news_category_id' => ['required', 'exists:news_categories,id'],
+            'excerpt'          => ['nullable', 'string', 'max:500'],
             'content'          => ['required', 'string'],
             'thumbnail'        => ['nullable', 'image', 'max:2048'],
             'is_active'        => ['boolean'],
             'published_at'     => ['nullable', 'date'],
+        ], [
+            'excerpt.max' => 'Mô tả ngắn không vượt quá :max ký tự.',
         ]);
 
         $data['slug']      = News::generateSlug($data['title'], $news->id);

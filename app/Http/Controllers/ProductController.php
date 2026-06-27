@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Review;
+use App\Services\BadWordDetector;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -54,6 +55,7 @@ class ProductController extends Controller
                 'category',
                 'brand',
                 'attributes.attribute',
+                'variants.variantAttributes.attribute',
             ])
             ->withCount(['visibleReviews as reviews_count'])
             ->where('slug', $slug)
@@ -109,13 +111,22 @@ class ProductController extends Controller
             return back()->with('error', 'Bạn đã đánh giá sản phẩm này rồi.');
         }
 
+        // ── Kiểm tra từ không chuẩn mực ──────────────────────────
+        $badWordResult = BadWordDetector::check($request->content);
+        $hasBadWords   = $badWordResult['found'];
+
         Review::create([
-            'product_id' => $productId,
-            'user_id'    => $userId,
-            'rating'     => $request->rating,
-            'content'    => $request->content,
-            'is_visible' => true,
+            'product_id'     => $productId,
+            'user_id'        => $userId,
+            'rating'         => $request->rating,
+            'content'        => $request->content,
+            'is_visible'     => !$hasBadWords,   // tự động ẩn nếu có từ xấu
+            'bad_words_flag' => $hasBadWords,
         ]);
+
+        if ($hasBadWords) {
+            return back()->with('error', 'Đánh giá của bạn chứa từ ngữ không phù hợp và đang chờ kiểm duyệt.');
+        }
 
         return back()->with('success', 'Cảm ơn bạn đã đánh giá!');
     }

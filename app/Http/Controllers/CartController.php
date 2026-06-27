@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -19,6 +20,16 @@ class CartController extends Controller
         session(['cart' => $cart]);
     }
 
+    /**
+     * Sinh key duy nhất cho 1 dòng trong giỏ.
+     * Cùng product nhưng khác variant -> key khác nhau.
+     * variant_id = null (sản phẩm không có biến thể) -> dùng 0.
+     */
+    private function makeKey(int $productId, ?int $variantId): string
+    {
+        return $productId . '-' . ($variantId ?? 0);
+    }
+
     // ─── Xem giỏ hàng ────────────────────────────────────────────
     public function index()
     {
@@ -26,17 +37,39 @@ class CartController extends Controller
         $products = [];
         $total    = 0;
 
-        foreach ($cart as $id => $item) {
-            $product = Product::find($id);
-            if ($product) {
-                $subtotal   = $product->sale_price * $item['quantity'];
-                $total     += $subtotal;
-                $products[] = [
-                    'product'  => $product,
-                    'quantity' => $item['quantity'],
-                    'subtotal' => $subtotal,
-                ];
+        foreach ($cart as $key => $item) {
+            // Bỏ qua item lỗi format (session cũ)
+            if (empty($item['product_id'])) {
+                unset($cart[$key]);
+                continue;
             }
+
+            $product = Product::find($item['product_id']);
+            if (!$product) continue;
+
+            $variant = null;
+            if (!empty($item['variant_id'])) {
+                $variant = ProductVariant::find($item['variant_id']);
+                // Nếu variant đã bị xóa thì bỏ qua dòng này
+                if (!$variant) continue;
+            }
+
+            // Giá & tồn kho lấy theo variant nếu có, ngược lại lấy theo product
+            $price = $variant ? $variant->final_price : $product->sale_price;
+            $stock = $variant ? $variant->stock : $product->stock;
+
+            $subtotal = $price * $item['quantity'];
+            $total   += $subtotal;
+
+            $products[] = [
+                'key'      => $key,
+                'product'  => $product,
+                'variant'  => $variant,
+                'quantity' => $item['quantity'],
+                'price'    => $price,
+                'stock'    => $stock,
+                'subtotal' => $subtotal,
+            ];
         }
 
         return view('cart.index', compact('products', 'total'));
@@ -46,43 +79,81 @@ class CartController extends Controller
     public function add(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id',
+            'product_id' => 'required|exists:products,id,deleted_at,NULL',
+            'variant_id' => 'nullable|exists:product_variants,id',
             'quantity'   => 'integer|min:1|max:99',
         ]);
 
-        $id  = $request->product_id;
-        $qty = $request->quantity ?? 1;
+        $productId = (int) $request->product_id;
+        $variantId = $request->variant_id ? (int) $request->variant_id : null;
+        $qty       = $request->quantity ?? 1;
 
+        // Nếu có variant_id thì phải đúng là variant của product này
+        if ($variantId) {
+            $belongs = ProductVariant::where('id', $variantId)
+                ->where('product_id', $productId)
+                ->exists();
+            if (!$belongs) {
+                return back()->with('error', 'Biến thể không hợp lệ.');
+            }
+        }
+
+        $key  = $this->makeKey($productId, $variantId);
         $cart = $this->getCart();
-        $cart[$id]['quantity'] = ($cart[$id]['quantity'] ?? 0) + $qty;
+
+        $cart[$key] = [
+            'product_id' => $productId,
+            'variant_id' => $variantId,
+            'quantity'   => ($cart[$key]['quantity'] ?? 0) + $qty,
+        ];
+
         $this->saveCart($cart);
 
-        return back()->with('success', 'Đã thêm vào giỏ hàng!');
+        return redirect()->route('cart.index')->with('success', 'Đã thêm vào giỏ hàng!');
     }
 
     // ─── Mua ngay (thêm rồi redirect sang giỏ) ───────────────────
     public function buyNow(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id',
+            'product_id' => 'required|exists:products,id,deleted_at,NULL',
+            'variant_id' => 'nullable|exists:product_variants,id',
         ]);
 
-        $id   = $request->product_id;
+        $productId = (int) $request->product_id;
+        $variantId = $request->variant_id ? (int) $request->variant_id : null;
+
+        if ($variantId) {
+            $belongs = ProductVariant::where('id', $variantId)
+                ->where('product_id', $productId)
+                ->exists();
+            if (!$belongs) {
+                return back()->with('error', 'Biến thể không hợp lệ.');
+            }
+        }
+
+        $key  = $this->makeKey($productId, $variantId);
         $cart = $this->getCart();
-        $cart[$id]['quantity'] = ($cart[$id]['quantity'] ?? 0) + 1;
+
+        $cart[$key] = [
+            'product_id' => $productId,
+            'variant_id' => $variantId,
+            'quantity'   => ($cart[$key]['quantity'] ?? 0) + 1,
+        ];
+
         $this->saveCart($cart);
 
         return redirect()->route('cart.index');
     }
 
     // ─── Cập nhật số lượng ───────────────────────────────────────
-    public function update(Request $request, int $productId)
+    public function update(Request $request, string $key)
     {
         $request->validate(['quantity' => 'required|integer|min:1|max:99']);
 
         $cart = $this->getCart();
-        if (isset($cart[$productId])) {
-            $cart[$productId]['quantity'] = $request->quantity;
+        if (isset($cart[$key])) {
+            $cart[$key]['quantity'] = $request->quantity;
             $this->saveCart($cart);
         }
 
@@ -90,10 +161,10 @@ class CartController extends Controller
     }
 
     // ─── Xóa sản phẩm khỏi giỏ ──────────────────────────────────
-    public function remove(int $productId)
+    public function remove(string $key)
     {
         $cart = $this->getCart();
-        unset($cart[$productId]);
+        unset($cart[$key]);
         $this->saveCart($cart);
 
         return back()->with('success', 'Đã xóa khỏi giỏ hàng.');

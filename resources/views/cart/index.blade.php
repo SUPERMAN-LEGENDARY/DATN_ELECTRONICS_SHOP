@@ -71,22 +71,28 @@
                                     {{ $item['product']->name }}
                                 </a>
                             </div>
+                            @if($item['variant'])
+                            <div class="cart-product-brand" style="color:#1565C0">
+                                Phiên bản:
+                                {{ $item['variant']->variantAttributes->pluck('value')->implode(' - ') }}
+                            </div>
+                            @endif
                             <div class="cart-product-brand">{{ $item['product']->brand->name ?? '' }}</div>
                         </div>
                     </div>
                 </td>
-                <td>{{ number_format($item['product']->sale_price) }}đ</td>
+                <td>{{ number_format($item['price']) }}đ</td>
                 <td>
-                    <form action="{{ route('cart.update', $item['product']->id) }}" method="POST" style="display:inline">
+                    <form action="{{ route('cart.update', $item['key']) }}" method="POST" style="display:inline">
                         @csrf @method('PATCH')
                         <input type="number" name="quantity" value="{{ $item['quantity'] }}"
-                               min="1" max="99" class="qty-input"
+                               min="1" max="{{ max($item['stock'], 1) }}" class="qty-input"
                                onchange="this.form.submit()">
                     </form>
                 </td>
                 <td style="font-weight:700;color:#1565C0">{{ number_format($item['subtotal']) }}đ</td>
                 <td>
-                    <form action="{{ route('cart.remove', $item['product']->id) }}" method="POST">
+                    <form action="{{ route('cart.remove', $item['key']) }}" method="POST">
                         @csrf @method('DELETE')
                         <button type="submit" class="btn-remove" title="Xóa">
                             <i class="fas fa-trash"></i>

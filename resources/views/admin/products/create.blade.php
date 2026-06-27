@@ -23,6 +23,13 @@
 .image-preview-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
 .image-preview-row img { width:80px; height:80px; object-fit:cover; border-radius:6px; border:1px solid #e0e0e0; }
 .attr-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.attr-field-row { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+.btn-field-remove { background:none; border:none; color:#ccc; cursor:pointer; font-size:12px; padding:0 2px; line-height:1; flex-shrink:0; }
+.btn-field-remove:hover { color:#E53935; }
+.removed-chip-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.removed-chip { display:inline-flex; align-items:center; gap:6px; background:#F5F5F5; border:1px dashed #ccc; color:#888; font-size:12px; padding:4px 10px; border-radius:14px; cursor:pointer; }
+.removed-chip:hover { background:#E3F2FD; border-color:#1565C0; color:#1565C0; }
+.removed-chip i { font-size:10px; }
 .btn-back { color:#666; text-decoration:none; font-size:13px; display:inline-flex; align-items:center; gap:4px; margin-bottom:16px; }
 .btn-back:hover { color:#1565C0; }
 .action-row { display:flex; gap:12px; margin-top:8px; }
@@ -143,7 +150,7 @@
 </div>
 
 <form action="{{ isset($product) ? route('admin.products.update', $product) : route('admin.products.store') }}"
-      method="POST" enctype="multipart/form-data" class="form-wrap">
+    method="POST" enctype="multipart/form-data" class="form-wrap" id="productForm" novalidate>
     @csrf
     @if(isset($product)) @method('PUT') @endif
 
@@ -152,42 +159,42 @@
         <h3>Thông tin cơ bản</h3>
         <div class="form-group">
             <label>Tên sản phẩm <span style="color:#E53935">*</span></label>
-            <input type="text" name="name" value="{{ old('name', $product->name ?? '') }}"
-                   placeholder="VD: iPhone 15 Pro Max 256GB Titan Tự Nhiên">
-            @error('name')<div class="error">{{ $message }}</div>@enderror
+            <input type="text" name="name" id="name" value="{{ old('name', $product->name ?? '') }}"
+                placeholder="VD: iPhone 15 Pro Max 256GB Titan Tự Nhiên">
+            <div class="error" id="name-error">@error('name'){{ $message }}@enderror</div>
         </div>
         <div class="form-row">
             <div class="form-group">
                 <label>Danh mục <span style="color:#E53935">*</span></label>
-                <select name="category_id">
+                <select name="category_id" id="category_id">
                     <option value="">-- Chọn danh mục --</option>
                     @foreach($categories as $cat)
                     <option value="{{ $cat->id }}"
-                            {{ old('category_id', $product->category_id ?? '') == $cat->id ? 'selected' : '' }}>
+                        {{ old('category_id', $product->category_id ?? '') == $cat->id ? 'selected' : '' }}>
                         {{ $cat->name }}
                     </option>
                     @endforeach
                 </select>
-                @error('category_id')<div class="error">{{ $message }}</div>@enderror
+                <div class="error" id="category_id-error">@error('category_id'){{ $message }}@enderror</div>
             </div>
             <div class="form-group">
                 <label>Thương hiệu <span style="color:#E53935">*</span></label>
-                <select name="brand_id">
+                <select name="brand_id" id="brand_id">
                     <option value="">-- Chọn thương hiệu --</option>
                     @foreach($brands as $brand)
                     <option value="{{ $brand->id }}"
-                            {{ old('brand_id', $product->brand_id ?? '') == $brand->id ? 'selected' : '' }}>
+                        {{ old('brand_id', $product->brand_id ?? '') == $brand->id ? 'selected' : '' }}>
                         {{ $brand->name }}
                     </option>
                     @endforeach
                 </select>
-                @error('brand_id')<div class="error">{{ $message }}</div>@enderror
+                <div class="error" id="brand_id-error">@error('brand_id'){{ $message }}@enderror</div>
             </div>
         </div>
         <div class="form-group">
             <label>Mô tả sản phẩm</label>
             <textarea name="description" rows="5"
-                      placeholder="Nhập mô tả chi tiết sản phẩm...">{{ old('description', $product->description ?? '') }}</textarea>
+                placeholder="Nhập mô tả chi tiết sản phẩm...">{{ old('description', $product->description ?? '') }}</textarea>
         </div>
     </div>
 
@@ -197,27 +204,27 @@
         <div class="form-row three">
             <div class="form-group">
                 <label>Giá gốc (đ) <span style="color:#E53935">*</span></label>
-                <input type="number" name="price" value="{{ old('price', $product->price ?? '') }}"
-                       placeholder="29990000" min="0">
-                @error('price')<div class="error">{{ $message }}</div>@enderror
+                <input type="number" name="price" id="price" value="{{ old('price', $product->price ?? '') }}"
+                    placeholder="29990000" min="0">
+                <div class="error" id="price-error">@error('price'){{ $message }}@enderror</div>
             </div>
             <div class="form-group">
                 <label>Giảm giá (%)</label>
                 <input type="number" name="discount_percent"
-                       value="{{ old('discount_percent', $product->discount_percent ?? 0) }}"
-                       min="0" max="100">
+                    value="{{ old('discount_percent', $product->discount_percent ?? 0) }}"
+                    min="0" max="100">
                 @error('discount_percent')<div class="error">{{ $message }}</div>@enderror
             </div>
             <div class="form-group">
                 <label>Số Lượng</label>
                 <input type="number" name="stock"
-                       value="{{ old('stock', $product->stock ?? 0) }}" min="0">
+                    value="{{ old('stock', $product->stock ?? 0) }}" min="0">
             </div>
         </div>
         <div class="form-group">
             <div class="toggle-check">
                 <input type="checkbox" id="is_active" name="is_active" value="1"
-                       {{ old('is_active', $product->is_active ?? true) ? 'checked' : '' }}>
+                    {{ old('is_active', $product->is_active ?? true) ? 'checked' : '' }}>
                 <label for="is_active" style="margin:0;font-size:13px;font-weight:600;cursor:pointer">
                     Hiển thị sản phẩm trên cửa hàng
                 </label>
@@ -278,14 +285,22 @@
         <div class="attr-grid" id="attrGrid">
             @foreach($attributes as $attr)
             <div class="form-group" id="attr-field-{{ $attr->id }}">
-                <label>{{ $attr->name }}</label>
+                <label class="attr-field-row">
+                    <span>{{ $attr->name }}</span>
+                    <button type="button" class="btn-field-remove" data-id="{{ $attr->id }}" data-name="{{ $attr->name }}"
+                        title="Sản phẩm này không cần thuộc tính này">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </label>
                 <input type="text"
-                       name="attributes[{{ $attr->id }}]"
-                       value="{{ old('attributes.' . $attr->id, $savedAttrs[$attr->id]->value ?? '') }}"
-                       placeholder="Nhập {{ strtolower($attr->name) }}...">
+                    name="attributes[{{ $attr->id }}]"
+                    value="{{ old('attributes.' . $attr->id, $savedAttrs[$attr->id]->value ?? '') }}"
+                    placeholder="Nhập {{ strtolower($attr->name) }}...">
             </div>
             @endforeach
         </div>
+
+        <div class="removed-chip-row" id="attrRemovedChips"></div>
 
         @if($attributes->isEmpty())
         <p style="color:#aaa;font-size:13px" id="attrEmptyMsg">
@@ -343,8 +358,14 @@
                         <div class="variant-attr-grid">
                             @foreach($attributes as $attr)
                             @php $va = $v->variantAttributes->firstWhere('attribute_id', $attr->id); @endphp
-                            <div class="form-group">
-                                <label>{{ $attr->name }}</label>
+                            <div class="form-group" id="vca-{{ $vi }}-{{ $attr->id }}">
+                                <label class="attr-field-row">
+                                    <span>{{ $attr->name }}</span>
+                                    <button type="button" class="btn-field-remove" data-id="{{ $attr->id }}" data-name="{{ $attr->name }}"
+                                        title="Biến thể này không cần thuộc tính này">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </label>
                                 <input type="text"
                                        name="variants[{{ $vi }}][attrs][{{ $attr->id }}]"
                                        value="{{ old("variants.$vi.attrs.$attr->id", $va->value ?? '') }}"
@@ -352,6 +373,7 @@
                             </div>
                             @endforeach
                         </div>
+                        <div class="removed-chip-row" id="vcRemovedChips-{{ $vi }}"></div>
                         {{-- Giá riêng của biến thể --}}
                         <div class="variant-price-row">
                             <div class="form-group">
@@ -441,12 +463,12 @@
 
 @push('scripts')
 <script>
-const CSRF   = document.querySelector('meta[name="csrf-token"]').content;
-const ROUTES = {
-    list:    '{{ route("admin.attributes.list") }}',
-    store:   '{{ route("admin.attributes.store") }}',
-    destroy: '{{ url("admin/thuoc-tinh") }}/__ID__',
-};
+    const CSRF = document.querySelector('meta[name="csrf-token"]').content;
+    const ROUTES = {
+        list: '{{ route("admin.attributes.list") }}',
+        store: '{{ route("admin.attributes.store") }}',
+        destroy: '{{ url("admin/thuoc-tinh") }}/__ID__',
+    };
 
 // ══════════════════════════════════════════════════════════════
 // PHẦN BIẾN THỂ (VARIANTS)
@@ -457,6 +479,18 @@ const ALL_ATTRIBUTES = @json($attributes->map(fn($a) => ['id' => $a->id, 'name' 
 
 // Value đã lưu trong ProductAttribute — prefill cho biến thể mới
 const SAVED_ATTR_VALUES = @json($savedAttrs->mapWithKeys(fn($pa, $attrId) => [(string)$attrId => $pa->value]));
+
+// ── Theo dõi thuộc tính bị "x" (ẩn riêng cho sp/biến thể), để có thể thêm lại ──
+const removedBaseAttrs    = {};  // { [attrId]: { name, value } }
+const removedVariantAttrs = {};  // { [variantIdx]: { [attrId]: { name, value } } }
+
+// Lấy value hiện tại của thuộc tính gốc (ưu tiên input đang gõ trên form,
+// nếu trống thì lấy giá trị đã lưu trong DB) — dùng để prefill cho biến thể.
+function getBaseAttrValue(id) {
+    const input = document.querySelector(`#attrGrid input[name="attributes[${id}]"]`);
+    if (input && input.value.trim() !== '') return input.value;
+    return SAVED_ATTR_VALUES[String(id)] ?? '';
+}
 
 // Index tăng dần cho variant mới (tránh trùng với variant PHP đã render)
 let variantIdx = {{ $savedVariants->count() }};
@@ -475,12 +509,19 @@ function addVariant() {
     card.className = 'variant-card';
     card.id = 'vc-' + idx;
 
-    // Build các input thuộc tính — prefill value từ product attributes
-    const attrInputs = ALL_ATTRIBUTES.map(a => {
-        const prefill = SAVED_ATTR_VALUES[String(a.id)] ?? '';
+    // Build các input thuộc tính — prefill value từ thuộc tính gốc của sản phẩm
+    // Bỏ qua những thuộc tính đang bị ẩn ở khu vực base (removedBaseAttrs)
+    const attrInputs = ALL_ATTRIBUTES.filter(a => !removedBaseAttrs[a.id]).map(a => {
+        const prefill = getBaseAttrValue(a.id);
         return `
-        <div class="form-group">
-            <label>${esc(a.name)}</label>
+        <div class="form-group" id="vca-${idx}-${a.id}">
+            <label class="attr-field-row">
+                <span>${esc(a.name)}</span>
+                <button type="button" class="btn-field-remove" data-id="${a.id}" data-name="${esc(a.name)}"
+                    title="Biến thể này không cần thuộc tính này">
+                    <i class="fas fa-times"></i>
+                </button>
+            </label>
             <input type="text" name="variants[${idx}][attrs][${a.id}]"
                    value="${esc(prefill)}"
                    placeholder="${esc(a.name)}...">
@@ -506,6 +547,7 @@ function addVariant() {
             <div class="variant-attr-grid">
                 ${attrInputs || '<p style="color:#aaa;font-size:12px;grid-column:1/-1">Chưa có thuộc tính. Thêm trong <strong>Quản lý thuộc tính</strong>.</p>'}
             </div>
+            <div class="removed-chip-row" id="vcRemovedChips-${idx}"></div>
             <div class="variant-price-row">
                 <div class="form-group">
                     <label><i class="fas fa-tag"></i> Giá (đ) *</label>
@@ -541,6 +583,7 @@ function addVariant() {
 function removeVariant(idx) {
     if (!confirm('Xóa biến thể này?')) return;
     document.getElementById('vc-' + idx)?.remove();
+    delete removedVariantAttrs[idx];
 
     const list = document.getElementById('variantList');
     if (!list.children.length) {
@@ -556,6 +599,161 @@ function toggleVariantCard(idx) {
     const body = document.getElementById('vcb-' + idx);
     body.style.display = body.style.display === 'none' ? '' : 'none';
 }
+
+// ══════════════════════════════════════════════════════════════
+// ẨN / THÊM LẠI THUỘC TÍNH RIÊNG CHO TỪNG SẢN PHẨM / BIẾN THỂ
+// (chỉ ẩn khỏi form này, KHÔNG xóa thuộc tính khỏi hệ thống)
+// ══════════════════════════════════════════════════════════════
+
+// ── Khu vực "Thông số kỹ thuật" (thuộc tính gốc của sản phẩm) ──
+function removeBaseAttrField(id, name) {
+    const field = document.getElementById('attr-field-' + id);
+    const input = field?.querySelector('input');
+    removedBaseAttrs[id] = { name, value: input ? input.value : '' };
+    field?.remove();
+
+    const grid = document.getElementById('attrGrid');
+    if (!grid.children.length && !document.getElementById('attrEmptyMsg')) {
+        const msg = document.createElement('p');
+        msg.id = 'attrEmptyMsg';
+        msg.style.cssText = 'color:#aaa;font-size:13px';
+        msg.innerHTML = 'Chưa có thuộc tính nào. Nhấn <strong>Quản lý thuộc tính</strong> để thêm.';
+        grid.after(msg);
+    }
+    renderBaseRemovedChips();
+
+    // ── Đồng bộ: ẩn thuộc tính này ở TẤT CẢ biến thể ──
+    document.querySelectorAll('.variant-card').forEach(card => {
+        const vcIdx = card.id.replace('vc-', '');
+        const vcField = document.getElementById(`vca-${vcIdx}-${id}`);
+        if (!vcField) return; // đã bị ẩn riêng trước đó → bỏ qua
+        const vcInput = vcField.querySelector('input');
+        if (!removedVariantAttrs[vcIdx]) removedVariantAttrs[vcIdx] = {};
+        // chỉ lưu nếu chưa bị ẩn riêng (tránh ghi đè)
+        if (!removedVariantAttrs[vcIdx][id]) {
+            removedVariantAttrs[vcIdx][id] = { name, value: vcInput ? vcInput.value : '', hiddenByBase: true };
+        }
+        vcField.remove();
+        const vcGrid = card.querySelector('.variant-attr-grid');
+        if (vcGrid && !vcGrid.children.length && !vcGrid.querySelector('p')) {
+            const msg = document.createElement('p');
+            msg.style.cssText = 'color:#aaa;font-size:12px;grid-column:1/-1';
+            msg.textContent = 'Biến thể này không áp dụng thuộc tính nào.';
+            vcGrid.appendChild(msg);
+        }
+        renderVariantRemovedChips(vcIdx);
+    });
+}
+
+function addBackBaseAttrField(id) {
+    const data = removedBaseAttrs[id];
+    if (!data) return;
+    addFieldToForm(id, data.name);
+    const input = document.querySelector(`#attrGrid input[name="attributes[${id}]"]`);
+    if (input) input.value = data.value;
+    delete removedBaseAttrs[id];
+    renderBaseRemovedChips();
+
+    // ── Đồng bộ: hiện lại thuộc tính này ở TẤT CẢ biến thể (chỉ những cái hiddenByBase) ──
+    document.querySelectorAll('.variant-card').forEach(card => {
+        const vcIdx = card.id.replace('vc-', '');
+        const vcData = removedVariantAttrs[vcIdx]?.[id];
+        if (!vcData || !vcData.hiddenByBase) return; // bị ẩn riêng bởi user → không tự hiện lại
+        addBackVariantAttrField(vcIdx, id);
+    });
+}
+
+function renderBaseRemovedChips() {
+    const wrap = document.getElementById('attrRemovedChips');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    Object.entries(removedBaseAttrs).forEach(([id, data]) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'removed-chip';
+        chip.innerHTML = `<i class="fas fa-plus"></i> ${esc(data.name)}`;
+        chip.addEventListener('click', () => addBackBaseAttrField(id));
+        wrap.appendChild(chip);
+    });
+}
+
+// Click vào nút x trong attrGrid (event delegation — bắt cả field render từ PHP và JS)
+document.getElementById('attrGrid').addEventListener('click', function (e) {
+    const btn = e.target.closest('.btn-field-remove');
+    if (!btn) return;
+    removeBaseAttrField(btn.dataset.id, btn.dataset.name);
+});
+
+// ── Khu vực thuộc tính trong từng biến thể ─────────────────────
+function removeVariantAttrField(idx, id, name) {
+    const field = document.getElementById(`vca-${idx}-${id}`);
+    const input = field?.querySelector('input');
+    if (!removedVariantAttrs[idx]) removedVariantAttrs[idx] = {};
+    removedVariantAttrs[idx][id] = { name, value: input ? input.value : '', hiddenByBase: false };
+    field?.remove();
+
+    const grid = document.querySelector(`#vc-${idx} .variant-attr-grid`);
+    if (grid && !grid.children.length && !grid.querySelector('p')) {
+        const msg = document.createElement('p');
+        msg.style.cssText = 'color:#aaa;font-size:12px;grid-column:1/-1';
+        msg.textContent = 'Biến thể này không áp dụng thuộc tính nào.';
+        grid.appendChild(msg);
+    }
+    renderVariantRemovedChips(idx);
+}
+
+function addBackVariantAttrField(idx, id) {
+    const data = removedVariantAttrs[idx]?.[id];
+    if (!data) return;
+    const grid = document.querySelector(`#vc-${idx} .variant-attr-grid`);
+    if (!grid) return;
+    grid.querySelector('p')?.remove();
+
+    // Ưu tiên value đã có trước khi bị ẩn, nếu trống thì lấy theo thuộc tính gốc
+    const value = data.value || getBaseAttrValue(id);
+
+    const div = document.createElement('div');
+    div.className = 'form-group';
+    div.id = `vca-${idx}-${id}`;
+    div.innerHTML = `
+        <label class="attr-field-row">
+            <span>${esc(data.name)}</span>
+            <button type="button" class="btn-field-remove" data-id="${id}" data-name="${esc(data.name)}"
+                title="Biến thể này không cần thuộc tính này">
+                <i class="fas fa-times"></i>
+            </button>
+        </label>
+        <input type="text" name="variants[${idx}][attrs][${id}]" value="${esc(value)}" placeholder="${esc(data.name)}...">`;
+    grid.appendChild(div);
+
+    delete removedVariantAttrs[idx][id];
+    renderVariantRemovedChips(idx);
+}
+
+function renderVariantRemovedChips(idx) {
+    const wrap = document.getElementById('vcRemovedChips-' + idx);
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    const map = removedVariantAttrs[idx] || {};
+    Object.entries(map).forEach(([id, data]) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'removed-chip';
+        chip.innerHTML = `<i class="fas fa-plus"></i> ${esc(data.name)}`;
+        chip.addEventListener('click', () => addBackVariantAttrField(idx, id));
+        wrap.appendChild(chip);
+    });
+}
+
+// Click vào nút x trong bất kỳ variant-attr-grid nào (event delegation)
+document.getElementById('variantList').addEventListener('click', function (e) {
+    const btn = e.target.closest('.btn-field-remove');
+    if (!btn) return;
+    const card = btn.closest('.variant-card');
+    if (!card) return;
+    const idx = card.id.replace('vc-', '');
+    removeVariantAttrField(idx, btn.dataset.id, btn.dataset.name);
+});
 
 function updateVariantBadge(idx) {
     const priceEl = document.querySelector(`[name="variants[${idx}][price]"]`);
@@ -608,12 +806,12 @@ function renderAttrList(attrs) {
         const li = document.createElement('li');
         li.id = 'modal-attr-' + attr.id;
         li.innerHTML = `
-            <span class="attr-item-name">${esc(attr.name)}</span>
-            <span class="attr-item-used">${attr.used_count > 0 ? attr.used_count + ' sản phẩm' : 'Chưa dùng'}</span>
-            <button class="btn-attr-del" data-id="${attr.id}" data-name="${esc(attr.name)}"
-                ${attr.used_count > 0 ? 'disabled title="Đang được dùng, không thể xóa"' : ''}>
-                <i class="fas fa-trash"></i>
-            </button>`;
+        <span class="attr-item-name">${esc(attr.name)}</span>
+        <span class="attr-item-used">${attr.used_count > 0 ? attr.used_count + ' sản phẩm' : 'Chưa dùng'}</span>
+        <button class="btn-attr-del" data-id="${attr.id}" data-name="${esc(attr.name)}"
+            ${attr.used_count > 0 ? 'disabled title="Đang được dùng, không thể xóa"' : ''}>
+            <i class="fas fa-trash"></i>
+        </button>`;
         ul.appendChild(li);
     });
     wrap.innerHTML = '';
@@ -623,9 +821,13 @@ function renderAttrList(attrs) {
     });
 }
 
+// ── Thêm ─────────────────────────────────────────────────────────
 document.getElementById('btnAddAttr').addEventListener('click', addAttr);
 document.getElementById('newAttrName').addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); addAttr(); }
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        addAttr();
+    }
 });
 
 function addAttr() {
@@ -684,12 +886,20 @@ function addFieldToForm(id, name) {
     div.className = 'form-group';
     div.id = 'attr-field-' + id;
     div.innerHTML = `
-        <label>${esc(name)}</label>
+        <label class="attr-field-row">
+            <span>${esc(name)}</span>
+            <button type="button" class="btn-field-remove" data-id="${id}" data-name="${esc(name)}"
+                title="Sản phẩm này không cần thuộc tính này">
+                <i class="fas fa-times"></i>
+            </button>
+        </label>
         <input type="text" name="attributes[${id}]" placeholder="Nhập ${esc(name.toLowerCase())}...">`;
     document.getElementById('attrGrid').appendChild(div);
 }
 function removeFieldFromForm(id) {
     document.getElementById('attr-field-' + id)?.remove();
+    delete removedBaseAttrs[id];
+    renderBaseRemovedChips();
     const grid = document.getElementById('attrGrid');
     if (!grid.children.length) {
         const msg = document.createElement('p');
@@ -712,13 +922,25 @@ function addAttrToAllVariants(id, name) {
         div.className = 'form-group';
         div.id = `vca-${vcIdx}-${id}`;
         div.innerHTML = `
-            <label>${esc(name)}</label>
+            <label class="attr-field-row">
+                <span>${esc(name)}</span>
+                <button type="button" class="btn-field-remove" data-id="${id}" data-name="${esc(name)}"
+                    title="Biến thể này không cần thuộc tính này">
+                    <i class="fas fa-times"></i>
+                </button>
+            </label>
             <input type="text" name="variants[${vcIdx}][attrs][${id}]" placeholder="${esc(name)}...">`;
         grid.appendChild(div);
     });
 }
 function removeAttrFromAllVariants(id) {
     document.querySelectorAll(`[id^="vca-"][id$="-${id}"]`).forEach(el => el.remove());
+    Object.keys(removedVariantAttrs).forEach(idx => {
+        if (removedVariantAttrs[idx][id]) {
+            delete removedVariantAttrs[idx][id];
+            renderVariantRemovedChips(idx);
+        }
+    });
 }
 
 // ── Helpers ───────────────────────────────────────────────────

@@ -6,13 +6,15 @@
         background: #fff;
         border-radius: 8px;
         padding: 24px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
         max-width: 700px;
         margin-top: 16px;
     }
+
     .form-group {
         margin-bottom: 16px;
     }
+
     .form-group label {
         display: block;
         font-weight: 600;
@@ -20,10 +22,12 @@
         margin-bottom: 4px;
         color: #495057;
     }
+
     .form-group label .required {
         color: #dc3545;
         margin-left: 2px;
     }
+
     .form-control {
         width: 100%;
         padding: 8px 12px;
@@ -33,19 +37,23 @@
         background: #fff;
         transition: border-color 0.15s;
     }
+
     .form-control:focus {
         border-color: #1565C0;
         outline: none;
         box-shadow: 0 0 0 0.2rem rgba(21, 101, 192, 0.25);
     }
+
     .form-control.is-invalid {
         border-color: #dc3545;
     }
+
     .invalid-feedback {
         color: #dc3545;
         font-size: 13px;
         margin-top: 4px;
     }
+
     .btn {
         display: inline-block;
         font-weight: 500;
@@ -57,40 +65,61 @@
         transition: all 0.15s;
         text-decoration: none;
     }
+
     .btn-primary {
         background: #1565C0;
         color: #fff;
     }
+
     .btn-primary:hover {
         background: #0D47A1;
     }
+
     .btn-secondary {
         background: #6c757d;
         color: #fff;
     }
+
     .btn-secondary:hover {
         background: #5a6268;
     }
+
     .checkbox-group {
         display: flex;
         align-items: center;
         gap: 8px;
         margin: 8px 0;
     }
+
     .checkbox-group input[type="checkbox"] {
         width: 18px;
         height: 18px;
         cursor: pointer;
     }
+
     .checkbox-group label {
         margin: 0;
         font-weight: 400;
         cursor: pointer;
     }
-    .mt-3 { margin-top: 16px; }
-    .text-muted { color: #6c757d; font-size: 13px; }
-    .text-danger { color: #dc3545; font-size: 13px; }
-    .mb-3 { margin-bottom: 16px; }
+
+    .mt-3 {
+        margin-top: 16px;
+    }
+
+    .text-muted {
+        color: #6c757d;
+        font-size: 13px;
+    }
+
+    .text-danger {
+        color: #dc3545;
+        font-size: 13px;
+    }
+
+    .mb-3 {
+        margin-bottom: 16px;
+    }
 </style>
 @endpush
 
@@ -107,65 +136,53 @@
             {{-- Mã giảm giá --}}
             <div class="form-group">
                 <label for="code">Mã giảm giá <span class="required">*</span></label>
-                <input type="text" name="code" id="code" class="form-control @error('code') is-invalid @enderror" 
-                       value="{{ old('code', $voucher->code) }}" placeholder="Ví dụ: SUMMER2025" 
-                       required pattern="[A-Z0-9_]+" title="Chỉ chấp nhận chữ hoa, số và dấu gạch dưới">
-                @error('code')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <input type="text" name="code" id="code" class="form-control @error('code') is-invalid @enderror"
+                    value="{{ old('code', $voucher->code) }}" placeholder="Ví dụ: SUMMER2025"
+                    pattern="[A-Z0-9_]+" title="Chỉ chấp nhận chữ hoa, số và dấu gạch dưới">
+                <div class="invalid-feedback" id="code-error">@error('code'){{ $message }}@enderror</div>
                 <small class="text-muted">Mã code duy nhất, chỉ chứa chữ hoa, số và dấu gạch dưới.</small>
             </div>
 
             {{-- Phần trăm giảm --}}
             <div class="form-group">
                 <label for="discount_percent">Phần trăm giảm (%) <span class="required">*</span></label>
-                <input type="number" name="discount_percent" id="discount_percent" class="form-control @error('discount_percent') is-invalid @enderror" 
-                       value="{{ old('discount_percent', $voucher->discount_percent) }}" min="1" max="100" required>
-                @error('discount_percent')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <input type="number" name="discount_percent" id="discount_percent" class="form-control @error('discount_percent') is-invalid @enderror"
+                    value="{{ old('discount_percent', $voucher->discount_percent) }}" min="1" max="100">
+                <div class="invalid-feedback" id="discount_percent-error">@error('discount_percent'){{ $message }}@enderror</div>
             </div>
 
             {{-- Giá trị tối thiểu --}}
             <div class="form-group">
                 <label for="min_order_value">Giá trị đơn hàng tối thiểu (VNĐ) <span class="required">*</span></label>
-                <input type="number" name="min_order_value" id="min_order_value" class="form-control @error('min_order_value') is-invalid @enderror" 
-                       value="{{ old('min_order_value', $voucher->min_order_value) }}" min="0" required>
-                @error('min_order_value')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <input type="number" name="min_order_value" id="min_order_value" class="form-control @error('min_order_value') is-invalid @enderror"
+                    value="{{ old('min_order_value', $voucher->min_order_value) }}" min="0">
+                <div class="invalid-feedback" id="min_order_value-error">@error('min_order_value'){{ $message }}@enderror</div>
                 <small class="text-muted">Đơn hàng phải có tổng giá trị ≥ giá trị này mới áp dụng được voucher.</small>
             </div>
 
             {{-- Số lượt sử dụng --}}
             <div class="form-group">
                 <label for="usage_limit">Số lượt sử dụng tối đa <span class="required">*</span></label>
-                <input type="number" name="usage_limit" id="usage_limit" class="form-control @error('usage_limit') is-invalid @enderror" 
-                       value="{{ old('usage_limit', $voucher->usage_limit) }}" min="1" required>
-                @error('usage_limit')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <input type="number" name="usage_limit" id="usage_limit" class="form-control @error('usage_limit') is-invalid @enderror"
+                    value="{{ old('usage_limit', $voucher->usage_limit) }}" min="1">
+                <div class="invalid-feedback" id="usage_limit-error">@error('usage_limit'){{ $message }}@enderror</div>
                 <small class="text-muted">Tổng số lần voucher này có thể được sử dụng.</small>
             </div>
 
             {{-- Ngày bắt đầu --}}
             <div class="form-group">
                 <label for="starts_at">Ngày bắt đầu <span class="required">*</span></label>
-                <input type="datetime-local" name="starts_at" id="starts_at" class="form-control @error('starts_at') is-invalid @enderror" 
-                       value="{{ old('starts_at', \Carbon\Carbon::parse($voucher->starts_at)->format('Y-m-d\TH:i')) }}" required>
-                @error('starts_at')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <input type="datetime-local" name="starts_at" id="starts_at" class="form-control @error('starts_at') is-invalid @enderror"
+                    value="{{ old('starts_at', \Carbon\Carbon::parse($voucher->starts_at)->format('Y-m-d\TH:i')) }}">
+                <div class="invalid-feedback" id="starts_at-error">@error('starts_at'){{ $message }}@enderror</div>
             </div>
 
             {{-- Ngày kết thúc --}}
             <div class="form-group">
                 <label for="expires_at">Ngày kết thúc <span class="required">*</span></label>
-                <input type="datetime-local" name="expires_at" id="expires_at" class="form-control @error('expires_at') is-invalid @enderror" 
-                       value="{{ old('expires_at', \Carbon\Carbon::parse($voucher->expires_at)->format('Y-m-d\TH:i')) }}" required>
-                @error('expires_at')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <input type="datetime-local" name="expires_at" id="expires_at" class="form-control @error('expires_at') is-invalid @enderror"
+                    value="{{ old('expires_at', \Carbon\Carbon::parse($voucher->expires_at)->format('Y-m-d\TH:i')) }}">
+                <div class="invalid-feedback" id="expires_at-error">@error('expires_at'){{ $message }}@enderror</div>
                 <small class="text-muted">Phải sau ngày bắt đầu.</small>
             </div>
 
@@ -196,108 +213,119 @@
 
 @push('scripts')
 <script>
-    (function() {
+    document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('voucherForm');
-        const errorContainer = document.getElementById('form-error');
 
-        function showError(message) {
-            errorContainer.textContent = message;
-            errorContainer.style.display = 'block';
+        // Hàm hiển thị lỗi cho từng trường
+        function setError(inputId, message) {
+            const input = document.getElementById(inputId);
+            const errorDiv = document.getElementById(inputId + '-error');
+            if (input) input.classList.add('is-invalid');
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
         }
 
-        function clearError() {
-            errorContainer.textContent = '';
-            errorContainer.style.display = 'none';
+        // Hàm xóa lỗi
+        function clearError(inputId) {
+            const input = document.getElementById(inputId);
+            const errorDiv = document.getElementById(inputId + '-error');
+            if (input) input.classList.remove('is-invalid');
+            if (errorDiv) {
+                errorDiv.textContent = '';
+                errorDiv.style.display = 'none';
+            }
         }
+
+        // Xóa lỗi khi người dùng nhập vào trường
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('input', function() {
+                clearError(this.id);
+            });
+            input.addEventListener('change', function() {
+                clearError(this.id);
+            });
+        });
 
         form.addEventListener('submit', function(e) {
-            clearError();
-
-            const code = document.getElementById('code');
-            const discount = document.getElementById('discount_percent');
-            const minOrder = document.getElementById('min_order_value');
-            const usageLimit = document.getElementById('usage_limit');
-            const startsAt = document.getElementById('starts_at');
-            const expiresAt = document.getElementById('expires_at');
-
             let isValid = true;
-            let errorMsg = '';
 
-            // Kiểm tra rỗng (nếu browser không hỗ trợ required)
+            // Code
+            const code = document.getElementById('code');
             if (!code.value.trim()) {
+                setError('code', 'Vui lòng nhập mã giảm giá.');
                 isValid = false;
-                errorMsg = 'Vui lòng nhập mã giảm giá.';
-                code.classList.add('is-invalid');
             } else {
-                code.classList.remove('is-invalid');
+                clearError('code');
             }
 
-            if (!discount.value || discount.value < 1 || discount.value > 100) {
+            // Discount percent
+            const discount = document.getElementById('discount_percent');
+            const discVal = parseInt(discount.value);
+            if (isNaN(discVal) || discVal < 1 || discVal > 100) {
+                setError('discount_percent', 'Phần trăm giảm phải từ 1 đến 100.');
                 isValid = false;
-                if (!errorMsg) errorMsg = 'Vui lòng nhập phần trăm giảm (1-100).';
-                discount.classList.add('is-invalid');
             } else {
-                discount.classList.remove('is-invalid');
+                clearError('discount_percent');
             }
 
-            if (!minOrder.value || parseFloat(minOrder.value) < 0) {
+            // Min order value
+            const minOrder = document.getElementById('min_order_value');
+            const minVal = parseFloat(minOrder.value);
+            if (minOrder.value === '' || isNaN(minVal) || minVal < 0) {
+                setError('min_order_value', 'Giá trị tối thiểu phải ≥ 0.');
                 isValid = false;
-                if (!errorMsg) errorMsg = 'Vui lòng nhập giá trị đơn hàng tối thiểu (≥ 0).';
-                minOrder.classList.add('is-invalid');
             } else {
-                minOrder.classList.remove('is-invalid');
+                clearError('min_order_value');
             }
 
-            if (!usageLimit.value || parseInt(usageLimit.value) < 1) {
+            // Usage limit
+            const usage = document.getElementById('usage_limit');
+            const usageVal = parseInt(usage.value);
+            if (isNaN(usageVal) || usageVal < 1) {
+                setError('usage_limit', 'Số lượt sử dụng phải ≥ 1.');
                 isValid = false;
-                if (!errorMsg) errorMsg = 'Vui lòng nhập số lượt sử dụng tối đa (≥ 1).';
-                usageLimit.classList.add('is-invalid');
             } else {
-                usageLimit.classList.remove('is-invalid');
+                clearError('usage_limit');
             }
 
-            if (!startsAt.value) {
+            // Starts at
+            const starts = document.getElementById('starts_at');
+            if (!starts.value) {
+                setError('starts_at', 'Vui lòng chọn ngày bắt đầu.');
                 isValid = false;
-                if (!errorMsg) errorMsg = 'Vui lòng chọn ngày bắt đầu.';
-                startsAt.classList.add('is-invalid');
             } else {
-                startsAt.classList.remove('is-invalid');
+                clearError('starts_at');
             }
 
-            if (!expiresAt.value) {
+            // Expires at
+            const expires = document.getElementById('expires_at');
+            if (!expires.value) {
+                setError('expires_at', 'Vui lòng chọn ngày kết thúc.');
                 isValid = false;
-                if (!errorMsg) errorMsg = 'Vui lòng chọn ngày kết thúc.';
-                expiresAt.classList.add('is-invalid');
             } else {
-                expiresAt.classList.remove('is-invalid');
+                clearError('expires_at');
             }
 
-            // Kiểm tra logic: expires_at > starts_at
-            if (startsAt.value && expiresAt.value) {
-                const start = new Date(startsAt.value);
-                const end = new Date(expiresAt.value);
+            // So sánh ngày
+            if (starts.value && expires.value) {
+                const start = new Date(starts.value);
+                const end = new Date(expires.value);
                 if (end <= start) {
+                    setError('expires_at', 'Ngày kết thúc phải sau ngày bắt đầu.');
                     isValid = false;
-                    if (!errorMsg) errorMsg = 'Ngày kết thúc phải sau ngày bắt đầu.';
-                    expiresAt.classList.add('is-invalid');
-                } else {
-                    expiresAt.classList.remove('is-invalid');
                 }
             }
 
             if (!isValid) {
                 e.preventDefault();
-                showError(errorMsg || 'Vui lòng kiểm tra lại các trường có dấu * (bắt buộc).');
+                form.querySelector('.is-invalid')?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
             }
         });
-
-        // Xóa class lỗi khi người dùng nhập
-        document.querySelectorAll('.form-control').forEach(input => {
-            input.addEventListener('input', function() {
-                this.classList.remove('is-invalid');
-                clearError();
-            });
-        });
-    })();
+    });
 </script>
 @endpush

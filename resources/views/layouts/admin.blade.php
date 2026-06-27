@@ -232,8 +232,8 @@
             </a>
 
             <div class="nav-section">Bán hàng</div>
-            <a href="{{ route('dashboard') }}"
-                class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <a href="{{ route('admin.dashboard') }}"
+                class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <i class="fas fa-chart-pie"></i> Thống kê
             </a>
 
@@ -254,6 +254,11 @@
             <a href="{{ route('admin.banners.index') }}"
                 class="nav-item {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
                 <i class="fas fa-images"></i> Banner trang chủ
+            </a>
+
+            <a href="{{ route('admin.events.index') }}"
+                class="nav-item {{ request()->routeIs('admin.events.*') ? 'active' : '' }}">
+                <i class="fas fa-gift"></i> Sự kiện / Khuyến mãi
             </a>
 
             <a href="{{ route('admin.vouchers.index') }}"
@@ -290,9 +295,9 @@
             @yield('title', 'Dashboard')
         </div>
         <div class="topbar-right">
-            <a href="{{ route('home') }}" class="topbar-link" target="_blank">
+            <!-- <a href="{{ route('home') }}" class="topbar-link" target="_blank">
                 <i class="fas fa-external-link-alt"></i> Cửa hàng
-            </a>
+            </a> -->
             <div class="topbar-user">
                 <div class="avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
                 {{ Auth::user()->name }}

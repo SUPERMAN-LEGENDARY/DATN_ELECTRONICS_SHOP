@@ -249,25 +249,25 @@
     </div>
     @endif
 
-    <form method="POST" action="{{ route('admin.users.update', $user) }}">
+    <form method="POST" action="{{ route('admin.users.update', $user) }}" id="userEditForm" novalidate>
         @csrf
         @method('PUT')
 
         {{-- Họ tên --}}
         <div class="form-group">
             <label>Họ tên <span class="req">*</span></label>
-            <input type="text" name="name" value="{{ old('name', $user->name) }}"
+            <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}"
                 class="form-control @error('name') is-invalid @enderror" placeholder="Nguyễn Văn A">
-            @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <div class="invalid-feedback" id="name-error">@error('name'){{ $message }}@enderror</div>
         </div>
 
         <div class="form-row">
             {{-- Email --}}
             <div class="form-group">
                 <label>Email <span class="req">*</span></label>
-                <input type="email" name="email" value="{{ old('email', $user->email) }}"
+                <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}"
                     class="form-control @error('email') is-invalid @enderror" placeholder="email@vidu.com">
-                @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                <div class="invalid-feedback" id="email-error">@error('email'){{ $message }}@enderror</div>
             </div>
 
             {{-- SĐT --}}
@@ -362,12 +362,30 @@
             </div>
         </div>
 
+        {{-- Đổi mật khẩu (tuỳ chọn) --}}
+        <div class="section-divider">
+            <div class="section-label"><i class="fas fa-key"></i> Đổi mật khẩu <span style="font-size:11px;color:#aaa;font-weight:400">(để trống nếu không muốn thay đổi)</span></div>
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+            <div class="form-group" style="flex:1;min-width:200px">
+                <label style="display:block;font-size:13px;font-weight:600;color:#444;margin-bottom:6px">Mật khẩu mới</label>
+                <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
+                    placeholder="Tối thiểu 8 ký tự" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box">
+                @error('password')<div class="invalid-feedback" style="color:#C62828;font-size:12px;margin-top:4px">{{ $message }}</div>@enderror
+            </div>
+            <div class="form-group" style="flex:1;min-width:200px">
+                <label style="display:block;font-size:13px;font-weight:600;color:#444;margin-bottom:6px">Xác nhận mật khẩu mới</label>
+                <input type="password" name="password_confirmation" class="form-control"
+                    placeholder="Nhập lại mật khẩu mới" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box">
+            </div>
+        </div>
+
         {{-- Nút --}}
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">
                 <i class="fas fa-save"></i> Cập nhật
             </button>
-            <a href="{{ route('admin.users.index') }}" class="btn btn-outline">
+            <a href="{{ route('admin.users.index', ['tab' => $user->role === 'customer' ? 'customer' : 'staff']) }}" class="btn btn-outline">
                 <i class="fas fa-arrow-left"></i> Quay lại
             </a>
         </div>
@@ -375,3 +393,64 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+    (function() {
+        const form = document.getElementById('userEditForm');
+
+        function setError(inputId, message) {
+            const input = document.getElementById(inputId);
+            const errorDiv = document.getElementById(inputId + '-error');
+            if (input) input.classList.add('is-invalid');
+            if (errorDiv) {
+                errorDiv.textContent = message;
+            }
+        }
+
+        function clearError(inputId) {
+            const input = document.getElementById(inputId);
+            const errorDiv = document.getElementById(inputId + '-error');
+            if (input) input.classList.remove('is-invalid');
+            if (errorDiv) errorDiv.textContent = '';
+        }
+
+        ['name', 'email'].forEach(id => {
+            document.getElementById(id)?.addEventListener('input', () => clearError(id));
+        });
+
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+
+            // Họ tên
+            const name = document.getElementById('name');
+            if (!name || !name.value.trim()) {
+                setError('name', 'Vui lòng nhập họ tên.');
+                isValid = false;
+            } else {
+                clearError('name');
+            }
+
+            // Email
+            const email = document.getElementById('email');
+            if (!email || !email.value.trim()) {
+                setError('email', 'Vui lòng nhập địa chỉ email.');
+                isValid = false;
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+                setError('email', 'Địa chỉ email không hợp lệ.');
+                isValid = false;
+            } else {
+                clearError('email');
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                form.querySelector('.is-invalid')?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+        });
+    })();
+</script>
+@endpush

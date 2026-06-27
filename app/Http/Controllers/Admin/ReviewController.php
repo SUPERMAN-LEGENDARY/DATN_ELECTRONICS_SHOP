@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Review;
+use App\Services\BadWordDetector;
 use Illuminate\Http\Request;
 
 class ReviewController extends Controller
@@ -21,6 +22,11 @@ class ReviewController extends Controller
         // Lọc theo rating
         if ($request->filled('rating')) {
             $query->where('rating', $request->rating);
+        }
+
+        // Lọc theo cờ từ không chuẩn mực
+        if ($request->filled('bad_words')) {
+            $query->where('bad_words_flag', $request->bad_words === '1');
         }
 
         // Tìm kiếm theo tên sản phẩm hoặc người dùng
