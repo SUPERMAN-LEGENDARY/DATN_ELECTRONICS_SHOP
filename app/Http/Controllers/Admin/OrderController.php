@@ -52,20 +52,21 @@ class OrderController extends Controller
     // ─── Lưu đơn hàng mới ────────────────────────────────────
     public function store(Request $request)
     {
-        $request->validate([
-    'user_id'        => 'required|exists:users,id',
-    'address_id'     => 'nullable|exists:addresses,id',
-    'address_name'   => 'required_without:address_id|nullable|string|max:255',
-    'address_phone'  => 'required_without:address_id|nullable|string|max:20',
-    'address_detail' => 'required_without:address_id|nullable|string|max:500',
-    'address_ward'   => 'required_without:address_id|nullable|string|max:100',
+       $request->validate([
+    'user_id'          => 'required|exists:users,id',
+    'address_id'       => 'nullable|exists:addresses,id',
+    'address_name'     => 'required_without:address_id|nullable|string|max:255',
+    'address_phone'    => 'required_without:address_id|nullable|string|max:20',
+    'address_detail'   => 'required_without:address_id|nullable|string|max:500',
+    'address_ward'     => 'required_without:address_id|nullable|string|max:100',
     'address_district' => 'required_without:address_id|nullable|string|max:100',
     'address_province' => 'required_without:address_id|nullable|string|max:100',
-    'voucher_id'     => 'nullable|exists:vouchers,id',
-    'payment_method' => 'required|in:cod,momo',
-    'payment_status' => 'required|in:unpaid,paid,refunded',
-    'note'           => 'nullable|string|max:500',
-    'items'          => 'required|array|min:1',
+    'voucher_id'       => 'nullable|exists:vouchers,id',
+    'status'           => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled,returned', // ✅ thêm dòng này
+    'payment_method'   => 'required|in:cod,momo',
+    'payment_status'   => 'required|in:unpaid,paid,refunded',
+    'note'             => 'nullable|string|max:500',
+    'items'            => 'required|array|min:1',
     'items.*.product_id' => 'required|exists:products,id',
     'items.*.quantity'   => 'required|integer|min:1',
     'items.*.unit_price' => 'nullable|numeric|min:0',
@@ -133,7 +134,7 @@ if ($request->voucher_id) {
                 'user_id'        => $request->user_id,
                 'address_id'     => $addressId,
                 'voucher_id'     => $request->voucher_id,
-                'status'         => 'delivered',
+                'status'         => $request->status,
                 'payment_method' => $request->payment_method,
                 'payment_status' => $request->payment_status,
                 'subtotal'       => $subtotal,
@@ -176,7 +177,7 @@ if ($request->voucher_id) {
     {
         $request->validate([
             'address_id'     => 'required|exists:addresses,id',
-            'status'         => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled,returned',
+            'status' => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled,returned',
             'payment_status' => 'required|in:unpaid,paid,refunded',
             'payment_method' => 'required|in:cod,momo',
             'voucher_id'     => 'nullable|exists:vouchers,id',

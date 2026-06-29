@@ -194,6 +194,16 @@
     <h1><i class="fas fa-plus-circle"></i> Thêm đơn hàng mới</h1>
 
     <div class="form-container">
+        {{-- Hiển thị lỗi --}}
+    @if($errors->any())
+        <div style="background:#fff5f5; border-left:4px solid #dc3545; padding:12px 16px; border-radius:6px; margin-bottom:16px;">
+            <ul style="margin:0; padding-left:18px;">
+                @foreach($errors->all() as $error)
+                    <li style="color:#dc3545; font-size:13px; margin-bottom:3px;">{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
         <form id="orderForm" action="{{ route('admin.orders.store') }}" method="POST" novalidate>
             @csrf
 
@@ -338,6 +348,22 @@
         @endforeach
     </select>
     @error('voucher_id')
+        <div class="error">{{ $message }}</div>
+    @enderror
+</div>
+            {{-- Trạng thái đơn hàng --}}
+<div class="form-group">
+    <label for="status">Trạng thái đơn hàng <span class="required">*</span></label>
+    <select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
+        <option value="pending"    {{ old('status', 'pending') == 'pending'    ? 'selected' : '' }}>Chờ xác nhận</option>
+        <option value="confirmed"  {{ old('status') == 'confirmed'  ? 'selected' : '' }}>Đã xác nhận</option>
+        <option value="processing" {{ old('status') == 'processing' ? 'selected' : '' }}>Đang xử lý</option>
+        <option value="shipped"    {{ old('status') == 'shipped'    ? 'selected' : '' }}>Đang giao</option>
+        <option value="delivered"  {{ old('status') == 'delivered'  ? 'selected' : '' }}>Đã giao</option>
+        <option value="cancelled"  {{ old('status') == 'cancelled'  ? 'selected' : '' }}>Đã hủy</option>
+        <option value="returned"   {{ old('status') == 'returned'   ? 'selected' : '' }}>Đã hoàn trả</option>
+    </select>
+    @error('status')
         <div class="error">{{ $message }}</div>
     @enderror
 </div>
@@ -694,13 +720,4 @@ const total = Math.max(0, subtotal - discount);
         updateSummary();
     });
 </script>
-@if($errors->any())
-    <div style="background:#fee; border:1px solid #dc3545; padding:12px; border-radius:6px; margin-bottom:16px;">
-        <ul style="margin:0; padding-left:20px;">
-            @foreach($errors->all() as $error)
-                <li style="color:#dc3545;">{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
 @endpush
