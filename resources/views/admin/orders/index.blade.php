@@ -18,37 +18,117 @@
 .filter-bar { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
 .filter-bar input, .filter-bar select { border:1px solid #e0e0e0; border-radius:6px; padding:8px 12px; font-size:13px; outline:none; }
 .filter-bar button { background:#1565C0; color:#fff; border:none; border-radius:6px; padding:8px 16px; font-size:13px; cursor:pointer; }
-.table-wrap { overflow-x:auto; }
-table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
-.data-table th { background:#f5f5f5; padding:10px 12px; text-align:left; font-weight:700; border-bottom:2px solid #e0e0e0; white-space:nowrap; }
-.data-table td { padding:10px 12px; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
-.data-table tr:hover td { background:#fafafa; }
-.badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
-.badge-success { background:#d4edda; color:#155724; }
-.badge-danger { background:#f8d7da; color:#721c24; }
-.badge-warning { background:#fff3cd; color:#856404; }
-.badge-info { background:#d1ecf1; color:#0c5460; }
-.badge-secondary { background:#e2e3e5; color:#383d41; }
 .alert-success { background:#E8F5E9; border:1px solid #A5D6A7; color:#2E7D32; padding:10px 16px; border-radius:6px; margin-bottom:16px; font-size:14px; }
 .alert-danger { background:#f8d7da; border:1px solid #f5c6cb; color:#721c24; padding:10px 16px; border-radius:6px; margin-bottom:16px; font-size:14px; }
 .text-center { text-align:center; }
+
+/* ── Bảng đơn hàng ── */
+.table-wrap {
+    overflow-x: auto;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    background: #fff;
+}
+table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+.data-table thead tr {
+    background: #1565C0;
+}
+.data-table th {
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+    white-space: nowrap;
+    border: none;
+}
+.data-table th:first-child { border-radius: 8px 0 0 0; }
+.data-table th:last-child  { border-radius: 0 8px 0 0; }
+.data-table tbody tr {
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.12s;
+}
+.data-table tbody tr:last-child { border-bottom: none; }
+.data-table tbody tr:hover td { background: #f0f6ff; }
+.data-table td {
+    padding: 11px 14px;
+    vertical-align: middle;
+    color: #333;
+}
+.data-table td:first-child {
+    font-weight: 700;
+    color: #1565C0;
+}
+
+/* ── Badge trạng thái ── */
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.badge-pending    { background: #fff3cd; color: #856404; }
+.badge-confirmed  { background: #d1ecf1; color: #0c5460; }
+.badge-processing { background: #cce5ff; color: #004085; }
+.badge-shipped    { background: #e2d9f3; color: #4a235a; }
+.badge-delivered  { background: #d4edda; color: #155724; }
+.badge-cancelled  { background: #f8d7da; color: #721c24; }
+.badge-returned   { background: #e2e3e5; color: #383d41; }
+.badge-paid       { background: #d4edda; color: #155724; }
+.badge-unpaid     { background: #fff3cd; color: #856404; }
+.badge-refunded   { background: #f8d7da; color: #721c24; }
+
+/* ── Dropdown trạng thái ── */
 .status-select {
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 5px 10px;
+    border-radius: 20px;
     border: 1px solid #ced4da;
     font-size: 12px;
+    font-weight: 600;
     background: #fff;
     cursor: pointer;
-    min-width: 110px;
-}
-.status-select:focus {
-    border-color: #1565C0;
+    min-width: 130px;
     outline: none;
+    transition: border-color 0.15s;
 }
-.status-select:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
+.status-select:focus { border-color: #1565C0; }
+.status-select:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── Nút thao tác ── */
+.action-group { display: flex; gap: 6px; align-items: center; }
+.btn-view {
+    background: #e3f2fd;
+    color: #1565C0;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: background 0.15s;
 }
+.btn-view:hover { background: #bbdefb; }
+.btn-del {
+    background: #fdecea;
+    color: #c62828;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    transition: background 0.15s;
+}
+.btn-del:hover { background: #ffcdd2; }
 </style>
 @endpush
 
@@ -56,6 +136,9 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
 <div class="admin-header">
     <h1><i class="fas fa-shopping-cart"></i> Quản lý đơn hàng</h1>
     <div style="display:flex;gap:10px;align-items:center">
+        <a href="{{ route('admin.orders.create') }}" class="btn-primary">
+            <i class="fas fa-plus"></i> Thêm đơn hàng
+        </a>
         <a href="{{ route('admin.orders.trash') }}" class="btn-trash">
             <i class="fas fa-trash-alt"></i> Thùng rác
             @if($trashedCount > 0)
@@ -72,20 +155,44 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
 <div class="alert-danger"><i class="fas fa-exclamation-circle"></i> {{ session('error') }}</div>
 @endif
 
+@php
+$statusLabels = [
+    'pending'    => 'Chờ xác nhận',
+    'confirmed'  => 'Đã xác nhận',
+    'processing' => 'Đang xử lý',
+    'shipped'    => 'Đang giao',
+    'delivered'  => 'Đã giao',
+    'cancelled'  => 'Đã hủy',
+    'returned'   => 'Đã hoàn trả',
+];
+$paymentLabels = [
+    'unpaid'   => 'Chưa thanh toán',
+    'paid'     => 'Đã thanh toán',
+    'refunded' => 'Đã hoàn tiền',
+];
+$allowedTransitions = [
+    'pending'    => ['confirmed', 'cancelled'],
+    'confirmed'  => ['processing', 'cancelled'],
+    'processing' => ['shipped', 'cancelled'],
+    'shipped'    => ['delivered', 'cancelled'],
+    'delivered'  => ['returned'],
+];
+@endphp
+
 {{-- Thanh lọc --}}
 <form class="filter-bar" method="GET" action="{{ route('admin.orders.index') }}">
     <input type="text" name="q" placeholder="Tìm theo ID hoặc tên khách hàng..." value="{{ request('q') }}" style="flex:1;min-width:160px">
     <select name="status">
         <option value="">Tất cả trạng thái</option>
-        @foreach(['pending','confirmed','processing','shipped','delivered','cancelled','returned'] as $st)
-            <option value="{{ $st }}" {{ request('status') == $st ? 'selected' : '' }}>{{ ucfirst($st) }}</option>
+        @foreach($statusLabels as $val => $label)
+            <option value="{{ $val }}" {{ request('status') == $val ? 'selected' : '' }}>{{ $label }}</option>
         @endforeach
     </select>
     <select name="payment_status">
         <option value="">Tất cả thanh toán</option>
-        <option value="unpaid" {{ request('payment_status') == 'unpaid' ? 'selected' : '' }}>Chưa thanh toán</option>
-        <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Đã thanh toán</option>
-        <option value="refunded" {{ request('payment_status') == 'refunded' ? 'selected' : '' }}>Hoàn tiền</option>
+        @foreach($paymentLabels as $val => $label)
+            <option value="{{ $val }}" {{ request('payment_status') == $val ? 'selected' : '' }}>{{ $label }}</option>
+        @endforeach
     </select>
     <button type="submit"><i class="fas fa-search"></i> Lọc</button>
     <a href="{{ route('admin.orders.index') }}" style="padding:8px 12px;font-size:13px;color:#666;text-decoration:none">Xóa bộ lọc</a>
@@ -99,7 +206,7 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
                 <th>ID</th>
                 <th>Khách hàng</th>
                 <th>Tổng tiền</th>
-                <th>Trạng thái</th>
+                <th>Trạng thái đơn</th>
                 <th>Thanh toán</th>
                 <th>Ngày tạo</th>
                 <th>Thao tác</th>
@@ -110,61 +217,62 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
             <tr>
                 <td>#{{ $order->id }}</td>
                 <td>{{ $order->user->name ?? 'N/A' }}</td>
-                <td>{{ number_format($order->total) }}đ</td>
+                <td style="font-weight:600;">{{ number_format($order->total) }}đ</td>
+
+                {{-- Trạng thái đơn hàng --}}
                 <td>
                     @php
-                        // Phải khớp với $allowedTransitions trong OrderController@updateStatus
-                        $allowedTransitions = [
-                            'pending'    => ['confirmed', 'cancelled'],
-                            'confirmed'  => ['processing', 'cancelled'],
-                            'processing' => ['shipped', 'cancelled'],
-                            'shipped'    => ['delivered', 'cancelled'],
-                            'delivered'  => ['returned'],
-                        ];
-                        $isOrderLocked = in_array($order->status, ['cancelled', 'returned']);
-                        $nextStatusOptions = $allowedTransitions[$order->status] ?? [];
+                        $isLocked = in_array($order->status, ['cancelled', 'returned']);
+                        $nextOptions = $allowedTransitions[$order->status] ?? [];
                     @endphp
-                    <form action="{{ route('admin.orders.update-status', $order) }}" method="POST" class="status-form-inline">
-                        @csrf
-                        @method('PATCH')
-                        <select name="status" class="status-select" onchange="this.form.submit()"
-                                @if($isOrderLocked) disabled @endif>
-                            {{-- Trạng thái hiện tại luôn hiện sẵn --}}
-                            <option value="{{ $order->status }}" selected>{{ ucfirst($order->status) }}</option>
-                            {{-- Chỉ hiện các trạng thái được phép đi tiếp theo, không cho nhảy bậc --}}
-                            @foreach($nextStatusOptions as $st)
-                                <option value="{{ $st }}">{{ ucfirst($st) }}</option>
+                    <form action="{{ route('admin.orders.update-status', $order) }}" method="POST">
+                        @csrf @method('PATCH')
+                        <select name="status" class="status-select badge-{{ $order->status }}"
+                                onchange="this.form.submit()" @if($isLocked) disabled @endif>
+                            <option value="{{ $order->status }}" selected>
+                                {{ $statusLabels[$order->status] ?? $order->status }}
+                            </option>
+                            @foreach($nextOptions as $st)
+                                <option value="{{ $st }}">{{ $statusLabels[$st] ?? $st }}</option>
                             @endforeach
                         </select>
                         <input type="hidden" name="payment_status" value="{{ $order->payment_status }}">
                     </form>
                 </td>
+
+                {{-- Trạng thái thanh toán --}}
                 <td>
-                    <form action="{{ route('admin.orders.update-status', $order) }}" method="POST" class="status-form-inline">
-                        @csrf
-                        @method('PATCH')
-                        <select name="payment_status" class="status-select" onchange="this.form.submit()"
-                                @if(in_array($order->status, ['cancelled', 'returned']) || $order->payment_status !== 'unpaid') disabled @endif>
+                    @php
+                        $payLocked = in_array($order->status, ['cancelled', 'returned']) || $order->payment_status !== 'unpaid';
+                    @endphp
+                    <form action="{{ route('admin.orders.update-status', $order) }}" method="POST">
+                        @csrf @method('PATCH')
+                        <select name="payment_status" class="status-select badge-{{ $order->payment_status }}"
+                                onchange="this.form.submit()" @if($payLocked) disabled @endif>
                             @if($order->payment_status === 'unpaid')
                                 <option value="unpaid" selected>Chưa thanh toán</option>
                                 <option value="paid">Đã thanh toán</option>
                             @elseif($order->payment_status === 'paid')
                                 <option value="paid" selected>Đã thanh toán</option>
                             @else
-                                <option value="refunded" selected>Hoàn tiền</option>
+                                <option value="refunded" selected>Đã hoàn tiền</option>
                             @endif
                         </select>
                         <input type="hidden" name="status" value="{{ $order->status }}">
                     </form>
                 </td>
-                <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
+
+                <td style="color:#666;">{{ $order->created_at->format('d/m/Y H:i') }}</td>
+
                 <td>
-                    <div style="display:flex;gap:6px;align-items:center">
-                        <a href="{{ route('admin.orders.show', $order) }}" class="btn-info"><i class="fas fa-eye"></i></a>
+                    <div class="action-group">
+                        <a href="{{ route('admin.orders.show', $order) }}" class="btn-view">
+                            <i class="fas fa-eye"></i>
+                        </a>
                         <form action="{{ route('admin.orders.destroy', $order) }}" method="POST"
                               onsubmit="return confirm('Chuyển đơn hàng này vào thùng rác?')">
                             @csrf @method('DELETE')
-                            <button type="submit" class="btn-danger"><i class="fas fa-trash"></i></button>
+                            <button type="submit" class="btn-del"><i class="fas fa-trash"></i></button>
                         </form>
                     </div>
                 </td>
@@ -172,6 +280,7 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
             @empty
             <tr>
                 <td colspan="7" class="text-center" style="padding:40px;color:#aaa">
+                    <i class="fas fa-inbox" style="font-size:32px;display:block;margin-bottom:8px;"></i>
                     Chưa có đơn hàng nào.
                 </td>
             </tr>
@@ -184,7 +293,5 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
 @endsection
 
 @push('scripts')
-<script>
-    // Tự động submit form khi thay đổi dropdown (đã dùng onchange)
-</script>
+<script></script>
 @endpush

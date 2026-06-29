@@ -28,4 +28,9 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function attributes()
+    {
+        return $this->hasMany(ProductAttribute::class, 'product_id', 'product_id');
+    }
 }

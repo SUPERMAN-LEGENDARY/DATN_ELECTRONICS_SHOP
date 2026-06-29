@@ -168,6 +168,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
         Route::get('/thung-rac',              [AdminOrderController::class, 'trash'])->name('trash');
         Route::patch('/khoi-phuc-tat-ca',     [AdminOrderController::class, 'restoreAll'])->name('restore-all');
         Route::delete('/don-thung-rac',       [AdminOrderController::class, 'emptyTrash'])->name('empty-trash');
+        Route::get('/them',                        [AdminOrderController::class, 'create'])->name('create');
+        Route::post('/',                           [AdminOrderController::class, 'store'])->name('store');
 
         // ── Route động ──
         Route::get('/{order}',                     [AdminOrderController::class, 'show'])->name('show');
