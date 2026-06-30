@@ -8,10 +8,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Voucher extends Model
 {
     use SoftDeletes;
-    
+
     protected $table = 'vouchers';
 
     public $timestamps = false;
+
+    protected $casts = [
+        'starts_at'  => 'datetime',
+        'expires_at' => 'datetime',
+        'is_active'  => 'boolean',
+    ];
 
     protected $fillable = [
         'code',
@@ -28,4 +34,4 @@ class Voucher extends Model
     {
         return $this->hasMany(Order::class);
     }
-} 
+}

@@ -4,373 +4,517 @@
 
 @push('styles')
 <style>
-    /* ===== HERO SLIDER ===== */
+    /* ===== LAYOUT WRAPPER ===== */
+    .page-body {
+        background: #f0f0f0;
+        min-height: 100vh;
+        padding-bottom: 40px;
+    }
+
+    /* ===== HERO ===== */
     .hero {
         position: relative;
+        border-radius: 0;
         overflow: hidden;
-        background: #EBF3FF;
+        margin: 0 0 8px;
+        background: #dce8fb;
     }
 
     .hero-inner {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        min-height: 320px;
-        max-width: 1200px;
-        margin: 0 auto;
+        grid-template-columns: 42% 58%;
+        min-height: 340px;
     }
 
     .hero-content {
-        padding: 48px 40px;
+        padding: 36px 32px 36px 40px;
         display: flex;
         flex-direction: column;
         justify-content: center;
+        gap: 8px;
     }
 
     .hero-label {
-        font-size: 12px;
+        color: #2563eb;
+        font-size: 11px;
         font-weight: 700;
-        color: #1565C0;
-        letter-spacing: 1px;
         text-transform: uppercase;
-        margin-bottom: 10px;
+        letter-spacing: .6px;
     }
 
     .hero-title {
-        font-size: 36px;
+        font-size: 28px;
         font-weight: 800;
-        line-height: 1.2;
-        color: #0D1B2A;
-        margin-bottom: 14px;
+        line-height: 1.25;
+        color: #111827;
+        margin: 0;
     }
 
     .hero-desc {
-        font-size: 15px;
-        color: #555;
-        margin-bottom: 14px;
+        color: #6b7280;
+        font-size: 13px;
+        line-height: 1.6;
+        margin: 0;
+        max-width: 280px;
     }
 
     .hero-price {
-        font-size: 22px;
+        color: #e53935;
+        font-size: 20px;
         font-weight: 800;
-        color: #E53935;
-        margin-bottom: 20px;
+        margin-top: 4px;
+    }
+
+    .hero-content .btn-primary {
+        background: #2563eb;
+        border: none;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 12px;
+        padding: 9px 20px;
+        color: #fff;
+        cursor: pointer;
+        width: fit-content;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 4px;
+    }
+
+    .hero-content .btn-primary:hover {
+        background: #1d4ed8;
     }
 
     .hero-img {
-        background: #dce8f5;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        height: 100%;
+        overflow: hidden;
     }
 
     .hero-img img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        display: block;
     }
 
     .hero-img-placeholder {
         width: 100%;
-        height: 320px;
-        background: #d8e6f3;
+        height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #aaa;
+        color: #bfdbfe;
+        font-size: 40px;
+        background: #cfe2fb;
     }
 
-    .hero-dots {
-        position: absolute;
-        bottom: 12px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 6px;
-    }
-
-    .hero-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #bbb;
-        cursor: pointer;
-    }
-
-    .hero-dot.active {
-        background: #1565C0;
-        width: 20px;
-        border-radius: 4px;
-    }
-
+    /* Arrow buttons */
     .hero-arrow {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        background: rgba(255, 255, 255, .85);
-        border: none;
-        width: 36px;
-        height: 36px;
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
-        cursor: pointer;
+        background: #fff;
+        border: 1px solid #e5e7eb;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
-        z-index: 2;
-        font-size: 14px;
-        color: #333;
+        color: #374151;
+        cursor: pointer;
+        z-index: 3;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, .12);
+        font-size: 11px;
     }
 
     .hero-arrow.left {
-        left: 12px;
+        left: 20px;
     }
 
     .hero-arrow.right {
-        right: 12px;
+        right: 20px;
+    }
+
+    .hero-dots {
+        position: absolute;
+        left: 40px;
+        bottom: 18px;
+        display: flex;
+        gap: 5px;
+        z-index: 3;
+    }
+
+    .hero-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #bfdbfe;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .hero-dot.active {
+        width: 16px;
+        border-radius: 3px;
+        background: #2563eb;
     }
 
     /* ===== TRUST BAR ===== */
     .trust-bar {
-        border-bottom: 1px solid #e0e0e0;
+        background: #fff;
+        margin-bottom: 8px;
     }
 
     .trust-bar .inner {
-        display: flex;
-        justify-content: space-around;
-        padding: 16px;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        padding: 10px 12px;
+        gap: 8px;
         max-width: 1200px;
         margin: 0 auto;
-        flex-wrap: wrap;
-        gap: 8px;
     }
 
     .trust-bar-item {
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 13px;
+        padding: 4px 6px;
     }
 
-    .trust-bar-item i {
-        color: #1565C0;
-        font-size: 18px;
+    .trust-bar-item .tbi-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .trust-bar-item div.tbi-text {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
     }
 
     .trust-bar-item b {
-        display: block;
-        font-weight: 600;
-        font-size: 13px;
+        font-size: 12px;
+        color: #1e293b;
+        font-weight: 700;
     }
 
     .trust-bar-item span {
-        font-size: 11px;
-        color: #888;
+        font-size: 10.5px;
+        color: #9ca3af;
     }
 
-    /* ===== PRODUCTS GRID ===== */
+    .trust-bar-item:nth-child(1) .tbi-icon {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .trust-bar-item:nth-child(2) .tbi-icon {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .trust-bar-item:nth-child(3) .tbi-icon {
+        background: #f3e8ff;
+        color: #7c3aed;
+    }
+
+    .trust-bar-item:nth-child(4) .tbi-icon {
+        background: #ffedd5;
+        color: #f97316;
+    }
+
+    .trust-bar-item:nth-child(5) .tbi-icon {
+        background: #fee2e2;
+        color: #ef4444;
+    }
+
+    /* ===== TWO-COLUMN MAIN LAYOUT ===== */
+    /* (ảnh thực tế dùng layout full-width dọc, không có sidebar) */
+
+    /* ===== SECTION ===== */
     .section {
-        padding: 32px 0;
+        background: #fff;
+        border-radius: 4px;
+        padding: 16px;
+        margin-bottom: 8px;
     }
 
-    .products-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #f3f4f6;
     }
 
-    /* ===== EVENTS / KHUYẾN MÃI THEO MÙA ===== */
-    .event-strip {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 16px;
-        margin: 20px 0 8px;
-    }
-
-    .event-card {
-        position: relative;
-        display: block;
-        border-radius: 14px;
-        min-height: 130px;
-        padding: 22px 24px;
-        overflow: hidden;
-        text-decoration: none;
-        color: #fff;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
-        transition: transform .2s, box-shadow .2s;
-    }
-
-    .event-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, .18);
-    }
-
-    .event-card-bg {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        opacity: .32;
-        z-index: 0;
-    }
-
-    .event-card-content {
-        position: relative;
-        z-index: 1;
-    }
-
-    .event-card-tag {
-        display: inline-block;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: .5px;
-        text-transform: uppercase;
-        opacity: .9;
-        margin-bottom: 6px;
-    }
-
-    .event-card-title {
-        font-size: 20px;
-        font-weight: 800;
-        margin-bottom: 6px;
-        line-height: 1.25;
-    }
-
-    .event-card-offer {
+    .section-title {
         font-size: 14px;
         font-weight: 700;
-        color: #FFD54F;
-        margin-bottom: 10px;
+        color: #1e293b;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+        margin: 0;
+        padding-left: 9px;
+        border-left: 3px solid #2563eb;
+        line-height: 1.4;
     }
 
-    .event-card-btn {
-        display: inline-flex;
+    .section-link {
+        color: #2563eb;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .section-link:hover {
+        text-decoration: underline;
+    }
+
+    /* ===== PRODUCT GRID ===== */
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+    }
+
+    .product-card {
+        position: relative;
+        background: #fff;
+        border: 1px solid #ebebeb;
+        border-radius: 6px;
+        overflow: hidden;
+        text-decoration: none;
+        color: #000;
+        transition: box-shadow .25s, transform .25s;
+        display: block;
+    }
+
+    .product-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, .1);
+    }
+
+    .product-card-img {
+        height: 160px;
+        background: #fafafa;
+        display: flex;
         align-items: center;
-        gap: 6px;
-        font-size: 13px;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .product-card-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 8px;
+    }
+
+    .product-card-body {
+        padding: 8px;
+        border-top: 1px solid #f3f4f6;
+    }
+
+    .product-card-name {
+        font-size: 12.5px;
+        color: #374151;
+        min-height: 36px;
+        line-height: 1.4;
+        display: -webkit-box;
+        /* -webkit-line-clamp:2; */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .product-card-price {
+        color: #e53935;
+        font-size: 14px;
         font-weight: 700;
-        background: rgba(255, 255, 255, .18);
-        padding: 6px 14px;
-        border-radius: 20px;
+        display: block;
+        margin-top: 4px;
+    }
+
+    .stars {
+        color: #f59e0b;
+        font-size: 11px;
+    }
+
+    .review-count {
+        color: #9ca3af;
+        margin-left: 2px;
+        font-size: 11px;
+    }
+
+    .badge-tag {
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        background: #e53935;
+        color: #fff;
+        font-size: 9px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 3px;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+        z-index: 2;
+    }
+
+    .wish {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 24px;
+        height: 24px;
+        background: #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #9ca3af;
+        font-size: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .15);
+        z-index: 2;
+    }
+
+    /* ===== IMAGE PLACEHOLDER ===== */
+    .img-placeholder {
+        background: #f3f4f6;
+        background-image:
+            linear-gradient(45deg, transparent calc(50% - 1px), #e5e7eb calc(50% - 1px), #e5e7eb calc(50% + 1px), transparent calc(50% + 1px)),
+            linear-gradient(-45deg, transparent calc(50% - 1px), #e5e7eb calc(50% - 1px), #e5e7eb calc(50% + 1px), transparent calc(50% + 1px));
+        color: #d1d5db;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     /* ===== PROMO BANNERS ===== */
     .promo-banners {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 16px;
-        margin: 8px 0 32px;
+        gap: 8px;
+        margin-bottom: 8px;
     }
 
     .promo-banner {
-        border-radius: 10px;
-        padding: 20px;
+        border-radius: 6px;
+        padding: 16px 14px;
         display: flex;
-        align-items: center;
         justify-content: space-between;
-        min-height: 110px;
-        position: relative;
+        align-items: center;
+        gap: 10px;
         overflow: hidden;
     }
 
-    .promo-banner.apple {
-        background: #EBF3FF;
+    .promo-banner .content {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
     }
 
-    .promo-banner.samsung {
-        background: #F3E8FF;
-    }
-
-    .promo-banner.phu-kien {
-        background: #FFF3E8;
-    }
-
-    .promo-banner .content .tag {
-        font-size: 11px;
+    .promo-banner .tag {
+        font-size: 10px;
         font-weight: 700;
-        letter-spacing: 1px;
         text-transform: uppercase;
+        letter-spacing: .5px;
     }
 
-    .promo-banner.apple .tag {
-        color: #1565C0;
-    }
-
-    .promo-banner.samsung .tag {
-        color: #7B1FA2;
-    }
-
-    .promo-banner.phu-kien .tag {
-        color: #E65100;
-    }
-
-    .promo-banner .content h3 {
-        font-size: 18px;
-        font-weight: 800;
-        margin: 4px 0 10px;
-    }
-
-    .promo-banner .content .btn-sm {
-        padding: 6px 14px;
-        font-size: 12px;
-        border-radius: 5px;
-        border: none;
-        cursor: pointer;
+    .promo-banner h3 {
+        margin: 0;
+        font-size: 15px;
         font-weight: 700;
+        color: #1e293b;
     }
 
-    .promo-banner.apple .btn-sm {
-        background: #1565C0;
+    .promo-banner .btn-sm {
+        border: none;
+        padding: 5px 12px;
+        border-radius: 5px;
+        font-size: 11px;
+        font-weight: 600;
         color: #fff;
-    }
-
-    .promo-banner.samsung .btn-sm {
-        background: #7B1FA2;
-        color: #fff;
-    }
-
-    .promo-banner.phu-kien .btn-sm {
-        background: #E65100;
-        color: #fff;
+        cursor: pointer;
+        align-self: flex-start;
     }
 
     .promo-img {
-        width: 90px;
+        width: 80px;
         height: 80px;
-        object-fit: cover;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, .5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #ccc;
+        border-radius: 6px;
+        flex-shrink: 0;
+    }
+
+    .promo-banner.apple {
+        background: #eff6ff;
+    }
+
+    .promo-banner.apple .tag {
+        color: #2563eb;
+    }
+
+    .promo-banner.apple .btn-sm {
+        background: #2563eb;
+    }
+
+    .promo-banner.samsung {
+        background: #f3e8ff;
+    }
+
+    .promo-banner.samsung .tag {
+        color: #7c3aed;
+    }
+
+    .promo-banner.samsung .btn-sm {
+        background: #7c3aed;
+    }
+
+    .promo-banner.phu-kien {
+        background: #fff7ed;
+    }
+
+    .promo-banner.phu-kien .tag {
+        color: #f97316;
+    }
+
+    .promo-banner.phu-kien .btn-sm {
+        background: #f97316;
     }
 
     /* ===== NEWS ===== */
     .news-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
+        gap: 10px;
     }
 
     .news-card {
         background: #fff;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
+        border: 1px solid #ebebeb;
+        border-radius: 6px;
         overflow: hidden;
+        text-decoration: none;
+        color: #000;
+        transition: box-shadow .25s, transform .25s;
+        display: block;
     }
 
     .news-card:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+        transform: translateY(-3px);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, .08);
     }
 
     .news-card-img {
         height: 160px;
-        background: #f0f0f0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #ccc;
+        overflow: hidden;
     }
 
     .news-card-img img {
@@ -380,262 +524,367 @@
     }
 
     .news-card-body {
-        padding: 12px;
+        padding: 10px;
     }
 
     .news-card-title {
         font-size: 13px;
         font-weight: 600;
-        line-height: 1.45;
-        margin-bottom: 6px;
+        color: #1e293b;
+        line-height: 1.5;
+        min-height: 40px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
     .news-card-excerpt {
+        color: #6b7280;
         font-size: 12px;
-        color: #777;
         line-height: 1.5;
-        margin-bottom: 8px;
+        margin: 5px 0 6px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
     .news-card-meta {
+        color: #9ca3af;
         font-size: 11px;
-        color: #aaa;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+        margin-top: 0;
+        background: #fff;
+        border-top: 1px solid #e5e7eb;
+        padding: 32px 0;
+    }
+
+    .footer-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media(max-width:1100px) {
+        .products-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    @media(max-width:860px) {
+        .products-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .news-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .promo-banners {
+            grid-template-columns: 1fr;
+        }
+
+        .hero-inner {
+            grid-template-columns: 1fr;
+        }
+
+        .trust-bar .inner {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .footer-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media(max-width:540px) {
+        .products-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .news-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .trust-bar .inner {
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
 </style>
 @endpush
 
 @section('content')
+<div class="page-body">
 
-{{-- HERO SLIDER --}}
-@if($banners->isNotEmpty())
-<section class="hero">
-    @if($banners->count() > 1)
-    <button class="hero-arrow left" id="heroPrev"><i class="fas fa-chevron-left"></i></button>
-    @endif
-
-    @foreach($banners as $i => $banner)
-    @if($banner->isImageOnly())
-    <div class="hero-inner hero-slide hero-slide-image {{ $i === 0 ? 'active' : '' }}" data-slide="{{ $i }}" style="{{ $i === 0 ? '' : 'display:none' }}">
-        @if($banner->button_link)
-        <a href="{{ $banner->button_link }}" style="display:block;width:100%;height:100%">
-            @endif
-            @if($banner->image)
-            <img src="{{ $banner->image }}" alt="banner" style="width:100%;height:100%;object-fit:cover;display:block">
-            @else
-            <div class="hero-img-placeholder" style="width:100%;height:100%"><i class="fas fa-image fa-2x"></i></div>
-            @endif
-            @if($banner->button_link)
-        </a>
+    {{-- ===== HERO SLIDER ===== --}}
+    @if($banners->isNotEmpty())
+    <section class="hero">
+        @if($banners->count() > 1)
+        <button class="hero-arrow left" id="heroPrev"><i class="fas fa-chevron-left"></i></button>
         @endif
-    </div>
-    @else
-    <div class="hero-inner hero-slide {{ $i === 0 ? 'active' : '' }}" data-slide="{{ $i }}"
-        style="{{ $i === 0 ? '' : 'display:none' }}{{ $banner->bg_color ? ' background:'.$banner->bg_color.';' : '' }}">
-        <div class="hero-content" style="{{ $banner->text_color ? 'color:'.$banner->text_color.';' : '' }}">
-            @if($banner->label)
-            <div class="hero-label" style="{{ $banner->text_color ? 'color:'.$banner->text_color.';opacity:.85;' : '' }}">{{ $banner->label }}</div>
-            @endif
-            @if($banner->title)
-            <h1 class="hero-title">{!! nl2br(e($banner->title)) !!}</h1>
-            @endif
-            @if($banner->description)
-            <p class="hero-desc" style="{{ $banner->text_color ? 'color:'.$banner->text_color.';opacity:.8;' : '' }}">{{ $banner->description }}</p>
-            @endif
-            @if($banner->price_text)
-            <div class="hero-price">{{ $banner->price_text }}</div>
-            @endif
-            @if($banner->button_text)
-            <a href="{{ $banner->button_link ?: '#' }}" class="btn btn-primary" style="width:fit-content">{{ $banner->button_text }}</a>
-            @endif
-        </div>
-        <div class="hero-img">
-            @if($banner->image)
-            <img src="{{ $banner->image }}" alt="{{ $banner->title }}">
-            @else
-            <div class="hero-img-placeholder"><i class="fas fa-image fa-2x"></i></div>
-            @endif
-        </div>
-    </div>
-    @endif
-    @endforeach
 
-    @if($banners->count() > 1)
-    <button class="hero-arrow right" id="heroNext"><i class="fas fa-chevron-right"></i></button>
-    <div class="hero-dots">
         @foreach($banners as $i => $banner)
-        <div class="hero-dot {{ $i === 0 ? 'active' : '' }}" data-slide="{{ $i }}"></div>
-        @endforeach
-    </div>
-    @endif
-</section>
-@endif
-
-{{-- EVENTS / KHUYẾN MÃI THEO MÙA --}}
-@if(isset($events) && $events->isNotEmpty())
-<div class="container">
-    <div class="event-strip">
-        @foreach($events as $event)
-        <a href="{{ $event->button_link ?: '#' }}" class="event-card"
-            style="background:{{ $event->bg_color ?: '#C62828' }};color:{{ $event->text_color ?: '#FFFFFF' }}">
-            @if($event->image)
-            <img src="{{ $event->image }}" class="event-card-bg" alt="{{ $event->title }}">
+        @if($banner->isImageOnly())
+        <div class="hero-inner hero-slide hero-slide-image {{ $i === 0 ? 'active' : '' }}" data-slide="{{ $i }}" style="{{ $i === 0 ? '' : 'display:none' }}">
+            @if($banner->button_link)
+            <a href="{{ $banner->button_link }}" style="display:block;width:100%;height:100%">
+                @endif
+                @if($banner->image)
+                <img src="{{ $banner->image }}" alt="banner" style="width:100%;height:100%;object-fit:cover;display:block">
+                @else
+                <div class="hero-img-placeholder" style="width:100%;height:100%"><i class="fas fa-image fa-2x"></i></div>
+                @endif
+                @if($banner->button_link)
+            </a>
             @endif
-            <div class="event-card-content">
-                @if($event->tag)
-                <span class="event-card-tag">{{ $event->tag }}</span>
+        </div>
+        @else
+        <div class="hero-inner hero-slide {{ $i === 0 ? 'active' : '' }}" data-slide="{{ $i }}"
+            style="{{ $i === 0 ? '' : 'display:none' }}{{ $banner->bg_color ? ';background:'.$banner->bg_color.';' : '' }}">
+            <div class="hero-content" style="{{ $banner->text_color ? 'color:'.$banner->text_color.';' : '' }}">
+                @if($banner->label)
+                <div class="hero-label" style="{{ $banner->text_color ? 'color:'.$banner->text_color.';opacity:.85;' : '' }}">{{ $banner->label }}</div>
                 @endif
-                <h3 class="event-card-title">{{ $event->title }}</h3>
-                @if($event->offer_text)
-                <div class="event-card-offer">{{ $event->offer_text }}</div>
+                @if($banner->title)
+                <h1 class="hero-title">{!! nl2br(e($banner->title)) !!}</h1>
                 @endif
-                @if($event->button_text)
-                <span class="event-card-btn">{{ $event->button_text }} <i class="fas fa-arrow-right"></i></span>
+                @if($banner->description)
+                <p class="hero-desc" style="{{ $banner->text_color ? 'color:'.$banner->text_color.';opacity:.8;' : '' }}">{{ $banner->description }}</p>
+                @endif
+                @if($banner->price_text)
+                <div class="hero-price">{{ $banner->price_text }}</div>
+                @endif
+                @if($banner->button_text)
+                <a href="{{ $banner->button_link ?: '#' }}" class="btn-primary" style="width:fit-content">{{ $banner->button_text }}</a>
                 @endif
             </div>
-        </a>
+            <div class="hero-img">
+                @if($banner->image)
+                <img src="{{ $banner->image }}" alt="{{ $banner->title }}">
+                @else
+                <div class="hero-img-placeholder"><i class="fas fa-image fa-2x"></i></div>
+                @endif
+            </div>
+        </div>
+        @endif
         @endforeach
-    </div>
-</div>
-@endif
 
-{{-- TRUST BAR --}}
-<div class="trust-bar">
-    <div class="inner">
-        <div class="trust-bar-item"><i class="fas fa-truck"></i>
-            <div><b>Giao hàng miễn phí</b><span>Đơn hàng từ 500k</span></div>
-        </div>
-        <div class="trust-bar-item"><i class="fas fa-shield-alt"></i>
-            <div><b>Chính hãng 100%</b><span>Bảo hành toàn quốc</span></div>
-        </div>
-        <div class="trust-bar-item"><i class="fas fa-sync-alt"></i>
-            <div><b>Đổi trả dễ dàng</b><span>Trong vòng 30 ngày</span></div>
-        </div>
-        <div class="trust-bar-item"><i class="fas fa-credit-card"></i>
-            <div><b>Trả góp 0%</b><span>Thủ tục nhanh chóng</span></div>
-        </div>
-        <div class="trust-bar-item"><i class="fas fa-headset"></i>
-            <div><b>Hỗ trợ 24/7</b><span>Hotline: 1900 1234</span></div>
-        </div>
-    </div>
-</div>
-
-{{-- NEW PRODUCTS --}}
-<div class="container">
-    <section class="section">
-        <div class="section-header">
-            <h2 class="section-title">Sản phẩm mới nhất</h2>
-            <a href="{{ route('products.index') }}" class="section-link">Xem tất cả →</a>
-        </div>
-        <div class="products-grid">
-            @forelse($newProducts ?? [] as $product)
-            <a href="{{ route('products.show', $product->slug) }}" class="product-card">
-                <div class="product-card-img">
-                    @if($product->image)
-                    <img src="{{ $product->image }}" alt="{{ $product->name }}">
-                    @else
-                    <i class="fas fa-image fa-2x" style="color:#ccc"></i>
-                    @endif
-                </div>
-                <div class="product-card-body">
-                    <div class="product-card-name">{{ $product->name }}</div>
-                    <div><span class="product-card-price">{{ number_format($product->price) }}đ</span></div>
-                    <div class="stars">★★★★★ <span class="review-count">({{ $product->reviews_count ?? 0 }})</span></div>
-                </div>
-            </a>
-            @empty
-            @foreach([
-            ['iPhone 15 Pro Max 256GB Titan','29.990.000','45'],
-            ['Samsung Galaxy S24 Ultra 5G','26.490.000','32'],
-            ['Xiaomi 14 Pro Leica','18.990.000','27'],
-            ['MacBook Air M3 2024','27.890.000','78'],
-            ] as $i => $p)
-            <a href="#" class="product-card">
-                @if($i === 0)<span class="badge-tag">MỚI</span>@endif
-                <span class="wish"><i class="far fa-heart"></i></span>
-                <div class="product-card-img img-placeholder"><i class="fas fa-image"></i></div>
-                <div class="product-card-body">
-                    <div class="product-card-name">{{ $p[0] }}</div>
-                    <div><span class="product-card-price">{{ $p[1] }}đ</span></div>
-                    <div class="stars">★★★★★ <span class="review-count">({{ $p[2] }})</span></div>
-                </div>
-            </a>
+        @if($banners->count() > 1)
+        <button class="hero-arrow right" id="heroNext"><i class="fas fa-chevron-right"></i></button>
+        <div class="hero-dots">
+            @foreach($banners as $i => $banner)
+            <div class="hero-dot {{ $i === 0 ? 'active' : '' }}" data-slide="{{ $i }}"></div>
             @endforeach
-            @endforelse
         </div>
+        @endif
     </section>
+    @endif
 
-    {{-- PROMO BANNERS --}}
-    <div class="promo-banners">
-        <div class="promo-banner apple">
-            <div class="content">
-                <div class="tag">THẾ GIỚI APPLE</div>
-                <h3>Giảm đến 4TR</h3>
-                <button class="btn-sm">Săn Ngay</button>
+    {{-- ===== TRUST BAR ===== --}}
+    <div class="trust-bar">
+        <div class="inner">
+            <div class="trust-bar-item">
+                <div class="tbi-icon"><i class="fas fa-truck"></i></div>
+                <div class="tbi-text"><b>Giao hàng miễn phí</b><span>Đơn hàng từ 500k</span></div>
             </div>
-            <div class="promo-img img-placeholder"><i class="fas fa-image"></i></div>
-        </div>
-        <div class="promo-banner samsung">
-            <div class="content">
-                <div class="tag">SAMSUNG STORE</div>
-                <h3>Thu cũ đổi mới</h3>
-                <button class="btn-sm">Xem Thêm</button>
+            <div class="trust-bar-item">
+                <div class="tbi-icon"><i class="fas fa-shield-alt"></i></div>
+                <div class="tbi-text"><b>Chính hãng 100%</b><span>Bảo hành toàn quốc</span></div>
             </div>
-            <div class="promo-img img-placeholder"><i class="fas fa-image"></i></div>
-        </div>
-        <div class="promo-banner phu-kien">
-            <div class="content">
-                <div class="tag">PHỤ KIỆN CÔNG NGHỆ</div>
-                <h3>Mua 1 tặng 1</h3>
-                <button class="btn-sm">Mua Ngay</button>
+            <div class="trust-bar-item">
+                <div class="tbi-icon"><i class="fas fa-sync-alt"></i></div>
+                <div class="tbi-text"><b>Đổi trả dễ dàng</b><span>Trong vòng 30 ngày</span></div>
             </div>
-            <div class="promo-img img-placeholder"><i class="fas fa-image"></i></div>
+            <div class="trust-bar-item">
+                <div class="tbi-icon"><i class="fas fa-credit-card"></i></div>
+                <div class="tbi-text"><b>Trả góp 0%</b><span>Thủ tục nhanh chóng</span></div>
+            </div>
+            <div class="trust-bar-item">
+                <div class="tbi-icon"><i class="fas fa-headset"></i></div>
+                <div class="tbi-text"><b>Hỗ trợ 24/7</b><span>Hotline: 1900 1234</span></div>
+            </div>
         </div>
     </div>
 
-    {{-- NEWS --}}
-    <section class="section" style="border-top:1px solid #f0f0f0; padding-top:32px">
-        <div class="section-header">
-            <h2 class="section-title">Tin tức công nghệ</h2>
-            <a href="{{ route('news.index') }}" class="section-link">Xem tin mới nhất →</a>
+    <div class="container">
+
+        {{-- ===== SẢN PHẨM MỚI NHẤT ===== --}}
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">Sản phẩm mới nhất</h2>
+                <a href="{{ route('products.index') }}" class="section-link">
+                    Xem tất cả →
+                </a>
+            </div>
+
+            <div class="products-grid">
+
+                @forelse($newProducts as $product)
+                <a href="{{ route('products.show', $product->slug) }}"
+                    class="product-card">
+
+                    <span class="wish">
+                        <i class="far fa-heart"></i>
+                    </span>
+
+                    <div class="product-card-img">
+
+                        @if($product->first_image)
+                        <img src="{{ $product->first_image }}" alt="{{ $product->name }}">
+                        @else
+                        <div class="img-placeholder"
+                            style="width:100%;height:100%">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        @endif
+
+                    </div>
+
+                    <div class="product-card-body">
+
+                        <div class="product-card-name">
+                            {{ $product->name }}
+                        </div>
+
+                        @if($product->brand)
+                        <div style="font-size:11px;color:#6b7280;margin-top:4px">
+                            {{ $product->brand->name }}
+                        </div>
+                        @endif
+
+                        <span class="product-card-price">
+                            {{ number_format($product->price) }}đ
+                        </span>
+
+                        <div class="stars">
+                            ★★★★★
+                            <span class="review-count">
+                                ({{ $product->reviews_count ?? 0 }})
+                            </span>
+                        </div>
+
+                    </div>
+
+                </a>
+
+                @empty
+
+                <div style="grid-column:1/-1;padding:40px;text-align:center">
+                    Chưa có sản phẩm nào.
+                </div>
+
+                @endforelse
+
+            </div>
+        </section>
+        {{-- ===== PROMO BANNERS ===== --}}
+        <div class="promo-banners">
+            <div class="promo-banner apple">
+                <div class="content">
+                    <div class="tag">THẾ GIỚI APPLE</div>
+                    <h3>Giảm đến 4TR</h3>
+                    <button class="btn-sm">Săn Ngay</button>
+                </div>
+                <div class="promo-img img-placeholder"><i class="fas fa-image"></i></div>
+            </div>
+            <div class="promo-banner samsung">
+                <div class="content">
+                    <div class="tag">SAMSUNG STORE</div>
+                    <h3>Thu cũ đổi mới</h3>
+                    <button class="btn-sm">Xem Thêm</button>
+                </div>
+                <div class="promo-img img-placeholder"><i class="fas fa-image"></i></div>
+            </div>
+            <div class="promo-banner phu-kien">
+                <div class="content">
+                    <div class="tag">PHỤ KIỆN CÔNG NGHỆ</div>
+                    <h3>Mua 1 tặng 1</h3>
+                    <button class="btn-sm">Mua Ngay</button>
+                </div>
+                <div class="promo-img img-placeholder"><i class="fas fa-image"></i></div>
+            </div>
         </div>
-        <div class="news-grid">
-            @forelse($latestNews ?? [] as $news)
-            <a href="{{ route('news.show', $news->slug) }}" class="news-card">
-                <div class="news-card-img">
-                    @if($news->thumbnail)<img src="{{ $news->thumbnail }}" alt="{{ $news->title }}">
-                    @else<i class="fas fa-image fa-2x"></i>@endif
-                </div>
-                <div class="news-card-body">
-                    <div class="news-card-title">{{ $news->title }}</div>
-                    <div class="news-card-excerpt">{{ Str::limit($news->excerpt, 80) }}</div>
-                    <div class="news-card-meta">{{ $news->created_at->diffForHumans() }} · {{ number_format($news->views ?? 0) }} lượt xem</div>
-                </div>
-            </a>
-            @empty
-            @foreach([
-            ['Đánh giá chi tiết iPhone 15 Pro Max: Titan thực sự khác biệt?','Sau một tháng sử dụng, khung viền titan mang lại cảm giác nhẹ hơn hẳn...','2 giờ trước · 343 lượt xem'],
-            ['Samsung Galaxy S24 ra mắt: Trí tuệ nhân tạo Galaxy AI là tâm điểm','Những tính năng dịch thuật trực tiếp và chỉnh sửa ảnh bằng AI gây ấn tượng...','5 giờ trước · 1.2k lượt xem'],
-            ['Lộ diện thiết kế iPad Pro M3 với màn hình OLED siêu mỏng','Các báo cáo mới nhất cho thấy Apple sẽ nâng cấp màn hình OLED cho dòng Pro...','1 ngày trước · 890 lượt xem'],
-            ['5 mẹo tiết kiệm pin cực hay cho Android 14 bạn nên biết','Tối ưu hóa cài đặt hệ thống giúp điện thoại của bạn duy trì thời lượng pin...','2 ngày trước · 3.4k lượt xem'],
-            ] as $n)
-            <a href="#" class="news-card">
-                <div class="news-card-img img-placeholder"><i class="fas fa-image fa-2x"></i></div>
-                <div class="news-card-body">
-                    <div class="news-card-title">{{ $n[0] }}</div>
-                    <div class="news-card-excerpt">{{ $n[1] }}</div>
-                    <div class="news-card-meta">{{ $n[2] }}</div>
-                </div>
-            </a>
-            @endforeach
-            @endforelse
-        </div>
-    </section>
-</div>
+
+        {{-- ===== TIN TỨC CÔNG NGHỆ ===== --}}
+        @if($latestNews->isNotEmpty())
+        <section class="section">
+
+            <div class="section-header">
+                <h2 class="section-title">Tin tức công nghệ</h2>
+
+                <a href="{{ route('news.index') }}"
+                    class="section-link">
+                    Xem tin mới nhất →
+                </a>
+            </div>
+
+            <div class="news-grid">
+
+                @foreach($latestNews as $news)
+
+                <a href="{{ route('news.show', $news->slug) }}"
+                    class="news-card">
+
+                    <div class="news-card-img">
+
+                        @if(!empty($news->thumbnail))
+                        <img src="{{ $news->thumbnail }}"
+                            alt="{{ $news->title }}">
+                        @else
+                        <div class="img-placeholder"
+                            style="height:100%">
+                            <i class="fas fa-image fa-2x"></i>
+                        </div>
+                        @endif
+
+                    </div>
+
+                    <div class="news-card-body">
+
+                        <div class="news-card-title">
+                            {{ $news->title }}
+                        </div>
+
+                        <div class="news-card-excerpt">
+                            {{ \Illuminate\Support\Str::limit(strip_tags($news->content), 100) }}
+                        </div>
+
+                        <div class="news-card-meta">
+
+                            @if($news->published_at)
+                            {{ $news->published_at->diffForHumans() }}
+                            @endif
+
+                            · {{ number_format($news->views ?? 0) }} lượt xem
+
+                            @if($news->category)
+                            · {{ $news->category->name }}
+                            @endif
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+                @endforeach
+
+            </div>
+
+        </section>
+        @endif
+
+    </div><!-- /.container -->
+</div><!-- /.page-body -->
 @endsection
 
 @push('scripts')
 <script>
-    // Hero slider (banner trang chủ)
     (function() {
         const slides = document.querySelectorAll('.hero-slide');
         const dots = document.querySelectorAll('.hero-dot');

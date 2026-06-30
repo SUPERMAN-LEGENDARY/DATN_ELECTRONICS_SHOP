@@ -14,13 +14,13 @@
         background: #fff;
         border-radius: 8px;
         padding: 20px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
         transition: transform 0.15s;
     }
 
     .stat-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     .stat-card .icon {
@@ -43,9 +43,17 @@
         margin-top: 4px;
     }
 
-    .stat-card .icon.orange { color: #F57C00; }
-    .stat-card .icon.green { color: #388E3C; }
-    .stat-card .icon.purple { color: #7B1FA2; }
+    .stat-card .icon.orange {
+        color: #F57C00;
+    }
+
+    .stat-card .icon.green {
+        color: #388E3C;
+    }
+
+    .stat-card .icon.purple {
+        color: #7B1FA2;
+    }
 
     /* ===== CHART CONTAINERS ===== */
     .chart-grid {
@@ -59,7 +67,7 @@
         background: #fff;
         border-radius: 8px;
         padding: 20px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
     }
 
     .chart-box h3 {
@@ -110,20 +118,48 @@
         line-height: 1.5;
     }
 
-    .badge-success { background: #d4edda; color: #155724; }
-    .badge-danger { background: #f8d7da; color: #721c24; }
-    .badge-warning { background: #fff3cd; color: #856404; }
-    .badge-info { background: #d1ecf1; color: #0c5460; }
-    .badge-secondary { background: #e2e3e5; color: #383d41; }
+    .badge-success {
+        background: #d4edda;
+        color: #155724;
+    }
 
-    .text-muted { color: #6c757d; }
-    .text-center { text-align: center; }
-    .mt-3 { margin-top: 16px; }
+    .badge-danger {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .badge-warning {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .badge-info {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .badge-secondary {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+
+    .text-muted {
+        color: #6c757d;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .mt-3 {
+        margin-top: 16px;
+    }
 
     @media (max-width: 768px) {
         .chart-grid {
             grid-template-columns: 1fr;
         }
+
         .stats-grid {
             grid-template-columns: 1fr 1fr;
         }
@@ -227,13 +263,13 @@
                     <td>{{ number_format($order->total) }}đ</td>
                     <td>
                         @php
-                            $class = match($order->status) {
-                                'delivered' => 'badge-success',
-                                'cancelled' => 'badge-danger',
-                                'pending'   => 'badge-warning',
-                                'processing'=> 'badge-info',
-                                default     => 'badge-secondary'
-                            };
+                        $class = match($order->status) {
+                        'delivered' => 'badge-success',
+                        'cancelled' => 'badge-danger',
+                        'pending' => 'badge-warning',
+                        'processing'=> 'badge-info',
+                        default => 'badge-secondary'
+                        };
                         @endphp
                         <span class="badge {{ $class }}">{{ ucfirst($order->status) }}</span>
                     </td>
@@ -259,10 +295,14 @@
         new Chart(ctx1, {
             type: 'bar',
             data: {
-                labels: {!! json_encode($months) !!},
+                labels: {
+                    !!json_encode($months) !!
+                },
                 datasets: [{
                     label: 'Doanh thu (VNĐ)',
-                    data: {!! json_encode($revenues) !!},
+                    data: {
+                        !!json_encode($revenues) !!
+                    },
                     backgroundColor: 'rgba(30, 136, 229, 0.6)',
                     borderColor: 'rgba(30, 136, 229, 1)',
                     borderWidth: 1,
@@ -273,7 +313,9 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
+                    legend: {
+                        display: false
+                    },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
@@ -290,7 +332,7 @@
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return value >= 1000000 ? (value/1000000) + 'M' : value;
+                                return value >= 1000000 ? (value / 1000000) + 'M' : value;
                             }
                         }
                     }
@@ -303,9 +345,13 @@
         new Chart(ctx2, {
             type: 'doughnut',
             data: {
-                labels: {!! json_encode($statusData['labels']) !!},
+                labels: {
+                    !!json_encode($statusData['labels']) !!
+                },
                 datasets: [{
-                    data: {!! json_encode($statusData['data']) !!},
+                    data: {
+                        !!json_encode($statusData['data']) !!
+                    },
                     backgroundColor: [
                         '#FFC107', // pending - vàng
                         '#FF9800', // confirmed - cam
@@ -313,7 +359,7 @@
                         '#00BCD4', // shipped - xanh cyan
                         '#4CAF50', // delivered - xanh lá
                         '#F44336', // cancelled - đỏ
-                        '#9E9E9E'  // returned - xám
+                        '#9E9E9E' // returned - xám
                     ]
                 }]
             },
@@ -324,7 +370,9 @@
                     legend: {
                         position: 'bottom',
                         labels: {
-                            font: { size: 12 }
+                            font: {
+                                size: 12
+                            }
                         }
                     }
                 }

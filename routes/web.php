@@ -44,6 +44,14 @@ Route::prefix('gio-hang')->name('cart.')->group(function () {
     Route::delete('/',            [CartController::class, 'clear'])->name('clear');
 });
 
+// ─── THANH TOÁN (CHECKOUT) ────────────────────────────────────────
+Route::prefix('thanh-toan')->name('checkout.')->middleware('auth')->group(function () {
+    Route::get('/',                  [\App\Http\Controllers\CheckoutController::class, 'index'])->name('index');
+    Route::post('/',                 [\App\Http\Controllers\CheckoutController::class, 'store'])->name('store');
+    Route::get('/momo/return',       [\App\Http\Controllers\CheckoutController::class, 'momoReturn'])->name('momo.return');
+    Route::get('/thanh-cong/{order}', [\App\Http\Controllers\CheckoutController::class, 'success'])->name('success');
+});
+
 // ─── ADMIN ────────────────────────────────────────────────────────
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])->group(function () {
 
