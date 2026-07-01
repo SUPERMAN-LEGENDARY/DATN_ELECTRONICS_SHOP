@@ -255,5 +255,30 @@
         </div>
     </div>
     @endif
+
+    {{-- ===== CÓ THỂ BẠN CŨNG THÍCH ===== --}}
+    @if(!empty($crossSell) && $crossSell->isNotEmpty())
+    <div style="margin-top:40px">
+        <h2 style="font-size:18px;font-weight:800;margin-bottom:16px">Có thể bạn cũng thích</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px">
+            @foreach($crossSell as $p)
+            <a href="{{ route('products.show', ['slug' => $p->slug, 'from' => 'suggestion', 'via' => 'cart']) }}"
+               style="display:block;background:#fff;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;text-decoration:none;color:inherit">
+                @if($p->first_image)
+                <img src="{{ $p->first_image }}" alt="{{ $p->name }}" style="width:100%;height:120px;object-fit:cover">
+                @else
+                <div style="width:100%;height:120px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#ccc">
+                    <i class="fas fa-image"></i>
+                </div>
+                @endif
+                <div style="padding:10px">
+                    <div style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:6px">{{ $p->name }}</div>
+                    <div style="font-size:14px;font-weight:700;color:#1565C0">{{ number_format($p->sale_price) }}đ</div>
+                </div>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
 </div>
 @endsection

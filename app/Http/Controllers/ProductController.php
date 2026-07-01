@@ -4,24 +4,62 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\ProductAttribute;
 use App\Models\Review;
+use App\Services\AiSearchParser;
 use App\Services\BadWordDetector;
+use App\Services\BehaviorLogger;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
     // ─── Danh sách sản phẩm (có filter, sort, search, phân trang) ─
 
-    public function index(Request $request)
+    public function index(Request $request, AiSearchParser $aiSearch)
     {
+        // ── AI phân tích thanh tìm kiếm: tách từ khóa / thuộc tính / giá / hãng / danh mục ──
+        $ai = $request->filled('q') ? $aiSearch->parse($request->q) : [];
+
+        $keywords   = $ai['keywords'] ?? $request->q;
+        $priceFrom  = $request->price_from ?: ($ai['price_min'] ?? null);
+        $priceTo    = $request->price_to ?: ($ai['price_max'] ?? null);
+        $sort       = $request->sort ?: ($ai['sort'] ?? null);
+        $attributes = $ai['attributes'] ?? [];
+
+        // Dropdown thủ công gửi sẵn ID; AI chỉ trả về slug nên cần resolve sang ID khi dropdown trống
+        $brandId = $request->brand
+            ?: optional(Category::where('slug', $ai['brand'] ?? null)->first())->id;
+        $categoryId = $request->category
+            ?: optional(Category::where('slug', $ai['category'] ?? null)->first())->id;
+
+        // Bộ lọc thuộc tính do user chọn thủ công từ sidebar
+        // (vd: attr[3][]=8GB&attr[3][]=16GB) -> ưu tiên hơn kết quả AI phân tích
+        $requestAttributes = $request->input('attr', []);
+        if (!empty($requestAttributes)) {
+            $attributes = $requestAttributes;
+        }
+
         $query = Product::with(['category', 'brand'])
             ->withCount(['visibleReviews as reviews_count'])
             ->active()
-            ->search($request->q)
-            ->filterBrand($request->brand)
-            ->filterCategory($request->category)
-            ->filterPrice($request->price_from, $request->price_to)
-            ->sorted($request->sort);
+            ->search($keywords)
+            ->filterBrand($brandId)
+            ->filterCategory($categoryId)
+            ->filterPrice($priceFrom, $priceTo)
+            ->filterAttributes($attributes)
+            ->sorted($sort);
+
+        // Bộ lọc AI quá chặt (thuộc tính/hãng/danh mục) mà không ra kết quả -> nới lỏng,
+        // chỉ giữ từ khóa gốc + khoảng giá để không trả về trang trống.
+        // Chỉ áp dụng nới lỏng khi thuộc tính đến từ AI (không nới lỏng khi user tự chọn checkbox).
+        if (!empty($ai['attributes']) && empty($requestAttributes) && (clone $query)->count() === 0) {
+            $query = Product::with(['category', 'brand'])
+                ->withCount(['visibleReviews as reviews_count'])
+                ->active()
+                ->search($request->q)
+                ->filterPrice($priceFrom, $priceTo)
+                ->sorted($sort);
+        }
 
         // Lọc theo khoảng giá dạng checkbox (vd: 0_5000000)
         if ($request->filled('price') && is_array($request->price)) {
@@ -42,14 +80,62 @@ class ProductController extends Controller
         $categories = Category::categories()->active()->get();
         $brands     = Category::brands()->active()->get();
 
+        // ── Danh sách thuộc tính kỹ thuật để hiển thị bộ lọc sidebar ──
+        $attributesFilter = $this->getAttributesFilter($categoryId, $brandId);
+
         return view('products.index', compact(
-            'products', 'categories', 'brands', 'totalProducts'
+            'products', 'categories', 'brands', 'totalProducts', 'attributesFilter'
         ));
+    }
+
+    /**
+     * Lấy danh sách thuộc tính + các giá trị khả dụng để hiển thị bộ lọc sidebar.
+     * Giới hạn theo danh mục/hãng đang được lọc (nếu có) để tránh hiện thuộc tính
+     * không liên quan (vd: "Dung lượng pin" cho sản phẩm thời trang).
+     *
+     * @return array<int, array{id:int, name:string, values:array<int,string>}>
+     */
+    private function getAttributesFilter($categoryId = null, $brandId = null): array
+    {
+        $productIdsQuery = Product::query()->active();
+
+        if ($categoryId) {
+            $productIdsQuery->where('category_id', $categoryId);
+        }
+        if ($brandId) {
+            $productIdsQuery->where('brand_id', $brandId);
+        }
+
+        $productIds = $productIdsQuery->pluck('id');
+
+        if ($productIds->isEmpty()) {
+            return [];
+        }
+
+        return ProductAttribute::query()
+            ->whereIn('product_id', $productIds)
+            ->whereNotNull('value')
+            ->where('value', '!=', '')
+            ->with('attribute')
+            ->get()
+            ->filter(fn ($pa) => $pa->attribute !== null)
+            ->groupBy('attribute_id')
+            ->map(function ($group) {
+                $attribute = $group->first()->attribute;
+                return [
+                    'id'     => $attribute->id,
+                    'name'   => $attribute->name,
+                    'values' => $group->pluck('value')->unique()->sort()->values()->all(),
+                ];
+            })
+            ->sortBy('name')
+            ->values()
+            ->all();
     }
 
     // ─── Chi tiết sản phẩm ────────────────────────────────────────
 
-    public function show(string $slug)
+    public function show(Request $request, string $slug)
     {
         $product = Product::with([
                 'category',
@@ -61,6 +147,20 @@ class ProductController extends Controller
             ->where('slug', $slug)
             ->active()
             ->firstOrFail();
+
+        // ── Ghi log hành vi: khách đang xem sản phẩm này ─────────
+        BehaviorLogger::log($product->id, 'view');
+
+        // ── Nếu khách đến từ 1 link gợi ý (related/AI suggestion) ──
+        // Link gợi ý cần thêm ?from=suggestion&via=<nguồn> vào URL, vd:
+        // route('products.show', ['slug' => $p->slug, 'from' => 'suggestion', 'via' => 'related'])
+        if ($request->query('from') === 'suggestion') {
+            BehaviorLogger::log(
+                $product->id,
+                'click_suggestion',
+                $request->query('via', 'related') // related | homepage | chatbot...
+            );
+        }
 
         // Đánh giá phân trang (5 per page)
         $reviews = Review::with('user')

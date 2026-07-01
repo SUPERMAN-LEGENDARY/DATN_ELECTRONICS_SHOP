@@ -85,7 +85,7 @@ class CheckoutController extends Controller
     }
 
     // ─── Áp dụng mã giảm giá (AJAX hoặc submit lại form) ──────────
-    private function applyVoucher(?string $code, float $subtotal): array
+    private function applyVoucher(?string $code, float $subtotal, ?int $userId = null): array
     {
         if (!$code) return [null, 0];
 
@@ -94,6 +94,12 @@ class CheckoutController extends Controller
             ->first();
 
         if (!$voucher) return [null, 0];
+
+        // Voucher cá nhân hoá (được admin tặng riêng) chỉ đúng khách đó mới dùng được
+        if ($voucher->assigned_user_id && $voucher->assigned_user_id !== $userId) {
+            return [null, 0];
+        }
+
         if ($voucher->expires_at && $voucher->expires_at->isPast()) return [null, 0];
         if ($voucher->starts_at && $voucher->starts_at->isFuture()) return [null, 0];
         if ($voucher->usage_limit && $voucher->used_count >= $voucher->usage_limit) return [null, 0];
@@ -159,7 +165,7 @@ class CheckoutController extends Controller
         }
 
         // 2. Áp dụng voucher (nếu có)
-        [$voucher, $discount] = $this->applyVoucher($request->voucher_code, $subtotal);
+        [$voucher, $discount] = $this->applyVoucher($request->voucher_code, $subtotal, $user->id);
         $total = $subtotal - $discount;
 
         $paymentMethod = $request->payment_method;

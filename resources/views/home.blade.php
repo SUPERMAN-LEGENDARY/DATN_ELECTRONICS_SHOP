@@ -713,6 +713,36 @@
 
     <div class="container">
 
+        {{-- ===== GỢI Ý DÀNH CHO BẠN (AI cá nhân hóa) ===== --}}
+        @auth
+        @if(!empty($suggestedProducts) && $suggestedProducts->isNotEmpty())
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">Gợi ý dành cho bạn</h2>
+            </div>
+            <div class="products-grid">
+                @foreach($suggestedProducts as $product)
+                <a href="{{ route('products.show', ['slug' => $product->slug, 'from' => 'suggestion', 'via' => 'homepage']) }}"
+                    class="product-card">
+                    <span class="wish"><i class="far fa-heart"></i></span>
+                    <div class="product-card-img">
+                        @if($product->first_image)
+                        <img src="{{ $product->first_image }}" alt="{{ $product->name }}">
+                        @else
+                        <div class="img-placeholder"><i class="fas fa-image"></i></div>
+                        @endif
+                    </div>
+                    <div class="product-card-body">
+                        <div class="product-card-name">{{ $product->name }}</div>
+                        <div class="product-card-price">{{ number_format($product->sale_price) }}đ</div>
+                    </div>
+                </a>
+                @endforeach
+            </div>
+        </section>
+        @endif
+        @endauth
+
         {{-- ===== SẢN PHẨM MỚI NHẤT ===== --}}
         <section class="section">
             <div class="section-header">

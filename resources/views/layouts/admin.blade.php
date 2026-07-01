@@ -276,6 +276,12 @@
                 <i class="fas fa-newspaper"></i> Tin tức
             </a>
 
+                        <div class="nav-section">Khách hàng</div>
+            <a href="{{ route('admin.leads.index') }}"
+                class="nav-item {{ request()->routeIs('admin.leads.*') ? 'active' : '' }}">
+                <i class="fas fa-brain"></i> Phân tích khách hàng
+            </a>
+
             @if(Auth::user()->role === 'admin')
             <div class="nav-section">Hệ thống</div>
             <a href="{{ route('admin.users.index') }}"

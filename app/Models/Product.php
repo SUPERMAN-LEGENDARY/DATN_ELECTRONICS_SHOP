@@ -111,7 +111,10 @@ use HasFactory, SoftDeletes;
     public function scopeSearch($query, ?string $keyword)
     {
         if ($keyword) {
-            $query->where('name', 'like', "%{$keyword}%");
+            $query->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%")
+                  ->orWhere('description', 'like', "%{$keyword}%");
+            });
         }
         return $query;
     }
@@ -136,6 +139,33 @@ use HasFactory, SoftDeletes;
     {
         if ($from) $query->where('price', '>=', $from);
         if ($to)   $query->where('price', '<=', $to);
+        return $query;
+    }
+
+    /**
+     * Lọc theo thuộc tính kỹ thuật.
+     * $attributes dạng: [attribute_id => [value1, value2, ...]]
+     * Trong cùng 1 thuộc tính: OR (vd RAM = 8GB hoặc 16GB)
+     * Giữa các thuộc tính khác nhau: AND (vd RAM=8GB AND Màu=Đen)
+     */
+    public function scopeFilterAttributes($query, ?array $attributes)
+    {
+        if (empty($attributes)) {
+            return $query;
+        }
+
+        foreach ($attributes as $attributeId => $values) {
+            $values = array_filter((array) $values, fn ($v) => $v !== null && $v !== '');
+            if (empty($values)) {
+                continue;
+            }
+
+            $query->whereHas('attributes', function ($q) use ($attributeId, $values) {
+                $q->where('attribute_id', $attributeId)
+                  ->whereIn('value', $values);
+            });
+        }
+
         return $query;
     }
 

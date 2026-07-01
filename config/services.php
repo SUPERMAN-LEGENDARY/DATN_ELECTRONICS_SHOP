@@ -42,4 +42,8 @@ return [
         'secret_key'   => env('MOMO_SECRET_KEY', 'at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa'),
     ],
 
+'gemini' => [
+    'key'   => env('GEMINI_API_KEY'),
+    'model' => env('GEMINI_MODEL', 'gemini-2.0-flash'),
+],
 ];

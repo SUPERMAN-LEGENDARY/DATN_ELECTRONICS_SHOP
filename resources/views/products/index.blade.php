@@ -25,7 +25,28 @@
 .price-range { display: flex; align-items: center; gap: 6px; margin: 10px 0; }
 .price-range input { flex: 1; border: 1px solid #e0e0e0; border-radius: 4px; padding: 6px 8px; font-size: 12px; outline: none; min-width: 0; }
 .price-range span { font-size: 12px; color: #888; }
+.attr-check { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; cursor: pointer; }
+.attr-check input { cursor: pointer; accent-color: #1565C0; }
+.attr-check label { font-size: 13px; color: #444; cursor: pointer; }
+.attr-values-wrap { max-height: 180px; overflow-y: auto; padding-right: 4px; }
 .btn-filter { width: 100%; padding: 8px; background: #1565C0; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.btn-advanced-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 10px; background: #fff; border: 1px dashed #1565C0; border-radius: 6px; font-size: 13px; font-weight: 600; color: #1565C0; cursor: pointer; margin-bottom: 14px; transition: background .15s; }
+.btn-advanced-toggle:hover { background: #f0f6fd; }
+.btn-advanced-toggle .badge-count { background: #1565C0; color: #fff; font-size: 11px; font-weight: 700; border-radius: 10px; padding: 1px 7px; margin-left: auto; }
+
+/* MODAL LỌC NÂNG CAO */
+.advanced-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+.advanced-overlay.open { display: flex; }
+.advanced-modal { background: #fff; border-radius: 10px; width: 100%; max-width: 520px; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,.2); }
+.advanced-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #eee; flex-shrink: 0; }
+.advanced-modal-header h3 { font-size: 15px; font-weight: 800; margin: 0; }
+.advanced-modal-close { border: none; background: none; font-size: 18px; color: #999; cursor: pointer; line-height: 1; padding: 4px; }
+.advanced-modal-close:hover { color: #333; }
+.advanced-modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+.advanced-modal-body .filter-group:last-child { margin-bottom: 0; }
+.advanced-modal-footer { padding: 14px 20px; border-top: 1px solid #eee; display: flex; gap: 10px; flex-shrink: 0; }
+.advanced-modal-footer .btn-filter { margin: 0; }
+.btn-advanced-clear { flex: 0 0 auto; padding: 8px 16px; background: #fff; color: #666; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
 
 /* PRODUCT GRID */
 .sort-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
@@ -110,6 +131,56 @@
             <form action="{{ route('products.index') }}" method="GET" id="filterForm">
                 @if(request('q'))<input type="hidden" name="q" value="{{ request('q') }}">@endif
                 @if(request('sort'))<input type="hidden" name="sort" value="{{ request('sort') }}">@endif
+                @if(request('category'))<input type="hidden" name="category" value="{{ request('category') }}">@endif
+                @if(request('brand'))<input type="hidden" name="brand" value="{{ request('brand') }}">@endif
+
+                {{-- Lọc nâng cao theo thuộc tính kỹ thuật (dạng modal) --}}
+                @if(count($attributesFilter))
+                    @php
+                        $selectedAttrCount = collect(request('attr', []))
+                            ->flatten()
+                            ->filter(fn ($v) => $v !== null && $v !== '')
+                            ->count();
+                    @endphp
+                    <button type="button" id="advancedToggle" class="btn-advanced-toggle">
+                        <span><i class="fas fa-sliders-h"></i> Lọc nâng cao</span>
+                        @if($selectedAttrCount)
+                            <span class="badge-count">{{ $selectedAttrCount }}</span>
+                        @endif
+                    </button>
+
+                    {{-- Modal nổi giữa màn hình, không đẩy layout trang --}}
+                    <div id="advancedOverlay" class="advanced-overlay">
+                        <div class="advanced-modal">
+                            <div class="advanced-modal-header">
+                                <h3>Lọc nâng cao</h3>
+                                <button type="button" class="advanced-modal-close" id="advancedClose">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="advanced-modal-body">
+                                @foreach($attributesFilter as $attr)
+                                <div class="filter-group">
+                                    <h3>{{ $attr['name'] }}</h3>
+                                    <div class="attr-values-wrap">
+                                        @foreach($attr['values'] as $value)
+                                        <label class="attr-check">
+                                            <input type="checkbox" name="attr[{{ $attr['id'] }}][]" value="{{ $value }}"
+                                                {{ in_array($value, request('attr.'.$attr['id'], [])) ? 'checked' : '' }}>
+                                            <span>{{ $value }}</span>
+                                        </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                            <div class="advanced-modal-footer">
+                                <button type="button" class="btn-advanced-clear" id="advancedClear">Bỏ chọn</button>
+                                <button type="submit" class="btn-filter">Áp dụng</button>
+                            </div>
+                        </div>
+                    </div>
+                @endif
 
                 {{-- Danh mục --}}
                 <div class="filter-group">
@@ -170,6 +241,10 @@
                         <span>–</span>
                         <input type="number" name="price_to" placeholder="Đến" value="{{ request('price_to') }}">
                     </div>
+                </div>
+
+
+                <div class="filter-group">
                     <button type="submit" class="btn-filter">Lọc ngay</button>
                 </div>
             </form>
@@ -241,5 +316,34 @@ document.getElementById('listView').addEventListener('click', function() {
     document.getElementById('gridView').classList.remove('active');
     document.getElementById('productsGrid').style.gridTemplateColumns = '1fr';
 });
+
+const advancedToggle = document.getElementById('advancedToggle');
+const advancedOverlay = document.getElementById('advancedOverlay');
+const advancedClose = document.getElementById('advancedClose');
+const advancedClear = document.getElementById('advancedClear');
+
+if (advancedToggle && advancedOverlay) {
+    advancedToggle.addEventListener('click', function() {
+        advancedOverlay.classList.add('open');
+    });
+    advancedClose.addEventListener('click', function() {
+        advancedOverlay.classList.remove('open');
+    });
+    // Bấm ra ngoài modal để đóng
+    advancedOverlay.addEventListener('click', function(e) {
+        if (e.target === advancedOverlay) {
+            advancedOverlay.classList.remove('open');
+        }
+    });
+    // Nhấn ESC để đóng
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            advancedOverlay.classList.remove('open');
+        }
+    });
+    advancedClear.addEventListener('click', function() {
+        advancedOverlay.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    });
+}
 </script>
 @endpush

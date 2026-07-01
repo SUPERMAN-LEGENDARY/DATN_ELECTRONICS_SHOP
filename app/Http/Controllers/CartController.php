@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Services\BehaviorLogger;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -72,7 +73,23 @@ class CartController extends Controller
             ];
         }
 
-        return view('cart.index', compact('products', 'total'));
+        // ── Gợi ý "Có thể bạn cũng thích": cùng category với sp trong giỏ ──
+        $crossSell = collect();
+        if (!empty($products)) {
+            $cartProductIds   = collect($products)->pluck('product.id')->all();
+            $categoryIds      = collect($products)->pluck('product.category_id')->unique()->filter()->all();
+
+            if (!empty($categoryIds)) {
+                $crossSell = Product::active()
+                    ->whereIn('category_id', $categoryIds)
+                    ->whereNotIn('id', $cartProductIds)
+                    ->inRandomOrder()
+                    ->limit(6)
+                    ->get();
+            }
+        }
+
+        return view('cart.index', compact('products', 'total', 'crossSell'));
     }
 
     // ─── Thêm vào giỏ ────────────────────────────────────────────
@@ -109,6 +126,9 @@ class CartController extends Controller
 
         $this->saveCart($cart);
 
+        // ── Ghi log hành vi: khách thêm sản phẩm vào giỏ ─────────
+        BehaviorLogger::log($productId, 'add_to_cart');
+
         return redirect()->route('cart.index')->with('success', 'Đã thêm vào giỏ hàng!');
     }
 
@@ -142,6 +162,9 @@ class CartController extends Controller
         ];
 
         $this->saveCart($cart);
+
+        // ── Ghi log hành vi: khách bấm mua ngay (tín hiệu mua mạnh) ─
+        BehaviorLogger::log($productId, 'add_to_cart', 'buy_now');
 
         return redirect()->route('cart.index');
     }

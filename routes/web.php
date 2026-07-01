@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\AttributeController as AdminAttributeController;
 use App\Http\Controllers\Admin\BannerController as AdminBannerController;
 use App\Http\Controllers\Admin\EventController as AdminEventController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
+use App\Http\Controllers\Admin\LeadController as AdminLeadController;
+use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CartController;
 use Illuminate\Support\Facades\Route;
@@ -44,6 +46,7 @@ Route::prefix('gio-hang')->name('cart.')->group(function () {
     Route::delete('/',            [CartController::class, 'clear'])->name('clear');
 });
 
+Route::post('/chatbot/send', [ChatbotController::class, 'send'])->name('chatbot.send');
 // ─── THANH TOÁN (CHECKOUT) ────────────────────────────────────────
 Route::prefix('thanh-toan')->name('checkout.')->middleware('auth')->group(function () {
     Route::get('/',                  [\App\Http\Controllers\CheckoutController::class, 'index'])->name('index');
@@ -191,6 +194,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
         Route::patch('/{id}/khoi-phuc',       [AdminOrderController::class, 'restore'])->name('restore');
         Route::delete('/{id}/xoa-vinh-vien',  [AdminOrderController::class, 'forceDelete'])->name('force-delete');
     });
+    // ── Khách hàng tiềm năng / AI Leads (admin + staff) ────────────
+    Route::prefix('khach-hang-tiem-nang')->name('leads.')->group(function () {
+        Route::get('/',                              [AdminLeadController::class, 'index'])->name('index');
+        Route::get('/{user}',                         [AdminLeadController::class, 'show'])->name('show');
+        Route::post('/{user}/de-xuat-thu-cong',       [AdminLeadController::class, 'updateSuggestions'])->name('update-suggestions');
+        Route::post('/{user}/tang-voucher',           [AdminLeadController::class, 'giftVoucher'])->name('gift-voucher');
+        Route::post('/{user}/tinh-lai-diem',          [AdminLeadController::class, 'recalculate'])->name('recalculate');
+    });
+
     // ── Quản lý voucher (admin + staff) ──────────────────────────
     Route::prefix('voucher')->name('vouchers.')->group(function () {
         // ── Các route tĩnh (không có tham số) ──
