@@ -15,6 +15,12 @@ use App\Http\Controllers\Admin\LeadController as AdminLeadController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CompareController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\NewsController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
 
 // ─── TRANG CHỦ ────────────────────────────────────────────────────
@@ -29,11 +35,53 @@ Route::prefix('san-pham')->name('products.')->group(function () {
         ->middleware('auth');
 });
 
+// ─── SO SÁNH SẢN PHẨM ─────────────────────────────────────────────
+Route::get('/compare', [CompareController::class, 'index'])->name('compare');
+Route::post('/compare/add/{product}', [CompareController::class, 'add'])->name('compare.add');
+Route::delete('/compare/remove/{product}', [CompareController::class, 'remove'])->name('compare.remove');
+
 // ─── PROFILE ──────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    // Alias để tương thích với các link/scaffold cũ dùng route('profile.edit')
+    Route::get('/profile/edit', [ProfileController::class, 'account'])->name('profile.edit');
+
+    // ── Thông tin tài khoản ──
+    Route::get('/profile', [ProfileController::class, 'account'])->name('profile.account');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // ── Sổ địa chỉ ──
+    Route::post('/profile/address', [ProfileController::class, 'storeAddress'])->name('profile.address.store');
+    Route::patch('/profile/address/{address}', [ProfileController::class, 'updateAddress'])->name('profile.address.update');
+    Route::delete('/profile/address/{address}', [ProfileController::class, 'destroyAddress'])->name('profile.address.destroy');
+    Route::patch('/profile/address/{address}/default', [ProfileController::class, 'setDefaultAddress'])->name('profile.address.default');
+
+    // ── Đổi mật khẩu ──
+    Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
+    // ── Đơn hàng (trong trang tài khoản) ──
+    Route::get('/profile/order', [OrderController::class, 'index'])->name('profile.order');
+    Route::get('/profile/order/{order}', [OrderController::class, 'show'])->name('profile.order.show');
+    Route::patch('/profile/order/{order}/cancel', [OrderController::class, 'cancel'])->name('profile.order.cancel');
+    Route::patch('/profile/order/{order}/received', [OrderController::class, 'received'])->name('profile.order.received');
+    Route::post('/profile/order/{order}/reorder', [OrderController::class, 'reorder'])->name('profile.order.reorder');
+    Route::get('/profile/order/{order}/review', [ReviewController::class, 'create'])->name('profile.review.create');
+    Route::post('/profile/order/{order}/review', [ReviewController::class, 'store'])->name('profile.review.store');
+
+    // ── Voucher ──
+    Route::get('/profile/voucher', [VoucherController::class, 'index'])->name('profile.voucher');
+
+    // ── Đánh giá của tôi ──
+    Route::get('/profile/review', [ReviewController::class, 'index'])->name('profile.review');
+});
+
+// ─── ĐƠN HÀNG (ngoài trang tài khoản) ──────────────────────────────
+Route::middleware('auth')->group(function () {
+    Route::get('/order', [OrderController::class, 'index'])->name('order.index');
+    Route::get('/order/{order}', [OrderController::class, 'show'])->name('order.show');
+    Route::patch('/order/{order}/cancel', [OrderController::class, 'cancel'])->name('order.cancel');
+    Route::patch('/order/{order}/received', [OrderController::class, 'received'])->name('order.received');
+    Route::post('/order/{order}/reorder', [OrderController::class, 'reorder'])->name('order.reorder');
 });
 
 // ─── GIỎ HÀNG ─────────────────────────────────────────────────────
@@ -98,6 +146,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
     Route::prefix('thuoc-tinh')->name('attributes.')->group(function () {
         Route::get('/list',            [AdminAttributeController::class, 'list'])->name('list');
         Route::post('/',               [AdminAttributeController::class, 'store'])->name('store');
+        Route::patch('/{attribute}/toggle-variant', [AdminAttributeController::class, 'toggleVariant'])->name('toggle-variant');
         Route::delete('/{attribute}',  [AdminAttributeController::class, 'destroy'])->name('destroy');
     });
 
@@ -241,8 +290,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
     });
 });
 
-// ─── TIN TỨC STOREFRONT (placeholder) ────────────────────────────
-Route::get('/tin-tuc', fn() => redirect('/'))->name('news.index');
-Route::get('/tin-tuc/{slug}', fn() => redirect('/'))->name('news.show');
+// ─── TIN TỨC STOREFRONT ───────────────────────────────────────────
+Route::prefix('tin-tuc')->name('news.')->group(function () {
+    Route::get('/', [NewsController::class, 'index'])->name('index');
+    Route::get('/danh-muc/{slug}', [NewsController::class, 'category'])->name('category');
+    Route::get('/{slug}', [NewsController::class, 'show'])->name('show');
+});
+
+// ─── LIÊN HỆ ────────────────────────────────────────────────────────
+Route::get('/lien-he', [ContactController::class, 'index'])->name('contact.index');
+Route::post('/lien-he', [ContactController::class, 'send'])->name('contact.send');
 
 require __DIR__ . '/auth.php';

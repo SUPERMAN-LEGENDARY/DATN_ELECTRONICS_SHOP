@@ -9,13 +9,14 @@
 .product-main { display: grid; grid-template-columns: 340px 1fr 260px; gap: 24px; margin-bottom: 32px; }
 
 /* GALLERY */
-.gallery-main { border: 1px solid #e0e0e0; border-radius: 8px; height: 300px; display: flex; align-items: center; justify-content: center; position: relative; background: #f8f8f8; margin-bottom: 10px; overflow: hidden; }
+.gallery-main { border: 1px solid #eef0f2; border-radius: 12px; height: 300px; display: flex; align-items: center; justify-content: center; position: relative; background: #fff; margin-bottom: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.04); }
 .gallery-main img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.discount-tag { position: absolute; top: 10px; left: 10px; background: #E53935; color: #fff; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
-.gallery-thumbs { display: flex; gap: 8px; flex-wrap: wrap; }
-.thumb { width: 56px; height: 56px; border: 2px solid transparent; border-radius: 6px; overflow: hidden; cursor: pointer; background: #f0f0f0; display: flex; align-items: center; justify-content: center; }
+.discount-tag { position: absolute; top: 10px; left: 10px; background: #E53935; color: #fff; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 5px; }
+.gallery-thumbs { display: flex; gap: 10px; flex-wrap: wrap; }
+.thumb { width: 58px; height: 58px; border: 2px solid #eef0f2; border-radius: 8px; overflow: hidden; cursor: pointer; background: #fff; display: flex; align-items: center; justify-content: center; transition: border-color .15s; }
+.thumb:hover { border-color: #90caf9; }
 .thumb.active { border-color: #1565C0; }
-.thumb img { width: 100%; height: 100%; object-fit: cover; }
+.thumb img { width: 100%; height: 100%; object-fit: contain; padding: 4px; box-sizing: border-box; }
 
 /* INFO */
 .product-brand { font-size: 12px; font-weight: 700; color: #1565C0; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
@@ -28,12 +29,16 @@
 .in-stock      { color: #2E7D32; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 4px; margin: 8px 0 16px; }
 .out-of-stock  { color: #E53935; font-size: 13px; font-weight: 500; margin: 8px 0 16px; }
 
-.option-group { margin-bottom: 14px; }
-.option-label { font-size: 13px; color: #555; margin-bottom: 8px; font-weight: 500; }
-.option-btns  { display: flex; gap: 8px; flex-wrap: wrap; }
-.opt-btn { padding: 6px 16px; border: 1.5px solid #e0e0e0; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; background: #fff; transition: all .15s; }
-.opt-btn.active { border-color: #1565C0; color: #1565C0; background: #EBF3FF; }
-.opt-btn:hover  { border-color: #1565C0; }
+#variantSelector { display: flex; flex-direction: column; gap: 14px; margin-bottom: 6px; }
+.option-group { margin-bottom: 0; }
+.option-label { font-size: 13px; color: #555; margin-bottom: 8px; font-weight: 600; }
+.option-label strong { color: #1e293b; font-weight: 700; }
+.option-btns  { display: flex; gap: 10px; flex-wrap: wrap; }
+.opt-btn { padding: 8px 18px; min-width: 56px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 13.5px; font-weight: 600; cursor: pointer; background: #fff; color: #333; transition: all .15s; }
+.opt-btn.active { border-color: #1565C0; color: #1565C0; background: #EBF3FF; box-shadow: 0 0 0 1px #1565C0 inset; }
+.opt-btn:hover:not(.opt-btn-disabled)  { border-color: #1565C0; color: #1565C0; }
+.opt-btn-disabled { opacity: .4; text-decoration: line-through; cursor: not-allowed; }
+.opt-btn-disabled:hover { border-color: #e0e0e0; color: #333; }
 
 .action-btns { display: flex; gap: 12px; margin-top: 20px; }
 .btn-add-cart { flex: 1; padding: 13px; border: 2px solid #1565C0; border-radius: 8px; background: #fff; color: #1565C0; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .2s; }
@@ -42,15 +47,16 @@
 .btn-buy-now:hover { background: #0D47A1; }
 
 /* SIDEBAR */
-.benefit-box { border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; margin-bottom: 14px; }
-.benefit-item { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; }
+.benefit-box { border: 1px solid #f1f3f5; border-radius: 12px; padding: 18px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.04); background: #fff; }
+.benefit-item { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 14px; }
 .benefit-item:last-child { margin-bottom: 0; }
 .benefit-item .bi-icon { color: #1565C0; font-size: 18px; margin-top: 2px; }
 .benefit-item .bi-title { font-size: 13px; font-weight: 600; }
 .benefit-item .bi-desc  { font-size: 12px; color: #777; }
-.commit-box { border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; }
-.commit-box h4 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
-.commit-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; color: #444; }
+.commit-box { border: 1px solid #f1f3f5; border-radius: 12px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,.04); background: #fff; }
+.commit-box h4 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 14px; }
+.commit-item { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 13px; color: #444; }
+.commit-item:last-child { margin-bottom: 0; }
 .commit-item i { color: #1565C0; }
 
 /* TABS */
@@ -67,7 +73,7 @@
 .specs-table td:first-child { color: #666; width: 200px; font-weight: 500; }
 
 /* REVIEWS */
-.rating-summary { display: flex; align-items: center; gap: 32px; padding: 24px; background: #f8f9fa; border-radius: 8px; margin-bottom: 24px; }
+.rating-summary { display: flex; align-items: center; gap: 32px; padding: 26px; background: #f8f9fa; border-radius: 12px; margin-bottom: 26px; }
 .rating-avg { text-align: center; }
 .rating-avg .big { font-size: 56px; font-weight: 800; color: #1565C0; line-height: 1; }
 .rating-avg .stars-lg { font-size: 20px; color: #FFA000; margin: 4px 0; }
@@ -86,7 +92,7 @@
 .review-stars { color: #FFA000; font-size: 14px; margin-bottom: 6px; }
 .review-content { font-size: 14px; color: #444; line-height: 1.6; }
 
-.review-form { background: #f8f9fa; border-radius: 8px; padding: 20px; margin-top: 24px; }
+.review-form { background: #f8f9fa; border-radius: 12px; padding: 22px; margin-top: 26px; }
 .review-form h4 { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
 .star-rating { display: flex; gap: 6px; margin-bottom: 12px; }
 .star-rating input { display: none; }
@@ -100,14 +106,14 @@
 .btn-submit-review:hover { background: #0D47A1; }
 
 /* RELATED */
-.related-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
-.product-card { display: block; border: 1px solid #e8e8e8; border-radius: 8px; overflow: hidden; text-decoration: none; color: inherit; transition: box-shadow .2s; position: relative; background: #fff; }
-.product-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.1); }
-.product-card-img { height: 140px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.product-card-img img { width: 100%; height: 100%; object-fit: cover; }
-.product-card-body { padding: 10px; }
-.product-card-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.product-card-price { font-size: 14px; font-weight: 800; color: #1565C0; }
+.related-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+.product-card { display: flex; flex-direction: column; height: 100%; border: 1px solid #e8e8e8; border-radius: 10px; overflow: hidden; text-decoration: none; color: inherit; transition: box-shadow .2s, transform .2s; position: relative; background: #fff; }
+.product-card:hover { box-shadow: 0 8px 20px rgba(0,0,0,.1); transform: translateY(-3px); border-color: transparent; }
+.product-card-img { height: 140px; background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+.product-card-img img { width: 100%; height: 100%; object-fit: contain; padding: 8px; box-sizing: border-box; }
+.product-card-body { padding: 12px; display: flex; flex-direction: column; flex: 1; }
+.product-card-name { font-size: 12.5px; font-weight: 600; margin-bottom: 6px; line-height: 1.4; min-height: 35px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.product-card-price { font-size: 14.5px; font-weight: 800; color: #1565C0; margin-top: auto; }
 .stars { font-size: 11px; color: #FFA000; }
 </style>
 @endpush
@@ -116,15 +122,24 @@
 <div class="product-detail-wrap">
 
     {{-- Breadcrumb --}}
-    <div class="breadcrumb" style="font-size:13px;color:#888;margin-bottom:16px">
-        <a href="{{ route('home') }}" style="color:#1565C0">Trang chủ</a> /
-        <a href="{{ route('products.index') }}" style="color:#1565C0">Sản phẩm</a> /
-        @if($product->category)
-            <a href="{{ route('products.index', ['category' => $product->category_id]) }}" style="color:#1565C0">
-                {{ $product->category->name }}
-            </a> /
-        @endif
-        <span style="color:#333">{{ $product->name }}</span>
+    <div class="breadcrumb" style="font-size:13px;color:#888;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+            <a href="{{ route('home') }}" style="color:#1565C0">Trang chủ</a> /
+            <a href="{{ route('products.index') }}" style="color:#1565C0">Sản phẩm</a> /
+            @if($product->category)
+                <a href="{{ route('products.index', ['category' => $product->category_id]) }}" style="color:#1565C0">
+                    {{ $product->category->name }}
+                </a> /
+            @endif
+            <span style="color:#333">{{ $product->name }}</span>
+        </div>
+        <form action="{{ route('compare.add', $product) }}" method="POST" style="margin:0">
+            @csrf
+            <button type="submit" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-code-compare"></i>
+                So sánh
+            </button>
+        </form>
     </div>
 
     {{-- Flash messages --}}
@@ -301,7 +316,7 @@
                     </div>
                 </div>
                 <div class="benefit-item">
-                    <i class="fas fa-sync-alt bi-icon"></i>
+                    <i class="fas fa-credit-card bi-icon"></i>
                     <div>
                         <div class="bi-title">Trả góp 0%</div>
                         <div class="bi-desc">Duyệt nhanh qua thẻ tín dụng</div>
@@ -318,9 +333,9 @@
             <div class="commit-box">
                 <h4>Cam kết từ ElectronicShop</h4>
                 <div class="commit-item"><i class="fas fa-check-circle"></i> Hàng chính hãng 100%</div>
-                <div class="commit-item"><i class="fas fa-map-marker-alt"></i> Bảo hành 12 tháng</div>
+                <div class="commit-item"><i class="fas fa-award"></i> Bảo hành 12 tháng</div>
                 <div class="commit-item"><i class="fas fa-headset"></i> Hỗ trợ 24/7: 1900 1234</div>
-                <div class="commit-item"><i class="fas fa-store"></i> 50+ cửa hàng toàn quốc</div>
+                <div class="commit-item"><i class="fas fa-map-marker-alt"></i> 50+ cửa hàng toàn quốc</div>
             </div>
         </div>
     </div>
@@ -347,18 +362,19 @@
 
     {{-- Tab: Thông số kỹ thuật --}}
     <div id="tab-specs" class="tab-content">
-        @if($product->attributes->isNotEmpty())
-        <table class="specs-table">
-            @foreach($product->attributes as $attr)
-            <tr>
-                <td>{{ $attr->attribute->name }}</td>
-                <td>{{ $attr->value }}</td>
-            </tr>
-            @endforeach
+        <table class="specs-table" id="specsTable" style="{{ $product->attributes->isEmpty() ? 'display:none' : '' }}">
+            <tbody id="specsTableBody">
+                @foreach($product->attributes as $attr)
+                <tr>
+                    <td>{{ $attr->attribute->name }}</td>
+                    <td>{{ $attr->value }}</td>
+                </tr>
+                @endforeach
+            </tbody>
         </table>
-        @else
-            <p style="color:#999;padding:24px 0">Chưa có thông số kỹ thuật.</p>
-        @endif
+        <p id="specsEmptyMsg" style="color:#999;padding:24px 0;{{ $product->attributes->isNotEmpty() ? 'display:none' : '' }}">
+            Chưa có thông số kỹ thuật.
+        </p>
     </div>
 
     {{-- Tab: Đánh giá --}}
@@ -523,9 +539,13 @@ $variantsForJs = $product->variants->map(function($v) {
         'discount_percent' => (int)   $v->discount_percent,
         'stock'            => (int)   $v->stock,
         'is_active'        => (bool)  $v->is_active,
-        'attrs'            => $v->variantAttributes->mapWithKeys(function($va) {
-            return [$va->attribute->name => $va->value];
-        })->toArray(),
+        // Chỉ những thuộc tính "chính" (is_variant = true) mới tạo nút chọn;
+        // thuộc tính "phụ" chỉ hiện trong bảng thông số kỹ thuật (BASE_ATTRS).
+        'attrs'            => $v->variantAttributes
+            ->filter(fn($va) => $va->attribute->is_variant)
+            ->mapWithKeys(function($va) {
+                return [$va->attribute->name => $va->value];
+            })->toArray(),
     ];
 })->values()->toArray();
 @endphp
@@ -541,126 +561,170 @@ const BASE_ATTRS = @json(
     $product->attributes->mapWithKeys(fn($pa) => [$pa->attribute->name => $pa->value])
 );
 
+// Tên các thuộc tính "chính" (is_variant = true) - chỉ những thuộc tính này
+// mới được dùng để tạo nút chọn; phần còn lại chỉ hiện trong bảng thông số.
+const MAIN_ATTR_NAMES = @json(
+    $product->attributes->pluck('attribute')->filter(fn($a) => $a && $a->is_variant)->pluck('name')->values()
+);
+
 // Sản phẩm gốc (fallback khi chưa chọn variant)
 const BASE_PRICE    = {{ (float)$product->price }};
 const BASE_DISCOUNT = {{ (int)$product->discount_percent }};
 const BASE_STOCK    = {{ (int)$product->stock }};
-
-// Thu thập tất cả attr names có trong variants
-const attrNames  = [];
-const attrValues = {};
-
-VARIANTS.forEach(v => {
-    for (const [name, val] of Object.entries(v.attrs)) {
-        if (!attrValues[name]) { attrNames.push(name); attrValues[name] = new Set(); }
-        attrValues[name].add(val);
-    }
-});
 
 // Format tiền VNĐ
 function fmt(n) {
     return Math.round(n).toLocaleString('vi-VN') + 'đ';
 }
 
-// Tính các attr khác nhau giữa tất cả options (base + variants)
-// → chỉ những attr này mới đưa vào label button
+function esc(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Base attrs dùng riêng cho việc dựng nút chọn - chỉ giữ thuộc tính "chính"
+const BASE_MAIN_ATTRS = {};
+MAIN_ATTR_NAMES.forEach(name => { if (BASE_ATTRS[name] !== undefined) BASE_MAIN_ATTRS[name] = BASE_ATTRS[name]; });
+
+// ── Tất cả lựa chọn có thể có: option "gốc" (sản phẩm chính) + các variant ──
+const ALL_OPTIONS = [
+    { id: null, price: BASE_PRICE, discount_percent: BASE_DISCOUNT, stock: BASE_STOCK, is_active: true, attrs: BASE_MAIN_ATTRS },
+    ...VARIANTS,
+];
+
+// Tính các thuộc tính thực sự khác nhau giữa các lựa chọn (chỉ những thuộc tính
+// này mới cần hiển thị dưới dạng nút chọn, ví dụ: Màu sắc, Dung lượng...)
 function getDiffKeys() {
-    const allOptions = [BASE_ATTRS, ...VARIANTS.map(v => v.attrs)];
-    const keys = Object.keys(BASE_ATTRS);
+    const keys = [];
+    ALL_OPTIONS.forEach(o => {
+        Object.keys(o.attrs).forEach(k => { if (!keys.includes(k)) keys.push(k); });
+    });
     return keys.filter(key => {
-        const vals = allOptions.map(o => o[key] ?? '');
+        const vals = ALL_OPTIONS.map(o => o.attrs[key] ?? '');
         return new Set(vals).size > 1; // có ít nhất 2 giá trị khác nhau
     });
 }
 const DIFF_KEYS = getDiffKeys();
 
-// Tạo label từ attrs, chỉ dùng các key khác nhau
-function buildLabel(attrs) {
-    const parts = DIFF_KEYS.map(k => attrs[k]).filter(Boolean);
-    // fallback nếu không có key khác nhau
-    return parts.length ? parts.join(' - ') : (Object.values(attrs).join(' - ') || 'Mặc định');
+// Giá trị khả dụng (không trùng) cho từng thuộc tính, giữ đúng thứ tự xuất hiện
+function valuesForKey(key) {
+    const vals = [];
+    ALL_OPTIONS.forEach(o => {
+        const v = o.attrs[key];
+        if (v && !vals.includes(v)) vals.push(v);
+    });
+    return vals;
 }
 
-// Áp dụng lên UI (price, stock, variant_id)
-function applyOption(price, discount, stock, variantId) {
+// Trạng thái lựa chọn hiện tại: { "Màu sắc": "Đen", "Dung lượng": "128GB", ... }
+const selectedAttrs = {};
+DIFF_KEYS.forEach(key => { selectedAttrs[key] = BASE_ATTRS[key] ?? valuesForKey(key)[0]; });
+
+// Tìm lựa chọn (base hoặc variant) khớp chính xác với tất cả thuộc tính đang chọn
+function findMatchingOption() {
+    return ALL_OPTIONS.find(o => DIFF_KEYS.every(key => (o.attrs[key] ?? '') === selectedAttrs[key])) || null;
+}
+
+// Một giá trị thuộc tính có khả dụng không (còn ít nhất 1 lựa chọn active + còn hàng chứa giá trị đó)
+function isValueAvailable(key, value) {
+    return ALL_OPTIONS.some(o => o.attrs[key] === value && o.is_active !== false && o.stock > 0);
+}
+
+// Áp dụng lên UI (giá, tồn kho, variant_id, thông số kỹ thuật)
+function applyOption(option) {
     const alertEl    = document.getElementById('variantAlert');
     const actionBtns = document.getElementById('actionBtns');
+    const addBtn      = document.getElementById('btnAddCart');
+    const buyBtn      = document.getElementById('btnBuyNow');
+
+    if (!option) {
+        // Không có lựa chọn nào khớp với tổ hợp thuộc tính hiện tại
+        if (alertEl) alertEl.style.display = '';
+        if (actionBtns) actionBtns.style.display = 'none';
+        renderSpecs(selectedAttrs);
+        return;
+    }
 
     if (alertEl) alertEl.style.display = 'none';
     if (actionBtns) actionBtns.style.display = '';
 
     ['inputVariantId', 'inputVariantIdBuy'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.value = variantId ?? '';
+        if (el) el.value = option.id ?? '';
     });
 
-    const addBtn  = document.getElementById('btnAddCart');
-    const buyBtn  = document.getElementById('btnBuyNow');
-    const soldOut = stock <= 0;
+    const soldOut = option.stock <= 0 || option.is_active === false;
     if (addBtn) { addBtn.disabled = soldOut; addBtn.style.opacity = soldOut ? '.5' : '1'; }
     if (buyBtn) { buyBtn.disabled = soldOut; buyBtn.style.opacity = soldOut ? '.5' : '1'; }
 
-    renderPrice(price, discount);
-    renderStock(stock);
+    renderPrice(option.price, option.discount_percent);
+    renderStock(option.stock);
+    renderSpecs(option.attrs);
 }
 
-// Build UI selector
+// Cập nhật bảng "Thông số kỹ thuật" theo thuộc tính đang chọn
+// (giữ nguyên các thông số cố định, ghi đè những thông số thay đổi theo biến thể)
+function renderSpecs(currentAttrs) {
+    const tbody   = document.getElementById('specsTableBody');
+    const table   = document.getElementById('specsTable');
+    const emptyEl = document.getElementById('specsEmptyMsg');
+    if (!tbody) return;
+
+    const merged = Object.assign({}, BASE_ATTRS, currentAttrs);
+    const keys   = Object.keys(merged);
+
+    if (keys.length === 0) {
+        if (table) table.style.display = 'none';
+        if (emptyEl) emptyEl.style.display = '';
+        return;
+    }
+
+    tbody.innerHTML = keys.map(k => `<tr><td>${esc(k)}</td><td>${esc(merged[k])}</td></tr>`).join('');
+    if (table) table.style.display = '';
+    if (emptyEl) emptyEl.style.display = 'none';
+}
+
+// Build UI selector — mỗi thuộc tính (Màu sắc, Dung lượng...) hiển thị thành một nhóm nút riêng
 const selector = document.getElementById('variantSelector');
 
-if (selector) {
-    const lblRow = document.createElement('div');
-    lblRow.className = 'option-label';
-    lblRow.style.marginBottom = '8px';
-    lblRow.innerHTML = 'Phiên bản: <strong id="lbl-selected-variant"></strong>';
-    selector.appendChild(lblRow);
+if (selector && DIFF_KEYS.length > 0) {
+    DIFF_KEYS.forEach(key => {
+        const group = document.createElement('div');
+        group.className = 'option-group';
 
-    const btnWrap = document.createElement('div');
-    btnWrap.className = 'option-btns';
-    btnWrap.style.cssText = 'flex-wrap:wrap;gap:8px';
+        const label = document.createElement('div');
+        label.className = 'option-label';
+        label.innerHTML = `${esc(key)}: <strong id="lbl-${esc(key)}">${esc(selectedAttrs[key] ?? '')}</strong>`;
+        group.appendChild(label);
 
-    // ── Option gốc (product_attributes, giá gốc sản phẩm) ──────
-    const baseLabel = buildLabel(BASE_ATTRS);
-    const baseBtn   = document.createElement('button');
-    baseBtn.type      = 'button';
-    baseBtn.className = 'opt-btn active';
-    baseBtn.textContent = baseLabel || 'Mặc định';
-    baseBtn.addEventListener('click', function () {
-        btnWrap.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        document.getElementById('lbl-selected-variant').textContent = this.textContent;
-        applyOption(BASE_PRICE, BASE_DISCOUNT, BASE_STOCK, null);
-    });
-    btnWrap.appendChild(baseBtn);
+        const btnWrap = document.createElement('div');
+        btnWrap.className = 'option-btns';
 
-    // ── Các biến thể ────────────────────────────────────────────
-    VARIANTS.forEach(v => {
-        const label = buildLabel(v.attrs);
-        const btn   = document.createElement('button');
-        btn.type      = 'button';
-        btn.className = 'opt-btn';
-        btn.textContent = label;
+        valuesForKey(key).forEach(value => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'opt-btn' + (selectedAttrs[key] === value ? ' active' : '');
+            btn.textContent = value;
 
-        if (!v.is_active || v.stock <= 0) {
-            btn.style.opacity = '0.45';
-            btn.style.textDecoration = 'line-through';
-            btn.title = v.stock <= 0 ? 'Hết hàng' : 'Không khả dụng';
-        }
+            if (!isValueAvailable(key, value)) {
+                btn.classList.add('opt-btn-disabled');
+                btn.title = 'Hết hàng / không khả dụng';
+            }
 
-        btn.addEventListener('click', function () {
-            btnWrap.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            document.getElementById('lbl-selected-variant').textContent = label;
-            applyOption(v.price, v.discount_percent, v.stock, v.id);
+            btn.addEventListener('click', function () {
+                selectedAttrs[key] = value;
+                btnWrap.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById(`lbl-${key}`).textContent = value;
+                applyOption(findMatchingOption());
+            });
+
+            btnWrap.appendChild(btn);
         });
 
-        btnWrap.appendChild(btn);
+        group.appendChild(btnWrap);
+        selector.appendChild(group);
     });
-
-    selector.appendChild(btnWrap);
 }
-
-
-// updateVariant() đã được thay bằng applyVariant() ở trên
 
 function renderPrice(price, discount) {
     const salePrice = price * (1 - discount / 100);
@@ -690,17 +754,9 @@ function renderStock(stock) {
     }
 }
 
-function esc(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// Khởi tạo: chọn và highlight variant đầu tiên active
+// Khởi tạo: áp dụng tổ hợp thuộc tính mặc định (theo product_attributes gốc)
 (function initVariant() {
-    // Khởi tạo: option gốc active, hiện giá gốc
-    const lbl = document.getElementById('lbl-selected-variant');
-    const baseBtn = selector ? selector.querySelector('.opt-btn') : null;
-    if (lbl && baseBtn) lbl.textContent = baseBtn.textContent;
-    applyOption(BASE_PRICE, BASE_DISCOUNT, BASE_STOCK, null);
+    applyOption(findMatchingOption() || ALL_OPTIONS[0]);
 })();
 
 

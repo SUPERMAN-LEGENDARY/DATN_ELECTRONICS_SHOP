@@ -3,282 +3,210 @@
 
 @push('styles')
 <style>
-    .cart-wrap {
-        max-width: 1000px;
-        margin: 0 auto;
-        padding: 24px 16px;
-    }
+.cart-page { background: #f5f7fa; min-height: 100vh; padding: 24px 0 60px; }
+.cart-container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+.cart-container h1 { font-size: 24px; font-weight: 800; margin-bottom: 20px; }
 
-    .cart-wrap h1 {
-        font-size: 22px;
-        font-weight: 800;
-        margin-bottom: 20px;
-    }
+.alert-box { padding: 14px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; font-weight: 500; }
+.alert-success { background: #dcfce7; color: #166534; }
+.alert-error   { background: #fee2e2; color: #b91c1c; }
 
-    .cart-table {
-        width: 100%;
-        border-collapse: collapse;
-        background: #fff;
-        border-radius: 8px;
-        overflow: hidden;
-        border: 1px solid #e0e0e0;
-    }
+/* ===== EMPTY ===== */
+.empty-cart { background: #fff; border-radius: 14px; padding: 80px 20px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+.empty-cart i { font-size: 64px; color: #d1d5db; margin-bottom: 20px; display: block; }
+.empty-cart p { font-size: 16px; color: #6b7280; margin-bottom: 20px; }
+.btn-shop { display: inline-block; padding: 12px 30px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600; }
+.btn-shop:hover { background: #1d4ed8; color: #fff; }
 
-    .cart-table th {
-        background: #f5f5f5;
-        padding: 12px 16px;
-        text-align: left;
-        font-size: 13px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: .5px;
-        color: #555;
-    }
+/* ===== LAYOUT ===== */
+.cart-wrapper { display: flex; gap: 24px; align-items: flex-start; }
+.cart-left { flex: 1; min-width: 0; }
+.cart-right { width: 340px; flex-shrink: 0; }
+@media (max-width: 991px) { .cart-wrapper { flex-direction: column; } .cart-right { width: 100%; } }
 
-    .cart-table td {
-        padding: 14px 16px;
-        border-top: 1px solid #f0f0f0;
-        vertical-align: middle;
-        font-size: 14px;
-    }
+/* ===== TABLE ===== */
+.cart-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+.cart-table thead { background: #f8fafc; }
+.cart-table th { padding: 15px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: #374151; text-align: left; }
+.cart-table td { padding: 16px 15px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; font-size: 14px; }
+.cart-table tr:last-child td { border-bottom: none; }
 
-    .cart-product {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-    }
+.cart-product { display: flex; align-items: center; gap: 14px; }
+.cart-product img, .cart-product .no-img { width: 72px; height: 72px; object-fit: contain; background: #fff; padding: 4px; box-sizing: border-box; border-radius: 10px; border: 1px solid #e5e7eb; flex-shrink: 0; }
+.cart-product .no-img { display: flex; align-items: center; justify-content: center; background: #f3f4f6; color: #cbd5e1; font-size: 20px; }
+.cart-product h5 { margin: 0 0 4px; font-size: 15px; font-weight: 600; }
+.cart-product h5 a { color: #111827; text-decoration: none; }
+.cart-product h5 a:hover { color: #2563eb; }
+.cart-product .variant-tag { font-size: 12.5px; color: #2563eb; font-weight: 600; }
+.cart-product .brand { font-size: 12.5px; color: #6b7280; }
 
-    .cart-product img {
-        width: 64px;
-        height: 64px;
-        object-fit: cover;
-        border-radius: 6px;
-        background: #f5f5f5;
-    }
+.qty-input { width: 62px; height: 38px; border: 1px solid #d1d5db; border-radius: 8px; text-align: center; font-size: 14px; outline: none; }
+.qty-input:focus { border-color: #2563eb; }
 
-    .cart-product-name {
-        font-weight: 600;
-        font-size: 14px;
-    }
+.price-cell { color: #374151; }
+.subtotal-cell { color: #2563eb; font-size: 15.5px; font-weight: 700; }
 
-    .cart-product-brand {
-        font-size: 12px;
-        color: #888;
-    }
+.btn-remove { border: none; background: none; color: #ef4444; font-size: 17px; cursor: pointer; padding: 4px 8px; }
+.btn-remove:hover { color: #dc2626; }
 
-    .qty-input {
-        width: 60px;
-        border: 1px solid #e0e0e0;
-        border-radius: 6px;
-        padding: 6px;
-        text-align: center;
-        font-size: 14px;
-        outline: none;
-    }
+.cart-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; flex-wrap: wrap; gap: 10px; }
+.cart-bottom a { text-decoration: none; color: #2563eb; font-weight: 600; font-size: 14px; }
+.cart-bottom button { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 14px; font-weight: 600; }
 
-    .btn-remove {
-        background: none;
-        border: none;
-        color: #E53935;
-        cursor: pointer;
-        font-size: 16px;
-        padding: 4px 8px;
-    }
+/* ===== SUMMARY ===== */
+.summary-box { background: #fff; border-radius: 14px; padding: 24px; box-shadow: 0 3px 12px rgba(0,0,0,.06); position: sticky; top: 90px; }
+.summary-box h3 { font-size: 20px; font-weight: 700; margin-bottom: 18px; }
+.summary-row { display: flex; justify-content: space-between; align-items: center; margin: 14px 0; font-size: 14.5px; color: #374151; }
+.summary-row .green { color: #16a34a; font-weight: 600; }
+.summary-total { font-size: 19px; font-weight: 800; color: #2563eb; border-top: 1px solid #e5e7eb; padding-top: 14px; margin-top: 6px; }
+.checkout-btn { display: block; width: 100%; margin-top: 18px; padding: 14px; background: #2563eb; color: #fff; text-align: center; text-decoration: none; border-radius: 10px; font-size: 15.5px; font-weight: 700; }
+.checkout-btn:hover { background: #1d4ed8; color: #fff; }
 
-    .btn-remove:hover {
-        color: #B71C1C;
-    }
+/* ===== CROSS-SELL ===== */
+.cross-sell { margin-top: 40px; }
+.cross-sell h2 { font-size: 19px; font-weight: 800; margin-bottom: 16px; }
+.cross-sell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+.cross-sell-card { display: block; background: #fff; border-radius: 12px; overflow: hidden; text-decoration: none; color: inherit; box-shadow: 0 2px 8px rgba(0,0,0,.06); transition: transform .15s, box-shadow .15s; }
+.cross-sell-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,.1); }
+.cross-sell-card img, .cross-sell-card .no-img { width: 100%; height: 130px; object-fit: contain; background: #fff; padding: 6px; box-sizing: border-box; display: block; }
+.cross-sell-card .no-img { display: flex; align-items: center; justify-content: center; background: #f3f4f6; color: #cbd5e1; font-size: 22px; }
+.cross-sell-body { padding: 12px; }
+.cross-sell-name { font-size: 13px; font-weight: 600; line-height: 1.3; margin-bottom: 6px; min-height: 34px; }
+.cross-sell-price { font-size: 14.5px; font-weight: 700; color: #2563eb; }
 
-    .cart-summary {
-        margin-top: 20px;
-        display: flex;
-        justify-content: flex-end;
-    }
-
-    .summary-box {
-        background: #fff;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 20px;
-        min-width: 280px;
-    }
-
-    .summary-row {
-        display: flex;
-        justify-content: space-between;
-        font-size: 14px;
-        margin-bottom: 10px;
-    }
-
-    .summary-total {
-        font-size: 18px;
-        font-weight: 800;
-        color: #1565C0;
-        border-top: 1px solid #e0e0e0;
-        padding-top: 12px;
-        margin-top: 4px;
-    }
-
-    .btn-checkout {
-        display: block;
-        width: 100%;
-        margin-top: 14px;
-        padding: 13px;
-        background: #1565C0;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        font-size: 15px;
-        font-weight: 700;
-        cursor: pointer;
-        text-align: center;
-        text-decoration: none;
-    }
-
-    .btn-checkout:hover {
-        background: #0D47A1;
-        color: #fff;
-    }
-
-    .empty-cart {
-        text-align: center;
-        padding: 60px 0;
-        color: #999;
-    }
-
-    .empty-cart i {
-        font-size: 48px;
-        opacity: .3;
-        margin-bottom: 16px;
-        display: block;
-    }
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .cart-table, .cart-table thead, .cart-table tbody, .cart-table tr, .cart-table td { display: block; width: 100%; }
+    .cart-table thead { display: none; }
+    .cart-table tr { margin-bottom: 14px; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .cart-table td { border-bottom: 1px solid #f1f5f9; }
+    .cart-bottom { flex-direction: column; align-items: flex-start; }
+}
 </style>
 @endpush
 
 @section('content')
-<div class="cart-wrap">
+<div class="cart-page">
+<div class="cart-container">
     <h1><i class="fas fa-shopping-cart"></i> Giỏ hàng</h1>
 
     @if(session('success'))
-    <div style="background:#E8F5E9;color:#2E7D32;padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:14px">
-        <i class="fas fa-check-circle"></i> {{ session('success') }}
-    </div>
+    <div class="alert-box alert-success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>
+    @endif
+    @if(session('error'))
+    <div class="alert-box alert-error"><i class="fas fa-exclamation-circle"></i> {{ session('error') }}</div>
     @endif
 
     @if(empty($products))
     <div class="empty-cart">
         <i class="fas fa-shopping-cart"></i>
-        <p style="font-size:16px;margin-bottom:16px">Giỏ hàng trống</p>
-        <a href="{{ route('products.index') }}" style="color:#1565C0;font-weight:600">← Tiếp tục mua sắm</a>
+        <p>Giỏ hàng của bạn đang trống</p>
+        <a href="{{ route('products.index') }}" class="btn-shop">Tiếp tục mua sắm</a>
     </div>
     @else
-    <table class="cart-table">
-        <thead>
-            <tr>
-                <th>Sản phẩm</th>
-                <th>Đơn giá</th>
-                <th>Số lượng</th>
-                <th>Thành tiền</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($products as $item)
-            <tr>
-                <td>
-                    <div class="cart-product">
-                        @if($item['product']->first_image)
-                        <img src="{{ $item['product']->first_image }}" alt="{{ $item['product']->name }}">
-                        @else
-                        <div style="width:64px;height:64px;background:#f0f0f0;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#ccc">
-                            <i class="fas fa-image"></i>
-                        </div>
-                        @endif
-                        <div>
-                            <div class="cart-product-name">
-                                <a href="{{ route('products.show', $item['product']->slug) }}" style="color:inherit;text-decoration:none">
-                                    {{ $item['product']->name }}
-                                </a>
-                            </div>
-                            @if($item['variant'])
-                            <div class="cart-product-brand" style="color:#1565C0">
-                                Phiên bản:
-                                {{ $item['variant']->variantAttributes->pluck('value')->implode(' - ') }}
-                            </div>
-                            @endif
-                            <div class="cart-product-brand">{{ $item['product']->brand->name ?? '' }}</div>
-                        </div>
-                    </div>
-                </td>
-                <td>{{ number_format($item['price']) }}đ</td>
-                <td>
-                    <form action="{{ route('cart.update', $item['key']) }}" method="POST" style="display:inline">
-                        @csrf @method('PATCH')
-                        <input type="number" name="quantity" value="{{ $item['quantity'] }}"
-                            min="1" max="{{ max($item['stock'], 1) }}" class="qty-input"
-                            onchange="this.form.submit()">
-                    </form>
-                </td>
-                <td style="font-weight:700;color:#1565C0">{{ number_format($item['subtotal']) }}đ</td>
-                <td>
-                    <form action="{{ route('cart.remove', $item['key']) }}" method="POST">
-                        @csrf @method('DELETE')
-                        <button type="submit" class="btn-remove" title="Xóa">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+    <div class="cart-wrapper">
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
-        <div>
-            <a href="{{ route('products.index') }}" style="color:#1565C0;font-size:14px">← Tiếp tục mua sắm</a>
-            &nbsp;&nbsp;
-            <form action="{{ route('cart.clear') }}" method="POST" style="display:inline">
-                @csrf @method('DELETE')
-                <button type="submit" style="color:#E53935;font-size:14px;background:none;border:none;cursor:pointer">
-                    Xóa tất cả
-                </button>
-            </form>
+        {{-- LEFT --}}
+        <div class="cart-left">
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Đơn giá</th>
+                        <th>Số lượng</th>
+                        <th>Thành tiền</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($products as $item)
+                    <tr>
+                        <td>
+                            <div class="cart-product">
+                                @if($item['product']->first_image)
+                                <img src="{{ $item['product']->first_image }}" alt="{{ $item['product']->name }}">
+                                @else
+                                <div class="no-img"><i class="fas fa-image"></i></div>
+                                @endif
+                                <div>
+                                    <h5>
+                                        <a href="{{ route('products.show', $item['product']->slug) }}">{{ $item['product']->name }}</a>
+                                    </h5>
+                                    @if($item['variant'])
+                                    <div class="variant-tag">
+                                        Phiên bản: {{ $item['variant']->variantAttributes->pluck('value')->implode(' - ') }}
+                                    </div>
+                                    @endif
+                                    <div class="brand">{{ $item['product']->brand->name ?? 'ElectronicShop' }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="price-cell">{{ number_format($item['price']) }}đ</td>
+                        <td>
+                            <form action="{{ route('cart.update', $item['key']) }}" method="POST">
+                                @csrf @method('PATCH')
+                                <input type="number" name="quantity" value="{{ $item['quantity'] }}"
+                                    min="1" max="{{ max($item['stock'], 1) }}" class="qty-input"
+                                    onchange="this.form.submit()">
+                            </form>
+                        </td>
+                        <td class="subtotal-cell">{{ number_format($item['subtotal']) }}đ</td>
+                        <td>
+                            <form action="{{ route('cart.remove', $item['key']) }}" method="POST">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="btn-remove" title="Xóa" onclick="return confirm('Bạn muốn xóa sản phẩm này?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            <div class="cart-bottom">
+                <a href="{{ route('products.index') }}">← Tiếp tục mua sắm</a>
+                <form action="{{ route('cart.clear') }}" method="POST">
+                    @csrf @method('DELETE')
+                    <button type="submit" onclick="return confirm('Xóa toàn bộ giỏ hàng?')">Xóa tất cả</button>
+                </form>
+            </div>
         </div>
-    </div>
 
-    <div class="cart-summary">
-        <div class="summary-box">
-            <div class="summary-row"><span>Tạm tính</span><span>{{ number_format($total) }}đ</span></div>
-            <div class="summary-row"><span>Phí vận chuyển</span><span style="color:#2E7D32">Miễn phí</span></div>
-            <div class="summary-row summary-total"><span>Tổng cộng</span><span>{{ number_format($total) }}đ</span></div>
-            <a href="{{ route('checkout.index') }}" class="btn-checkout">Tiến hành thanh toán →</a>
+        {{-- RIGHT --}}
+        <div class="cart-right">
+            <div class="summary-box">
+                <h3>Thông tin đơn hàng</h3>
+                <div class="summary-row"><span>Tạm tính</span><strong>{{ number_format($total) }}đ</strong></div>
+                <div class="summary-row"><span>Phí vận chuyển</span><span class="green">Miễn phí</span></div>
+                <div class="summary-row summary-total"><span>Tổng cộng</span><span>{{ number_format($total) }}đ</span></div>
+                <a href="{{ route('checkout.index') }}" class="checkout-btn">Tiến hành thanh toán</a>
+            </div>
         </div>
     </div>
     @endif
 
     {{-- ===== CÓ THỂ BẠN CŨNG THÍCH ===== --}}
     @if(!empty($crossSell) && $crossSell->isNotEmpty())
-    <div style="margin-top:40px">
-        <h2 style="font-size:18px;font-weight:800;margin-bottom:16px">Có thể bạn cũng thích</h2>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px">
+    <div class="cross-sell">
+        <h2>Có thể bạn cũng thích</h2>
+        <div class="cross-sell-grid">
             @foreach($crossSell as $p)
-            <a href="{{ route('products.show', ['slug' => $p->slug, 'from' => 'suggestion', 'via' => 'cart']) }}"
-               style="display:block;background:#fff;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;text-decoration:none;color:inherit">
+            <a href="{{ route('products.show', ['slug' => $p->slug, 'from' => 'suggestion', 'via' => 'cart']) }}" class="cross-sell-card">
                 @if($p->first_image)
-                <img src="{{ $p->first_image }}" alt="{{ $p->name }}" style="width:100%;height:120px;object-fit:cover">
+                <img src="{{ $p->first_image }}" alt="{{ $p->name }}">
                 @else
-                <div style="width:100%;height:120px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#ccc">
-                    <i class="fas fa-image"></i>
-                </div>
+                <div class="no-img"><i class="fas fa-image"></i></div>
                 @endif
-                <div style="padding:10px">
-                    <div style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:6px">{{ $p->name }}</div>
-                    <div style="font-size:14px;font-weight:700;color:#1565C0">{{ number_format($p->sale_price) }}đ</div>
+                <div class="cross-sell-body">
+                    <div class="cross-sell-name">{{ $p->name }}</div>
+                    <div class="cross-sell-price">{{ number_format($p->sale_price) }}đ</div>
                 </div>
             </a>
             @endforeach
         </div>
     </div>
     @endif
+</div>
 </div>
 @endsection

@@ -3,7 +3,8 @@
 
 <div id="ai-chatbot-root">
     <button id="ai-chat-toggle" aria-label="Mở chat tư vấn">
-        💬
+        <i class="fas fa-comment-dots" id="ai-chat-icon-open"></i>
+        <i class="fas fa-xmark" id="ai-chat-icon-close" style="display:none"></i>
     </button>
 
     <div id="ai-chat-window" class="hidden">
@@ -25,9 +26,12 @@
 #ai-chatbot-root { position: fixed; bottom: 20px; right: 20px; z-index: 9999; font-family: inherit; }
 #ai-chat-toggle {
     width: 56px; height: 56px; border-radius: 50%; border: none;
-    background: #2563eb; color: #fff; font-size: 24px; cursor: pointer;
+    background: #2563eb; color: #fff; font-size: 22px; cursor: pointer;
     box-shadow: 0 4px 14px rgba(0,0,0,.2);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .15s, box-shadow .15s;
 }
+#ai-chat-toggle:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.25); }
 #ai-chat-window {
     position: absolute; bottom: 70px; right: 0; width: 360px; max-width: 90vw;
     height: 520px; max-height: 75vh; background: #fff; border-radius: 12px;
@@ -72,14 +76,26 @@
     const form      = document.getElementById('ai-chat-form');
     const input     = document.getElementById('ai-chat-input');
     const messages  = document.getElementById('ai-chat-messages');
+    const iconOpen  = document.getElementById('ai-chat-icon-open');
+    const iconClose = document.getElementById('ai-chat-icon-close');
+
+    function syncToggleIcon() {
+        const isOpen = !win.classList.contains('hidden');
+        iconOpen.style.display  = isOpen ? 'none' : '';
+        iconClose.style.display = isOpen ? '' : 'none';
+    }
 
     toggleBtn.addEventListener('click', () => {
         win.classList.toggle('hidden');
+        syncToggleIcon();
         if (!win.classList.contains('hidden') && messages.children.length === 0) {
             appendBot('Chào bạn 👋 Mình có thể giúp tìm sản phẩm, so sánh, hoặc giải đáp thắc mắc. Bạn cần gì nhé?');
         }
     });
-    closeBtn.addEventListener('click', () => win.classList.add('hidden'));
+    closeBtn.addEventListener('click', () => {
+        win.classList.add('hidden');
+        syncToggleIcon();
+    });
 
     function appendUser(text) {
         const div = document.createElement('div');

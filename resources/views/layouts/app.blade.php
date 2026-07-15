@@ -9,6 +9,7 @@
     <title>@yield('title', config('app.name', 'ElectronicShop'))</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
         :root {
@@ -18,6 +19,13 @@
 
         body {
             font-family: "Segoe UI", Roboto, Arial, sans-serif;
+        }
+
+        /* Ảnh mặc định luôn responsive, không tràn ra ngoài khung chứa
+           (các rule riêng của từng component có độ ưu tiên cao hơn nên vẫn hoạt động bình thường) */
+        img {
+            max-width: 100%;
+            height: auto;
         }
 
         /* ===== Header trên ===== */
@@ -157,7 +165,7 @@
 
         .footer {
             background: #fff;
-            padding: 30px 15px 0;
+            padding: 30px 0 0;
             color: #555;
             font-family: "Segoe UI", Roboto, Arial, sans-serif;
         }
@@ -166,7 +174,9 @@
             display: grid;
             grid-template-columns: 1.2fr 1fr 1fr 1fr;
             gap: 35px;
-            padding-bottom: 40px;
+            padding: 0 15px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         /* Tiêu đề */
@@ -262,9 +272,10 @@
         /* Copyright */
         .footer-bottom {
             border-top: 1px solid #cfe8ff;
-            padding: 20px 0;
+            padding: 20px 15px;
             font-size: 14px;
             color: #777;
+            text-align: center;
         }
 
         /* Mạng xã hội */
@@ -335,7 +346,7 @@
                 </form>
                 <div class="d-flex align-items-center gap-4 flex-shrink-0">
                     @auth
-                    <a href="{{ route('login') }}" class="nav-icon-link">
+                    <a href="{{ route('profile.account') }}" class="nav-icon-link">
                         <i class="bi bi-person"></i> Tài khoản
                     </a>
                     @else
@@ -365,7 +376,7 @@
                 <li><a href="{{ url('/') }}">Trang chủ</a></li>
                 <li><a href="{{ route('products.index') }}">Sản phẩm</a></li>
                 <li><a href="{{ route('news.index') }}">Tin tức</a></li>
-                <li><a href="{{route('news.index')}}">Liên hệ</a></li>
+                <li><a href="{{ route('contact.index') }}">Liên hệ</a></li>
             </ul>
             <div class="hotline">
                 HOTLINE: 1900 1234
@@ -376,21 +387,17 @@
         @stack('styles')
         @yield('content')
     </main>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    @stack('scripts')
 
-    <x-chatbot-widget />
-</body>
 <footer class="footer">
     <div class="footer-container">
         <!-- Cột 1 -->
         <div class="footer-column footer-brand">
-            <h2>ElectronShop</h2>
+            <h2>ElectronicShop</h2>
             <p>
                 Địa chỉ: 123 Đường Nguyễn Văn Linh,<br>
                 Quận Hải Châu, TP Đà Nẵng<br>
                 Điện thoại: 1900 1234<br>
-                Email: electronshop@gmail.com
+                Email: electronicshop@gmail.com
             </p>
             <div class="socials">
                 <a class="facebook">
@@ -419,7 +426,7 @@
         <!-- Cột 3 -->
         <div class="footer-column">
             <h3>Về chúng tôi</h3>
-            <a>Giới thiệu ElectronShop</a>
+            <a>Giới thiệu ElectronicShop</a>
             <a>Tuyển dụng</a>
             <a>Hệ thống cửa hàng</a>
             <a>Chính sách bảo mật</a>
@@ -430,7 +437,7 @@
             <h3>Đăng ký nhận tin</h3>
             <p>
                 Đăng ký để nhận các chương trình khuyến mãi
-                sớm nhất từ ElectronShop.
+                sớm nhất từ ElectronicShop.
             </p>
             <div class="email-box">
                 <input type="email" placeholder="Email của bạn...">
@@ -442,10 +449,14 @@
         </div>
     </div>
     <div class="footer-bottom">
-        © 2026 ELETRON SHOP. All rights reserved. Designed for Vietnamese users.
+        © 2026 ELECTRONICSHOP. All rights reserved. Designed for Vietnamese users.
     </div>
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    @stack('scripts')
+
+    <x-chatbot-widget />
+</body>
 
 </html>

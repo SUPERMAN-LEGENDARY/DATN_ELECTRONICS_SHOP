@@ -14,7 +14,7 @@ class AttributeController extends Controller
     {
         $attrs = Attribute::orderBy('name')
             ->withCount('productAttributes as used_count')
-            ->get(['id', 'name']);
+            ->get(['id', 'name', 'is_variant']);
 
         return response()->json($attrs);
     }
@@ -24,15 +24,35 @@ class AttributeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:100|unique:attributes,name',
+            'name'       => 'required|string|max:100|unique:attributes,name',
+            'is_variant' => 'nullable|boolean',
         ]);
 
-        $attr = Attribute::create(['name' => trim($request->name)]);
+        $attr = Attribute::create([
+            'name'       => trim($request->name),
+            'is_variant' => $request->boolean('is_variant', true),
+        ]);
 
         return response()->json([
             'id'         => $attr->id,
             'name'       => $attr->name,
+            'is_variant' => $attr->is_variant,
             'used_count' => 0,
+        ]);
+    }
+
+    // ─── Đổi "Chính" ⇄ "Phụ" (AJAX) ────────────────────────────────
+    // Chính  = tạo nút chọn lựa chọn mua hàng (vd: Màu sắc, Dung lượng)
+    // Phụ    = chỉ hiện trong bảng "Thông số kỹ thuật"
+
+    public function toggleVariant(Attribute $attribute)
+    {
+        $attribute->is_variant = ! $attribute->is_variant;
+        $attribute->save();
+
+        return response()->json([
+            'id'         => $attribute->id,
+            'is_variant' => $attribute->is_variant,
         ]);
     }
 

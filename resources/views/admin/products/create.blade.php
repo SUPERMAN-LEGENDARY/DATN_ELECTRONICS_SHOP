@@ -286,7 +286,7 @@
             @foreach($attributes as $attr)
             <div class="form-group" id="attr-field-{{ $attr->id }}">
                 <label class="attr-field-row">
-                    <span>{{ $attr->name }}</span>
+                    <span>{{ $attr->name }} @if($attr->is_variant)<em style="color:#1565C0;font-weight:600;font-style:normal">(chính)</em>@else<em style="color:#aaa;font-weight:400;font-style:normal">(phụ)</em>@endif</span>
                     <button type="button" class="btn-field-remove" data-id="{{ $attr->id }}" data-name="{{ $attr->name }}"
                         title="Sản phẩm này không cần thuộc tính này">
                         <i class="fas fa-times"></i>
@@ -299,6 +299,12 @@
             </div>
             @endforeach
         </div>
+
+        <p style="color:#999;font-size:12px;margin-top:8px">
+            <i class="fas fa-circle-info"></i>
+            Thuộc tính đánh dấu <strong>"chính"</strong> (xem trong "Quản lý thuộc tính") sẽ hiện thành nút chọn ở phần Biến thể bên dưới;
+            thuộc tính <strong>"phụ"</strong> chỉ hiện trong bảng thông số này.
+        </p>
 
         <div class="removed-chip-row" id="attrRemovedChips"></div>
 
@@ -356,7 +362,7 @@
                         <input type="hidden" name="variants[{{ $vi }}][id]" value="{{ $v->id }}">
                         {{-- Thuộc tính của biến thể --}}
                         <div class="variant-attr-grid">
-                            @foreach($attributes as $attr)
+                            @foreach($attributes->where('is_variant', true) as $attr)
                             @php $va = $v->variantAttributes->firstWhere('attribute_id', $attr->id); @endphp
                             <div class="form-group" id="vca-{{ $vi }}-{{ $attr->id }}">
                                 <label class="attr-field-row">
@@ -448,6 +454,10 @@
                     <i class="fas fa-plus"></i> Thêm
                 </button>
             </div>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#555;margin:-4px 0 10px">
+                <input type="checkbox" id="newAttrIsVariant" checked style="cursor:pointer">
+                Thuộc tính chính (tạo nút chọn ở phần Biến thể — VD: Màu sắc, Dung lượng)
+            </label>
             <div class="modal-error" id="modalError" style="display:none"></div>
             <div id="modalAttrListWrap">
                 <div class="modal-loading">Đang tải...</div>
@@ -468,6 +478,7 @@
         list: '{{ route("admin.attributes.list") }}',
         store: '{{ route("admin.attributes.store") }}',
         destroy: '{{ url("admin/thuoc-tinh") }}/__ID__',
+        toggleVariant: '{{ url("admin/thuoc-tinh") }}/__ID__/toggle-variant',
     };
 
 // ══════════════════════════════════════════════════════════════
@@ -475,7 +486,7 @@
 // ══════════════════════════════════════════════════════════════
 
 // Danh sách thuộc tính hiện tại (từ PHP → JS)
-const ALL_ATTRIBUTES = @json($attributes->map(fn($a) => ['id' => $a->id, 'name' => $a->name]));
+const ALL_ATTRIBUTES = @json($attributes->map(fn($a) => ['id' => $a->id, 'name' => $a->name, 'is_variant' => (bool) $a->is_variant]));
 
 // Value đã lưu trong ProductAttribute — prefill cho biến thể mới
 const SAVED_ATTR_VALUES = @json($savedAttrs->mapWithKeys(fn($pa, $attrId) => [(string)$attrId => $pa->value]));
@@ -511,7 +522,7 @@ function addVariant() {
 
     // Build các input thuộc tính — prefill value từ thuộc tính gốc của sản phẩm
     // Bỏ qua những thuộc tính đang bị ẩn ở khu vực base (removedBaseAttrs)
-    const attrInputs = ALL_ATTRIBUTES.filter(a => !removedBaseAttrs[a.id]).map(a => {
+    const attrInputs = ALL_ATTRIBUTES.filter(a => !removedBaseAttrs[a.id] && a.is_variant).map(a => {
         const prefill = getBaseAttrValue(a.id);
         return `
         <div class="form-group" id="vca-${idx}-${a.id}">
@@ -780,6 +791,7 @@ document.getElementById('attrModal').addEventListener('click', function(e) {
 function closeModal() {
     document.getElementById('attrModal').classList.remove('open');
     document.getElementById('newAttrName').value = '';
+    document.getElementById('newAttrIsVariant').checked = true;
     hideModalError();
 }
 
@@ -807,6 +819,11 @@ function renderAttrList(attrs) {
         li.id = 'modal-attr-' + attr.id;
         li.innerHTML = `
         <span class="attr-item-name">${esc(attr.name)}</span>
+        <button class="btn-attr-toggle" data-id="${attr.id}"
+            style="border:1px solid ${attr.is_variant ? '#1565C0' : '#ccc'};color:${attr.is_variant ? '#1565C0' : '#888'};background:${attr.is_variant ? '#EBF3FF' : '#f5f5f5'};font-size:11px;font-weight:700;border-radius:12px;padding:3px 10px;cursor:pointer;white-space:nowrap"
+            title="Bấm để chuyển thành thuộc tính ${attr.is_variant ? 'phụ' : 'chính'}">
+            ${attr.is_variant ? 'Chính' : 'Phụ'}
+        </button>
         <span class="attr-item-used">${attr.used_count > 0 ? attr.used_count + ' sản phẩm' : 'Chưa dùng'}</span>
         <button class="btn-attr-del" data-id="${attr.id}" data-name="${esc(attr.name)}"
             ${attr.used_count > 0 ? 'disabled title="Đang được dùng, không thể xóa"' : ''}>
@@ -819,6 +836,41 @@ function renderAttrList(attrs) {
     wrap.querySelectorAll('.btn-attr-del:not(:disabled)').forEach(btn => {
         btn.addEventListener('click', () => deleteAttr(btn.dataset.id, btn.dataset.name));
     });
+    wrap.querySelectorAll('.btn-attr-toggle').forEach(btn => {
+        btn.addEventListener('click', () => toggleAttrVariant(btn.dataset.id));
+    });
+}
+
+// ── Chuyển "Chính" ⇄ "Phụ" ─────────────────────────────────────────
+function toggleAttrVariant(id) {
+    fetch(ROUTES.toggleVariant.replace('__ID__', id), {
+        method: 'PATCH',
+        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
+    })
+    .then(r => r.json())
+    .then(data => {
+        const entry = ALL_ATTRIBUTES.find(a => a.id == data.id);
+        if (entry) entry.is_variant = data.is_variant;
+
+        // Cập nhật nhãn "(chính)"/"(phụ)" trên form thông số
+        const nameEl = document.querySelector('#attr-field-' + data.id + ' .attr-field-row span');
+        if (nameEl && entry) {
+            nameEl.innerHTML = esc(entry.name) + (data.is_variant
+                ? ' <em style="color:#1565C0;font-weight:600;font-style:normal">(chính)</em>'
+                : ' <em style="color:#aaa;font-weight:400;font-style:normal">(phụ)</em>');
+        }
+
+        // Nếu chuyển sang "phụ": bỏ cột này khỏi tất cả biến thể hiện có
+        // Nếu chuyển sang "chính": thêm cột này vào tất cả biến thể hiện có
+        if (!data.is_variant) {
+            removeAttrFromAllVariants(data.id);
+        } else if (entry) {
+            addAttrToAllVariants(data.id, entry.name);
+        }
+
+        loadAttrList();
+    })
+    .catch(() => alert('Lỗi kết nối, thử lại.'));
 }
 
 // ── Thêm ─────────────────────────────────────────────────────────
@@ -833,6 +885,7 @@ document.getElementById('newAttrName').addEventListener('keydown', e => {
 function addAttr() {
     const input = document.getElementById('newAttrName');
     const name  = input.value.trim();
+    const isVariant = document.getElementById('newAttrIsVariant').checked;
     if (!name) { showModalError('Vui lòng nhập tên thuộc tính.'); return; }
     const btn = document.getElementById('btnAddAttr');
     btn.disabled = true;
@@ -841,16 +894,16 @@ function addAttr() {
     fetch(ROUTES.store, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name, is_variant: isVariant }),
     })
     .then(r => r.json())
     .then(data => {
         if (data.errors) { showModalError(Object.values(data.errors)[0][0]); return; }
         input.value = '';
         // Thêm vào danh sách ALL_ATTRIBUTES (để variant mới có field này)
-        ALL_ATTRIBUTES.push({ id: data.id, name: data.name });
-        addFieldToForm(data.id, data.name);
-        addAttrToAllVariants(data.id, data.name);
+        ALL_ATTRIBUTES.push({ id: data.id, name: data.name, is_variant: data.is_variant });
+        addFieldToForm(data.id, data.name, data.is_variant);
+        if (data.is_variant) addAttrToAllVariants(data.id, data.name);
         loadAttrList();
     })
     .catch(() => showModalError('Lỗi kết nối, thử lại.'))
@@ -879,15 +932,18 @@ function deleteAttr(id, name) {
 }
 
 // ── Sync field thông số kỹ thuật ─────────────────────────────
-function addFieldToForm(id, name) {
+function addFieldToForm(id, name, isVariant) {
     if (document.getElementById('attr-field-' + id)) return;
     document.getElementById('attrEmptyMsg')?.remove();
     const div = document.createElement('div');
     div.className = 'form-group';
     div.id = 'attr-field-' + id;
+    const subLabel = isVariant
+        ? ' <em style="color:#1565C0;font-weight:600;font-style:normal">(chính)</em>'
+        : ' <em style="color:#aaa;font-weight:400;font-style:normal">(phụ)</em>';
     div.innerHTML = `
         <label class="attr-field-row">
-            <span>${esc(name)}</span>
+            <span>${esc(name)}${subLabel}</span>
             <button type="button" class="btn-field-remove" data-id="${id}" data-name="${esc(name)}"
                 title="Sản phẩm này không cần thuộc tính này">
                 <i class="fas fa-times"></i>

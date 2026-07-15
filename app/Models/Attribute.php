@@ -8,7 +8,11 @@ class Attribute extends Model
 {
     public $timestamps = false;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'is_variant'];
+
+    protected $casts = [
+        'is_variant' => 'boolean',
+    ];
 
     public function productAttributes()
     {

@@ -12,25 +12,25 @@
 
     .success-icon {
         font-size: 64px;
-        color: #2E7D32;
+        color: #16a34a;
         margin-bottom: 16px;
     }
 
     .success-wrap h1 {
-        font-size: 24px;
+        font-size: 26px;
         font-weight: 800;
         margin-bottom: 10px;
     }
 
     .success-wrap p {
-        color: #666;
+        color: #6b7280;
         margin-bottom: 24px;
     }
 
     .order-card {
         background: #fff;
-        border: 1px solid #e0e0e0;
-        border-radius: 10px;
+        border-radius: 14px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.06);
         padding: 24px;
         text-align: left;
         margin-bottom: 24px;
@@ -39,8 +39,8 @@
     .order-card .row {
         display: flex;
         justify-content: space-between;
-        padding: 8px 0;
-        border-bottom: 1px solid #f5f5f5;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9;
         font-size: 14px;
     }
 
@@ -49,7 +49,7 @@
     }
 
     .order-card .label {
-        color: #888;
+        color: #6b7280;
     }
 
     .item-row {
@@ -61,21 +61,23 @@
 
     .btn-group a {
         display: inline-block;
-        padding: 12px 24px;
-        border-radius: 8px;
+        padding: 13px 26px;
+        border-radius: 10px;
         font-weight: 700;
         text-decoration: none;
         margin: 0 6px;
     }
 
     .btn-primary {
-        background: #1565C0;
+        background: #2563eb;
         color: #fff;
     }
 
+    .btn-primary:hover { background: #1d4ed8; color: #fff; }
+
     .btn-outline {
-        border: 1px solid #1565C0;
-        color: #1565C0;
+        border: 2px solid #2563eb;
+        color: #2563eb;
     }
 
     .status-badge {
@@ -87,13 +89,13 @@
     }
 
     .status-paid {
-        background: #E8F5E9;
-        color: #2E7D32;
+        background: #dcfce7;
+        color: #166534;
     }
 
     .status-unpaid {
-        background: #FFF3E0;
-        color: #E65100;
+        background: #fef3c7;
+        color: #b45309;
     }
 </style>
 @endpush
@@ -126,7 +128,7 @@
             @endforeach
         </div>
 
-        <div class="row" style="font-weight:800;color:#1565C0;font-size:16px;margin-top:8px">
+        <div class="row" style="font-weight:800;color:#2563eb;font-size:16px;margin-top:8px">
             <span>Tổng cộng</span><span>{{ number_format($order->total) }}đ</span>
         </div>
     </div>

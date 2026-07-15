@@ -11,6 +11,10 @@
         padding-bottom: 40px;
     }
 
+    .page-body .container {
+        padding-top: 16px;
+    }
+
     /* ===== HERO ===== */
     .hero {
         position: relative;
@@ -159,16 +163,86 @@
         background: #2563eb;
     }
 
+    /* ===== EVENTS (dưới banner) - khớp với xem trước ở trang admin ===== */
+    .events-strip {
+        max-width: 1200px;
+        margin: 14px auto 0;
+        padding: 0 15px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 14px;
+    }
+
+    .event-card {
+        position: relative;
+        display: flex;
+        align-items: center;
+        min-height: 140px;
+        border-radius: 12px;
+        overflow: hidden;
+        text-decoration: none;
+        background: #263238;
+        color: #fff;
+        padding: 22px 26px;
+        transition: transform .2s, box-shadow .2s;
+    }
+
+    .event-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, .16);
+    }
+
+    .event-card-bg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: .35;
+    }
+
+    .event-card-body {
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+    }
+
+    .event-card-tag {
+        font-size: 11.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: .85;
+        margin-bottom: 6px;
+    }
+
+    .event-card-title {
+        font-size: 21px;
+        font-weight: 800;
+        line-height: 1.25;
+        margin-bottom: 6px;
+        white-space: normal;
+    }
+
+    .event-card-offer {
+        font-size: 14.5px;
+        font-weight: 700;
+        color: #FFD54F;
+    }
+
     /* ===== TRUST BAR ===== */
     .trust-bar {
         background: #fff;
-        margin-bottom: 8px;
+        margin: 14px auto 0;
+        max-width: 1200px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
     }
 
     .trust-bar .inner {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
-        padding: 10px 12px;
+        padding: 14px 16px;
         gap: 8px;
         max-width: 1200px;
         margin: 0 auto;
@@ -209,29 +283,9 @@
         color: #9ca3af;
     }
 
-    .trust-bar-item:nth-child(1) .tbi-icon {
+    .trust-bar-item .tbi-icon {
         background: #eff6ff;
         color: #2563eb;
-    }
-
-    .trust-bar-item:nth-child(2) .tbi-icon {
-        background: #dcfce7;
-        color: #16a34a;
-    }
-
-    .trust-bar-item:nth-child(3) .tbi-icon {
-        background: #f3e8ff;
-        color: #7c3aed;
-    }
-
-    .trust-bar-item:nth-child(4) .tbi-icon {
-        background: #ffedd5;
-        color: #f97316;
-    }
-
-    .trust-bar-item:nth-child(5) .tbi-icon {
-        background: #fee2e2;
-        color: #ef4444;
     }
 
     /* ===== TWO-COLUMN MAIN LAYOUT ===== */
@@ -240,35 +294,36 @@
     /* ===== SECTION ===== */
     .section {
         background: #fff;
-        border-radius: 4px;
-        padding: 16px;
-        margin-bottom: 8px;
+        border-radius: 12px;
+        padding: 20px 22px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
     }
 
     .section-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 14px;
-        padding-bottom: 10px;
+        margin-bottom: 18px;
+        padding-bottom: 12px;
         border-bottom: 1px solid #f3f4f6;
     }
 
     .section-title {
-        font-size: 14px;
+        font-size: 16px;
         font-weight: 700;
         color: #1e293b;
         text-transform: uppercase;
         letter-spacing: .3px;
         margin: 0;
-        padding-left: 9px;
+        padding-left: 10px;
         border-left: 3px solid #2563eb;
         line-height: 1.4;
     }
 
     .section-link {
         color: #2563eb;
-        font-size: 12px;
+        font-size: 12.5px;
         font-weight: 600;
         text-decoration: none;
         white-space: nowrap;
@@ -282,54 +337,61 @@
     .products-grid {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
-        gap: 10px;
+        gap: 16px;
     }
 
     .product-card {
         position: relative;
         background: #fff;
         border: 1px solid #ebebeb;
-        border-radius: 6px;
+        border-radius: 10px;
         overflow: hidden;
         text-decoration: none;
         color: #000;
         transition: box-shadow .25s, transform .25s;
-        display: block;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
     }
 
     .product-card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, .1);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, .1);
+        border-color: transparent;
     }
 
     .product-card-img {
-        height: 160px;
-        background: #fafafa;
+        height: 170px;
+        background: #fff;
         display: flex;
         align-items: center;
         justify-content: center;
         overflow: hidden;
+        flex-shrink: 0;
     }
 
     .product-card-img img {
         width: 100%;
         height: 100%;
         object-fit: contain;
-        padding: 8px;
+        padding: 10px;
     }
 
     .product-card-body {
-        padding: 8px;
+        padding: 12px 12px 14px;
         border-top: 1px solid #f3f4f6;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
     }
 
     .product-card-name {
-        font-size: 12.5px;
+        font-size: 13px;
         color: #374151;
         min-height: 36px;
         line-height: 1.4;
         display: -webkit-box;
-        /* -webkit-line-clamp:2; */
+        -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
@@ -345,6 +407,8 @@
     .stars {
         color: #f59e0b;
         font-size: 11px;
+        margin-top: auto;
+        padding-top: 4px;
     }
 
     .review-count {
@@ -355,14 +419,14 @@
 
     .badge-tag {
         position: absolute;
-        top: 6px;
-        left: 6px;
+        top: 8px;
+        left: 8px;
         background: #e53935;
         color: #fff;
-        font-size: 9px;
+        font-size: 10px;
         font-weight: 700;
-        padding: 2px 6px;
-        border-radius: 3px;
+        padding: 3px 7px;
+        border-radius: 5px;
         text-transform: uppercase;
         letter-spacing: .3px;
         z-index: 2;
@@ -370,10 +434,10 @@
 
     .wish {
         position: absolute;
-        top: 6px;
-        right: 6px;
-        width: 24px;
-        height: 24px;
+        top: 8px;
+        right: 8px;
+        width: 26px;
+        height: 26px;
         background: #fff;
         border-radius: 50%;
         display: flex;
@@ -381,7 +445,7 @@
         justify-content: center;
         color: #9ca3af;
         font-size: 12px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, .15);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
         z-index: 2;
     }
 
@@ -401,13 +465,13 @@
     .promo-banners {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        margin-bottom: 8px;
+        gap: 14px;
+        margin-bottom: 16px;
     }
 
     .promo-banner {
-        border-radius: 6px;
-        padding: 16px 14px;
+        border-radius: 12px;
+        padding: 20px 18px;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -418,11 +482,11 @@
     .promo-banner .content {
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 7px;
     }
 
     .promo-banner .tag {
-        font-size: 10px;
+        font-size: 10.5px;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: .5px;
@@ -430,16 +494,16 @@
 
     .promo-banner h3 {
         margin: 0;
-        font-size: 15px;
+        font-size: 15.5px;
         font-weight: 700;
         color: #1e293b;
     }
 
     .promo-banner .btn-sm {
         border: none;
-        padding: 5px 12px;
-        border-radius: 5px;
-        font-size: 11px;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 11.5px;
         font-weight: 600;
         color: #fff;
         cursor: pointer;
@@ -447,10 +511,16 @@
     }
 
     .promo-img {
-        width: 80px;
-        height: 80px;
-        border-radius: 6px;
+        width: 84px;
+        height: 84px;
+        border-radius: 14px;
         flex-shrink: 0;
+        object-fit: contain;
+        background: #fff;
+        border: 1px solid rgba(0, 0, 0, .06);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+        padding: 8px;
+        box-sizing: border-box;
     }
 
     .promo-banner.apple {
@@ -477,15 +547,15 @@
         background: #7c3aed;
     }
 
-    .promo-banner.phu-kien {
+    .promo-banner.bao-hanh {
         background: #fff7ed;
     }
 
-    .promo-banner.phu-kien .tag {
+    .promo-banner.bao-hanh .tag {
         color: #f97316;
     }
 
-    .promo-banner.phu-kien .btn-sm {
+    .promo-banner.bao-hanh .btn-sm {
         background: #f97316;
     }
 
@@ -493,13 +563,13 @@
     .news-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
+        gap: 16px;
     }
 
     .news-card {
         background: #fff;
         border: 1px solid #ebebeb;
-        border-radius: 6px;
+        border-radius: 10px;
         overflow: hidden;
         text-decoration: none;
         color: #000;
@@ -509,22 +579,29 @@
 
     .news-card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 4px 14px rgba(0, 0, 0, .08);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, .08);
+        border-color: transparent;
     }
 
     .news-card-img {
         height: 160px;
         overflow: hidden;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .news-card-img img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
+        padding: 6px;
+        box-sizing: border-box;
     }
 
     .news-card-body {
-        padding: 10px;
+        padding: 14px;
     }
 
     .news-card-title {
@@ -651,7 +728,7 @@
                 <div class="hero-label" style="{{ $banner->text_color ? 'color:'.$banner->text_color.';opacity:.85;' : '' }}">{{ $banner->label }}</div>
                 @endif
                 @if($banner->title)
-                <h1 class="hero-title">{!! nl2br(e($banner->title)) !!}</h1>
+                <h1 class="hero-title" style="{{ $banner->text_color ? 'color:'.$banner->text_color.';' : '' }}">{!! nl2br(e($banner->title)) !!}</h1>
                 @endif
                 @if($banner->description)
                 <p class="hero-desc" style="{{ $banner->text_color ? 'color:'.$banner->text_color.';opacity:.8;' : '' }}">{{ $banner->description }}</p>
@@ -683,6 +760,29 @@
         </div>
         @endif
     </section>
+    @endif
+
+    {{-- ===== SỰ KIỆN / KHUYẾN MÃI (hiển thị ngay dưới banner, khớp xem trước ở trang admin) ===== --}}
+    @if(isset($events) && $events->isNotEmpty())
+    <div class="events-strip">
+        @foreach($events as $event)
+        <a href="{{ $event->button_link ?: '#' }}" class="event-card"
+            style="background:{{ $event->bg_color ?: '#263238' }};color:{{ $event->text_color ?: '#fff' }}">
+            @if($event->image)
+            <img src="{{ $event->image }}" alt="{{ $event->title }}" class="event-card-bg">
+            @endif
+            <div class="event-card-body">
+                @if($event->tag)
+                <div class="event-card-tag">{{ $event->tag }}</div>
+                @endif
+                <div class="event-card-title">{{ $event->title }}</div>
+                @if($event->offer_text)
+                <div class="event-card-offer">{{ $event->offer_text }}</div>
+                @endif
+            </div>
+        </a>
+        @endforeach
+    </div>
     @endif
 
     {{-- ===== TRUST BAR ===== --}}
@@ -781,11 +881,9 @@
                             {{ $product->name }}
                         </div>
 
-                        @if($product->brand)
-                        <div style="font-size:11px;color:#6b7280;margin-top:4px">
-                            {{ $product->brand->name }}
+                        <div style="font-size:11px;color:#6b7280;margin-top:4px;min-height:14px">
+                            {{ $product->brand->name ?? '' }}
                         </div>
-                        @endif
 
                         <span class="product-card-price">
                             {{ number_format($product->price) }}đ
@@ -820,7 +918,7 @@
                     <h3>Giảm đến 4TR</h3>
                     <button class="btn-sm">Săn Ngay</button>
                 </div>
-                <div class="promo-img img-placeholder"><i class="fas fa-image"></i></div>
+                <img class="promo-img" src="{{ asset('images/promo-apple.png') }}" alt="Thế giới Apple">
             </div>
             <div class="promo-banner samsung">
                 <div class="content">
@@ -828,15 +926,15 @@
                     <h3>Thu cũ đổi mới</h3>
                     <button class="btn-sm">Xem Thêm</button>
                 </div>
-                <div class="promo-img img-placeholder"><i class="fas fa-image"></i></div>
+                <img class="promo-img" src="{{ asset('images/promo-samsung.png') }}" alt="Samsung Store">
             </div>
-            <div class="promo-banner phu-kien">
+            <div class="promo-banner bao-hanh">
                 <div class="content">
-                    <div class="tag">PHỤ KIỆN CÔNG NGHỆ</div>
-                    <h3>Mua 1 tặng 1</h3>
-                    <button class="btn-sm">Mua Ngay</button>
+                    <div class="tag">BẢO HÀNH CHÍNH HÃNG</div>
+                    <h3>An tâm 12 tháng</h3>
+                    <button class="btn-sm">Xem Chi Tiết</button>
                 </div>
-                <div class="promo-img img-placeholder"><i class="fas fa-image"></i></div>
+                <img class="promo-img" src="{{ asset('images/promo-baohanh.png') }}" alt="Bảo hành chính hãng">
             </div>
         </div>
 
@@ -863,7 +961,7 @@
                     <div class="news-card-img">
 
                         @if(!empty($news->thumbnail))
-                        <img src="{{ $news->thumbnail }}"
+                        <img src="{{ asset('storage/' . $news->thumbnail) }}"
                             alt="{{ $news->title }}">
                         @else
                         <div class="img-placeholder"
