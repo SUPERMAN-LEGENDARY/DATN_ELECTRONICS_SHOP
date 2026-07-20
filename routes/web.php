@@ -17,6 +17,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CompareController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReviewController;
@@ -300,5 +301,6 @@ Route::prefix('tin-tuc')->name('news.')->group(function () {
 // ─── LIÊN HỆ ────────────────────────────────────────────────────────
 Route::get('/lien-he', [ContactController::class, 'index'])->name('contact.index');
 Route::post('/lien-he', [ContactController::class, 'send'])->name('contact.send');
+Route::post('/dang-ky-nhan-tin', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 
 require __DIR__ . '/auth.php';

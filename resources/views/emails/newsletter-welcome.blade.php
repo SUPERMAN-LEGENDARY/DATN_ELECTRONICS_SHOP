@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng ký nhận tin thành công</title>
+</head>
+
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:'Segoe UI',Roboto,Arial,sans-serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:24px 0;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0"
+                    style="background:#ffffff;border-radius:10px;overflow:hidden;max-width:600px;width:100%;">
+
+                    <tr>
+                        <td style="background:#2563eb;padding:28px;text-align:center;">
+                            <h1 style="margin:0;color:#ffffff;font-size:20px;">ElectronicShop</h1>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:32px 28px;">
+                            <h2 style="margin:0 0 12px;color:#111827;font-size:18px;">Đăng ký thành công! 🎉</h2>
+                            <p style="margin:0 0 16px;color:#4b5563;font-size:14px;line-height:1.7;">
+                                Cảm ơn bạn đã đăng ký nhận tin từ ElectronicShop. Từ nay bạn sẽ là người đầu tiên
+                                biết về các chương trình khuyến mãi, sản phẩm mới và ưu đãi đặc biệt dành riêng cho bạn.
+                            </p>
+                            <a href="{{ url('/') }}"
+                                style="display:inline-block;padding:12px 28px;background:#2563eb;color:#ffffff;
+                                text-decoration:none;border-radius:8px;font-size:14px;font-weight:600;">
+                                Khám phá ngay
+                            </a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:16px 28px;background:#f8fafc;border-top:1px solid #f1f5f9;">
+                            <p style="margin:0;color:#9ca3af;font-size:12px;">
+                                Bạn nhận được email này vì đã đăng ký nhận tin tại ElectronicShop với địa chỉ
+                                {{ $subscriber->email }}.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

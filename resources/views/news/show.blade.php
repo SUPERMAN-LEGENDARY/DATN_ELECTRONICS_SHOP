@@ -134,9 +134,11 @@ $showSearch = true;
 
                     <p>Nhận thông tin khuyến mãi mới nhất từ ElectronicShop</p>
 
-                    <input type="email" placeholder="Email của bạn">
-
-                    <button>ĐĂNG KÝ</button>
+                    <form id="newsShowNewsletterForm" onsubmit="return false;">
+                        <input type="email" name="email" id="newsShowNewsletterEmail" placeholder="Email của bạn" required>
+                        <button type="submit" id="newsShowNewsletterBtn">ĐĂNG KÝ</button>
+                    </form>
+                    <div id="newsShowNewsletterMsg" style="font-size:12.5px;margin-top:8px;display:none"></div>
 
                 </div>
 
@@ -149,6 +151,59 @@ $showSearch = true;
 </section>
 
 @endsection
+
+@push('scripts')
+<script>
+    (function () {
+        const form  = document.getElementById('newsShowNewsletterForm');
+        if (!form) return;
+        const input = document.getElementById('newsShowNewsletterEmail');
+        const btn   = document.getElementById('newsShowNewsletterBtn');
+        const msg   = document.getElementById('newsShowNewsletterMsg');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const email = input.value.trim();
+            if (!email) return;
+
+            btn.disabled = true;
+            const originalText = btn.textContent;
+            btn.textContent = '...';
+
+            fetch('{{ route('newsletter.subscribe') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                },
+                body: JSON.stringify({ email: email, source: 'news_detail' }),
+            })
+            .then(async (res) => {
+                const data = await res.json();
+                msg.style.display = 'block';
+                if (res.ok) {
+                    msg.style.color = '#16a34a';
+                    msg.textContent = data.message;
+                    input.value = '';
+                } else {
+                    msg.style.color = '#e53935';
+                    msg.textContent = data.message || 'Có lỗi xảy ra, vui lòng thử lại.';
+                }
+            })
+            .catch(() => {
+                msg.style.display = 'block';
+                msg.style.color = '#e53935';
+                msg.textContent = 'Không thể kết nối, vui lòng thử lại.';
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            });
+        });
+    })();
+</script>
+@endpush
 
 <style>
     .news-detail {

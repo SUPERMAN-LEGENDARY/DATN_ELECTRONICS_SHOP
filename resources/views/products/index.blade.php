@@ -14,6 +14,10 @@
 
 /* SIDEBAR */
 .filter-sidebar { background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.05); padding: 18px; position: sticky; top: 90px; }
+.filter-sidebar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.filter-sidebar-header h2 { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: #222; margin: 0; }
+.btn-clear-filter { font-size: 12.5px; color: #E53935; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 4px; padding: 4px 6px; border-radius: 6px; transition: background .15s; }
+.btn-clear-filter:hover { background: #FDECEA; }
 .filter-group { margin-bottom: 22px; }
 .filter-group:last-of-type { margin-bottom: 0; }
 .filter-group h3 { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: #222; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
@@ -80,12 +84,15 @@
 .badge-tag { position: absolute; top: 10px; left: 10px; background: #E53935; color: #fff; font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 5px; z-index: 1; }
 
 /* PAGINATION */
-.pagination-wrap { display: flex; justify-content: center; margin-top: 36px; }
-.pagination-wrap .pagination { display: flex; gap: 6px; }
+.pagination-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 36px; }
+.pagination-wrap nav { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.pagination-wrap .pagination { display: flex; gap: 6px; list-style: none; margin: 0; padding: 0; }
 .pagination-wrap .page-item .page-link { min-width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; color: #333; font-size: 14px; text-decoration: none; transition: all .15s; }
 .pagination-wrap .page-item .page-link:hover { border-color: #1565C0; color: #1565C0; }
 .pagination-wrap .page-item.active .page-link { background: #1565C0; color: #fff; border-color: #1565C0; }
 .pagination-wrap .page-item.disabled .page-link { color: #ccc; pointer-events: none; }
+.pagination-wrap .pagination-info { margin: 0; font-size: 13px; color: #6b7280; text-align: center; }
+.pagination-wrap .pagination-info strong { color: #374151; font-weight: 700; }
 </style>
 @endpush
 
@@ -144,6 +151,24 @@
                 @if(request('category'))<input type="hidden" name="category" value="{{ request('category') }}">@endif
                 @if(request('brand'))<input type="hidden" name="brand" value="{{ request('brand') }}">@endif
 
+                @php
+                    $hasActiveFilters = request('category')
+                        || request('brand')
+                        || collect(request('price', []))->filter()->isNotEmpty()
+                        || request('price_from')
+                        || request('price_to')
+                        || collect(request('attr', []))->flatten()->filter(fn ($v) => $v !== null && $v !== '')->isNotEmpty();
+                @endphp
+
+                <div class="filter-sidebar-header">
+                    <h2>Bộ lọc</h2>
+                    @if($hasActiveFilters)
+                        <a href="{{ route('products.index', request('q') ? ['q' => request('q')] : []) }}" class="btn-clear-filter">
+                            <i class="fas fa-times-circle"></i> Xóa bộ lọc
+                        </a>
+                    @endif
+                </div>
+
                 {{-- Lọc nâng cao theo thuộc tính kỹ thuật (dạng modal) --}}
                 @if(count($attributesFilter))
                     @php
@@ -158,38 +183,6 @@
                             <span class="badge-count">{{ $selectedAttrCount }}</span>
                         @endif
                     </button>
-
-                    {{-- Modal nổi giữa màn hình, không đẩy layout trang --}}
-                    <div id="advancedOverlay" class="advanced-overlay">
-                        <div class="advanced-modal">
-                            <div class="advanced-modal-header">
-                                <h3>Lọc nâng cao</h3>
-                                <button type="button" class="advanced-modal-close" id="advancedClose">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            <div class="advanced-modal-body">
-                                @foreach($attributesFilter as $attr)
-                                <div class="filter-group">
-                                    <h3>{{ $attr['name'] }}</h3>
-                                    <div class="attr-values-wrap">
-                                        @foreach($attr['values'] as $value)
-                                        <label class="attr-check">
-                                            <input type="checkbox" name="attr[{{ $attr['id'] }}][]" value="{{ $value }}"
-                                                {{ in_array($value, request('attr.'.$attr['id'], [])) ? 'checked' : '' }}>
-                                            <span>{{ $value }}</span>
-                                        </label>
-                                        @endforeach
-                                    </div>
-                                </div>
-                                @endforeach
-                            </div>
-                            <div class="advanced-modal-footer">
-                                <button type="button" class="btn-advanced-clear" id="advancedClear">Bỏ chọn</button>
-                                <button type="submit" class="btn-filter">Áp dụng</button>
-                            </div>
-                        </div>
-                    </div>
                 @endif
 
                 {{-- Danh mục --}}
@@ -305,12 +298,93 @@
             </div>
 
             {{-- PAGINATION --}}
+            @php $paginator = $products->appends(request()->query()); @endphp
+            @if ($paginator->hasPages())
             <div class="pagination-wrap">
-                {{ $products->links() }}
+                <nav aria-label="Phân trang">
+                    <ul class="pagination">
+                        {{-- Nút Trang trước --}}
+                        @if ($paginator->onFirstPage())
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&lsaquo;</span>
+                            </li>
+                        @else
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev" aria-label="Trang trước">&lsaquo;</a>
+                            </li>
+                        @endif
+
+                        {{-- Danh sách số trang --}}
+                        @foreach ($paginator->getUrlRange(1, $paginator->lastPage()) as $page => $url)
+                            @if ($page == $paginator->currentPage())
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link">{{ $page }}</span>
+                                </li>
+                            @else
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ $url }}">{{ $page }}</a>
+                                </li>
+                            @endif
+                        @endforeach
+
+                        {{-- Nút Trang sau --}}
+                        @if ($paginator->hasMorePages())
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next" aria-label="Trang sau">&rsaquo;</a>
+                            </li>
+                        @else
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&rsaquo;</span>
+                            </li>
+                        @endif
+                    </ul>
+
+                    {{-- Dòng thông tin nằm dưới các nút số, toàn bộ tiếng Việt --}}
+                    <p class="pagination-info">
+                        Hiển thị <strong>{{ $paginator->firstItem() }}</strong>–<strong>{{ $paginator->lastItem() }}</strong>
+                        trong tổng <strong>{{ number_format($paginator->total()) }}</strong> kết quả
+                    </p>
+                </nav>
             </div>
+            @endif
             @endif
         </div>
     </div>
+
+    {{-- Modal lọc nâng cao: đặt NGOÀI aside (position:sticky) để tránh bị kẹt trong
+         stacking context của sidebar, nếu không sẽ bị lưới sản phẩm đè lên dù z-index cao --}}
+    @if(count($attributesFilter))
+    <div id="advancedOverlay" class="advanced-overlay">
+        <div class="advanced-modal">
+            <div class="advanced-modal-header">
+                <h3>Lọc nâng cao</h3>
+                <button type="button" class="advanced-modal-close" id="advancedClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="advanced-modal-body">
+                @foreach($attributesFilter as $attr)
+                <div class="filter-group">
+                    <h3>{{ $attr['name'] }}</h3>
+                    <div class="attr-values-wrap">
+                        @foreach($attr['values'] as $value)
+                        <label class="attr-check">
+                            <input type="checkbox" form="filterForm" name="attr[{{ $attr['id'] }}][]" value="{{ $value }}"
+                                {{ in_array($value, request('attr.'.$attr['id'], [])) ? 'checked' : '' }}>
+                            <span>{{ $value }}</span>
+                        </label>
+                        @endforeach
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            <div class="advanced-modal-footer">
+                <button type="button" class="btn-advanced-clear" id="advancedClear">Bỏ chọn</button>
+                <button type="submit" form="filterForm" class="btn-filter">Áp dụng</button>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 @endsection
 

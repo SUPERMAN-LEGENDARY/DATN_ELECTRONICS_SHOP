@@ -439,13 +439,14 @@
                 Đăng ký để nhận các chương trình khuyến mãi
                 sớm nhất từ ElectronicShop.
             </p>
-            <div class="email-box">
-                <input type="email" placeholder="Email của bạn...">
-                <button>
+            <form id="footerNewsletterForm" class="email-box" onsubmit="return false;">
+                <input type="email" name="email" id="footerNewsletterEmail" placeholder="Email của bạn..." required>
+                <button type="submit" id="footerNewsletterBtn">
                     ĐĂNG<br>
                     KÝ
                 </button>
-            </div>
+            </form>
+            <div id="footerNewsletterMsg" style="font-size:12.5px;margin-top:8px;display:none"></div>
         </div>
     </div>
     <div class="footer-bottom">
@@ -455,6 +456,57 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     @stack('scripts')
+
+    <script>
+        (function () {
+            const form  = document.getElementById('footerNewsletterForm');
+            if (!form) return;
+            const input = document.getElementById('footerNewsletterEmail');
+            const btn   = document.getElementById('footerNewsletterBtn');
+            const msg   = document.getElementById('footerNewsletterMsg');
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const email = input.value.trim();
+                if (!email) return;
+
+                btn.disabled = true;
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '...';
+
+                fetch('{{ route('newsletter.subscribe') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    },
+                    body: JSON.stringify({ email: email, source: 'footer' }),
+                })
+                .then(async (res) => {
+                    const data = await res.json();
+                    msg.style.display = 'block';
+                    if (res.ok) {
+                        msg.style.color = '#16a34a';
+                        msg.textContent = data.message;
+                        input.value = '';
+                    } else {
+                        msg.style.color = '#e53935';
+                        msg.textContent = data.message || 'Có lỗi xảy ra, vui lòng thử lại.';
+                    }
+                })
+                .catch(() => {
+                    msg.style.display = 'block';
+                    msg.style.color = '#e53935';
+                    msg.textContent = 'Không thể kết nối, vui lòng thử lại.';
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                });
+            });
+        })();
+    </script>
 
     <x-chatbot-widget />
 </body>
