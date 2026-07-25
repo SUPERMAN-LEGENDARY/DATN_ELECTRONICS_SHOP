@@ -6,13 +6,222 @@
 <style>
     /* ===== LAYOUT WRAPPER ===== */
     .page-body {
-        background: #f0f0f0;
+        background: linear-gradient(180deg,
+            #bae6fd 0%,
+            #e0f2fe 18%,
+            #f0f9ff 38%,
+            #e0f2fe 62%,
+            #bae6fd 100%);
         min-height: 100vh;
         padding-bottom: 40px;
+        position: relative;
+    }
+
+    /* Floating cloud texture */
+    .page-body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background:
+            radial-gradient(ellipse 600px 300px at 10% 15%, rgba(125,211,252,.35) 0%, transparent 70%),
+            radial-gradient(ellipse 500px 260px at 85% 30%, rgba(186,230,253,.4) 0%, transparent 70%),
+            radial-gradient(ellipse 700px 350px at 50% 75%, rgba(224,242,254,.5) 0%, transparent 70%);
+        z-index: 0;
+        animation: cloudDrift 20s ease-in-out infinite alternate;
+    }
+
+    @keyframes cloudDrift {
+        0%   { background-position: 0% 0%; opacity: .8; }
+        33%  { background-position: 5% 8%; opacity: 1; }
+        66%  { background-position: -4% 4%; opacity: .85; }
+        100% { background-position: 3% -5%; opacity: 1; }
+    }
+
+    .page-body > * {
+        position: relative;
+        z-index: 1;
     }
 
     .page-body .container {
         padding-top: 16px;
+    }
+
+    /* ===== CANVAS CLOUDS ===== */
+    #sky-canvas {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        opacity: .55;
+    }
+
+    /* ===== BUBBLES ===== */
+    .bubble {
+        position: fixed;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 35%, rgba(255,255,255,.8), rgba(186,230,253,.3));
+        border: 1px solid rgba(125,211,252,.4);
+        pointer-events: none;
+        z-index: 0;
+        animation: bubbleRise linear infinite;
+    }
+
+    @keyframes bubbleRise {
+        0%   { transform: translateY(0) scale(1);   opacity: .7; }
+        80%  { opacity: .5; }
+        100% { transform: translateY(-110vh) scale(1.1); opacity: 0; }
+    }
+
+    /* ===== SCROLL REVEAL ===== */
+    .reveal {
+        opacity: 0;
+        transform: translateY(36px);
+        transition: opacity .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1);
+    }
+
+    .reveal.revealed {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .reveal-left {
+        opacity: 0;
+        transform: translateX(-40px);
+        transition: opacity .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1);
+    }
+
+    .reveal-left.revealed {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* stagger children */
+    .stagger-children > * {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity .5s cubic-bezier(.16,1,.3,1), transform .5s cubic-bezier(.16,1,.3,1);
+    }
+
+    .stagger-children.revealed > *:nth-child(1) { opacity:1; transform:translateY(0); transition-delay: .05s; }
+    .stagger-children.revealed > *:nth-child(2) { opacity:1; transform:translateY(0); transition-delay: .12s; }
+    .stagger-children.revealed > *:nth-child(3) { opacity:1; transform:translateY(0); transition-delay: .19s; }
+    .stagger-children.revealed > *:nth-child(4) { opacity:1; transform:translateY(0); transition-delay: .26s; }
+    .stagger-children.revealed > *:nth-child(5) { opacity:1; transform:translateY(0); transition-delay: .33s; }
+    .stagger-children.revealed > *:nth-child(6) { opacity:1; transform:translateY(0); transition-delay: .40s; }
+    .stagger-children.revealed > *:nth-child(n+7) { opacity:1; transform:translateY(0); transition-delay: .46s; }
+
+    /* ===== CARD SHINE ===== */
+    .product-card,
+    .news-card {
+        overflow: hidden;
+    }
+
+    .product-card::after,
+    .news-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg,
+            transparent 40%,
+            rgba(255,255,255,.45) 50%,
+            transparent 60%);
+        transform: translateX(-120%);
+        transition: transform .55s ease;
+        pointer-events: none;
+        z-index: 3;
+    }
+
+    .product-card:hover::after,
+    .news-card:hover::after {
+        transform: translateX(120%);
+    }
+
+    /* ===== RIPPLE ===== */
+    .ripple-wave {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(125,211,252,.35);
+        transform: scale(0);
+        animation: rippleOut .6s linear;
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    @keyframes rippleOut {
+        to { transform: scale(4); opacity: 0; }
+    }
+
+    /* ===== HERO ENTRANCE ===== */
+    .hero-content > * {
+        opacity: 0;
+        animation: heroIn .7s cubic-bezier(.16,1,.3,1) forwards;
+    }
+
+    .hero-content > *:nth-child(1) { animation-delay: .1s; }
+    .hero-content > *:nth-child(2) { animation-delay: .22s; }
+    .hero-content > *:nth-child(3) { animation-delay: .34s; }
+    .hero-content > *:nth-child(4) { animation-delay: .44s; }
+    .hero-content > *:nth-child(5) { animation-delay: .54s; }
+
+    @keyframes heroIn {
+        from { opacity: 0; transform: translateY(18px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== BRAND CHIP FLOAT ===== */
+    .brand-chip:hover .brand-chip-logo {
+        animation: chipBounce .4s cubic-bezier(.34,1.56,.64,1);
+    }
+
+    @keyframes chipBounce {
+        0%   { transform: translateY(0)     scale(1); }
+        40%  { transform: translateY(-8px)  scale(1.08); }
+        70%  { transform: translateY(-3px)  scale(1.04); }
+        100% { transform: translateY(-4px)  scale(1.05); }
+    }
+
+    /* ===== TRUST BAR ICON PULSE ===== */
+    .trust-bar-item .tbi-icon {
+        animation: iconPulse 3s ease-in-out infinite;
+    }
+
+    .trust-bar-item:nth-child(2) .tbi-icon { animation-delay: .4s; }
+    .trust-bar-item:nth-child(3) .tbi-icon { animation-delay: .8s; }
+    .trust-bar-item:nth-child(4) .tbi-icon { animation-delay: 1.2s; }
+    .trust-bar-item:nth-child(5) .tbi-icon { animation-delay: 1.6s; }
+
+    @keyframes iconPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(14,165,233,.0); transform: scale(1); }
+        50%       { box-shadow: 0 0 0 6px rgba(14,165,233,.15); transform: scale(1.08); }
+    }
+
+    /* ===== SECTION HEADER UNDERLINE GROW ===== */
+    .section-title {
+        position: relative;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        left: 10px;
+        bottom: -13px;
+        height: 2px;
+        width: 0;
+        background: linear-gradient(90deg, #38bdf8, #7dd3fc);
+        transition: width .5s cubic-bezier(.16,1,.3,1);
+        border-radius: 2px;
+    }
+
+    .section.revealed .section-title::after {
+        width: calc(100% - 10px);
+    }
+
+    /* ===== EVENTS STRIP SLIDE ===== */
+    .event-card {
+        animation: none;
     }
 
     /* ===== HERO ===== */
@@ -21,7 +230,7 @@
         border-radius: 0;
         overflow: hidden;
         margin: 0 0 8px;
-        background: #dce8fb;
+        background: linear-gradient(135deg, #cfe8fb 0%, #bae6fd 100%);
     }
 
     .hero-inner {
@@ -106,9 +315,9 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #bfdbfe;
+        color: #7dd3fc;
         font-size: 40px;
-        background: #cfe2fb;
+        background: linear-gradient(135deg, #bae6fd, #e0f2fe);
     }
 
     /* Arrow buttons */
@@ -163,7 +372,7 @@
         background: #2563eb;
     }
 
-    /* ===== EVENTS (dưới banner) - khớp với xem trước ở trang admin ===== */
+    /* ===== EVENTS (dưới banner) ===== */
     .events-strip {
         max-width: 1200px;
         margin: 14px auto 0;
@@ -232,11 +441,14 @@
 
     /* ===== TRUST BAR ===== */
     .trust-bar {
-        background: #fff;
+        background: rgba(255,255,255,.75);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         margin: 14px auto 0;
         max-width: 1200px;
-        border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
+        border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(14,165,233,.12), 0 0 0 1px rgba(186,230,253,.6);
+        border: 1px solid rgba(186,230,253,.7);
     }
 
     .trust-bar .inner {
@@ -274,30 +486,185 @@
 
     .trust-bar-item b {
         font-size: 12px;
-        color: #1e293b;
+        color: #0c4a6e;
         font-weight: 700;
     }
 
     .trust-bar-item span {
         font-size: 10.5px;
-        color: #9ca3af;
+        color: #0284c7;
+        opacity: .75;
     }
 
     .trust-bar-item .tbi-icon {
-        background: #eff6ff;
-        color: #2563eb;
+        background: linear-gradient(135deg, #bae6fd, #7dd3fc);
+        color: #0369a1;
     }
-
-    /* ===== TWO-COLUMN MAIN LAYOUT ===== */
-    /* (ảnh thực tế dùng layout full-width dọc, không có sidebar) */
 
     /* ===== SECTION ===== */
     .section {
-        background: #fff;
-        border-radius: 12px;
+        background: rgba(255,255,255,.82);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-radius: 14px;
         padding: 20px 22px;
         margin-bottom: 16px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
+        box-shadow: 0 4px 20px rgba(14,165,233,.1), 0 0 0 1px rgba(186,230,253,.5);
+        border: 1px solid rgba(186,230,253,.55);
+    }
+
+    /* ===== SẢN PHẨM MỚI NHẤT — nền giống danh mục thương hiệu ===== */
+    .section--products {
+        background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 35%, #7dd3fc 65%, #38bdf8 100%);
+        border: none;
+        box-shadow: 0 4px 20px rgba(14,165,233,.18);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .section--products::before {
+        content: '';
+        position: absolute;
+        top: -60px;
+        right: -60px;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.18);
+        pointer-events: none;
+    }
+
+    .section--products::after {
+        content: '';
+        position: absolute;
+        bottom: -40px;
+        left: -40px;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.14);
+        pointer-events: none;
+    }
+
+    .section--products .section-header {
+        border-bottom: 1px solid rgba(12,74,110,.15);
+        position: relative;
+        z-index: 2;
+    }
+
+    .section--products .section-title {
+        color: #0c4a6e;
+        border-left-color: #0369a1;
+    }
+
+    .section--products .section-title::after {
+        background: linear-gradient(90deg, #0369a1, #0284c7);
+    }
+
+    .section--products .section-link {
+        color: #0c4a6e;
+        background: rgba(255,255,255,.55);
+        border-color: rgba(255,255,255,.8);
+    }
+
+    .section--products .section-link:hover {
+        background: rgba(255,255,255,.8);
+    }
+
+    .section--products .products-grid {
+        position: relative;
+        z-index: 2;
+    }
+
+    .section--products .product-card {
+        background: rgba(255,255,255,.85);
+        border-color: rgba(255,255,255,.7);
+        backdrop-filter: blur(6px);
+    }
+
+    .section--products .product-card:hover {
+        background: rgba(255,255,255,.96);
+        box-shadow: 0 10px 28px rgba(3,105,161,.22);
+        border-color: rgba(255,255,255,.9);
+    }
+
+    /* ===== TIN TỨC CÔNG NGHỆ — nền giống danh mục thương hiệu ===== */
+    .section--news {
+        background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 35%, #7dd3fc 65%, #38bdf8 100%);
+        border: none;
+        box-shadow: 0 4px 20px rgba(14,165,233,.18);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .section--news::before {
+        content: '';
+        position: absolute;
+        top: -60px;
+        right: -60px;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.18);
+        pointer-events: none;
+    }
+
+    .section--news::after {
+        content: '';
+        position: absolute;
+        bottom: -40px;
+        left: -40px;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.14);
+        pointer-events: none;
+    }
+
+    .section--news .section-header {
+        border-bottom: 1px solid rgba(12,74,110,.15);
+        position: relative;
+        z-index: 2;
+    }
+
+    .section--news .section-title {
+        color: #0c4a6e;
+        border-left-color: #0369a1;
+    }
+
+    .section--news .section-title::after {
+        background: linear-gradient(90deg, #0369a1, #0284c7);
+    }
+
+    .section--news .section-link {
+        color: #0c4a6e;
+        background: rgba(255,255,255,.55);
+        border-color: rgba(255,255,255,.8);
+    }
+
+    .section--news .section-link:hover {
+        background: rgba(255,255,255,.8);
+    }
+
+    .section--news .news-grid {
+        position: relative;
+        z-index: 2;
+    }
+
+    .section--news .news-card {
+        background: rgba(255,255,255,.85);
+        border-color: rgba(255,255,255,.7);
+        backdrop-filter: blur(6px);
+    }
+
+    .section--news .news-card:hover {
+        background: rgba(255,255,255,.96);
+        box-shadow: 0 10px 28px rgba(3,105,161,.22);
+        border-color: rgba(255,255,255,.9);
+    }
+
+    .section--news .news-card-title {
+        color: #0c4a6e;
     }
 
     .section-header {
@@ -306,31 +673,216 @@
         align-items: center;
         margin-bottom: 18px;
         padding-bottom: 12px;
-        border-bottom: 1px solid #f3f4f6;
+        border-bottom: 1px solid #bae6fd;
     }
 
     .section-title {
         font-size: 16px;
         font-weight: 700;
-        color: #1e293b;
+        color: #0c4a6e;
         text-transform: uppercase;
         letter-spacing: .3px;
         margin: 0;
         padding-left: 10px;
-        border-left: 3px solid #2563eb;
+        border-left: 3px solid #0ea5e9;
         line-height: 1.4;
     }
 
     .section-link {
-        color: #2563eb;
+        color: #0284c7;
         font-size: 12.5px;
         font-weight: 600;
         text-decoration: none;
         white-space: nowrap;
+        background: rgba(186,230,253,.4);
+        padding: 5px 12px;
+        border-radius: 20px;
+        border: 1px solid rgba(125,211,252,.5);
+        transition: background .2s;
     }
 
     .section-link:hover {
-        text-decoration: underline;
+        background: rgba(125,211,252,.5);
+        text-decoration: none;
+    }
+
+    /* ===== BRANDS SECTION ===== */
+    .brands-section {
+        position: relative;
+        margin: 20px auto 0;
+        max-width: 1200px;
+        padding: 0 15px;
+        margin-bottom: 0;
+    }
+
+    .brands-bg {
+        background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 35%, #7dd3fc 65%, #38bdf8 100%);
+        border-radius: 16px;
+        padding: 28px 28px 24px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(14, 165, 233, 0.18);
+    }
+
+    /* decorative clouds / circles */
+    .brands-bg::before {
+        content: '';
+        position: absolute;
+        top: -60px;
+        right: -60px;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.18);
+        pointer-events: none;
+    }
+
+    .brands-bg::after {
+        content: '';
+        position: absolute;
+        bottom: -40px;
+        left: -40px;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.14);
+        pointer-events: none;
+    }
+
+    .brands-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .brands-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .brands-title-icon {
+        width: 36px;
+        height: 36px;
+        background: rgba(255,255,255,.7);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0284c7;
+        font-size: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    .brands-title {
+        font-size: 16px;
+        font-weight: 800;
+        color: #0c4a6e;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+        margin: 0;
+    }
+
+    .brands-subtitle {
+        font-size: 11.5px;
+        color: #0369a1;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .brands-link {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #0c4a6e;
+        text-decoration: none;
+        background: rgba(255,255,255,.55);
+        padding: 6px 14px;
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,.8);
+        backdrop-filter: blur(4px);
+        transition: background .2s, transform .15s;
+        white-space: nowrap;
+        position: relative;
+        z-index: 1;
+    }
+
+    .brands-link:hover {
+        background: rgba(255,255,255,.8);
+        transform: translateY(-1px);
+    }
+
+    .brands-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 12px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .brand-chip {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform .2s;
+    }
+
+    .brand-chip:hover {
+        transform: translateY(-4px);
+    }
+
+    .brand-chip-logo {
+        width: 100%;
+        aspect-ratio: 1;
+        background: rgba(255,255,255,.85);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,.08), 0 0 0 1px rgba(255,255,255,.6);
+        overflow: hidden;
+        padding: 10px;
+        box-sizing: border-box;
+        backdrop-filter: blur(4px);
+        transition: box-shadow .2s, background .2s;
+    }
+
+    .brand-chip:hover .brand-chip-logo {
+        box-shadow: 0 8px 24px rgba(0, 120, 200, .22), 0 0 0 2px rgba(255,255,255,.9);
+        background: #fff;
+    }
+
+    .brand-chip-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    /* fallback khi không có logo */
+    .brand-chip-logo .brand-chip-initials {
+        font-size: 13px;
+        font-weight: 800;
+        color: #0369a1;
+        letter-spacing: -.5px;
+        text-align: center;
+        line-height: 1.1;
+    }
+
+    .brand-chip-name {
+        font-size: 11px;
+        font-weight: 700;
+        color: #0c4a6e;
+        text-align: center;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
     }
 
     /* ===== PRODUCT GRID ===== */
@@ -342,27 +894,29 @@
 
     .product-card {
         position: relative;
-        background: #fff;
-        border: 1px solid #ebebeb;
-        border-radius: 10px;
+        background: rgba(255,255,255,.88);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(186,230,253,.6);
+        border-radius: 12px;
         overflow: hidden;
         text-decoration: none;
         color: #000;
-        transition: box-shadow .25s, transform .25s;
+        transition: box-shadow .25s, transform .25s, border-color .25s;
         display: flex;
         flex-direction: column;
         height: 100%;
     }
 
     .product-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, .1);
-        border-color: transparent;
+        transform: translateY(-4px);
+        box-shadow: 0 10px 28px rgba(14,165,233,.18);
+        border-color: #7dd3fc;
     }
 
     .product-card-img {
         height: 170px;
-        background: #fff;
+        background: linear-gradient(160deg, #f0f9ff 0%, #e0f2fe 100%);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -379,7 +933,7 @@
 
     .product-card-body {
         padding: 12px 12px 14px;
-        border-top: 1px solid #f3f4f6;
+        border-top: 1px solid rgba(186,230,253,.6);
         display: flex;
         flex-direction: column;
         flex: 1;
@@ -387,7 +941,7 @@
 
     .product-card-name {
         font-size: 13px;
-        color: #374151;
+        color: #0f4c75;
         min-height: 36px;
         line-height: 1.4;
         display: -webkit-box;
@@ -438,24 +992,25 @@
         right: 8px;
         width: 26px;
         height: 26px;
-        background: #fff;
+        background: rgba(255,255,255,.85);
+        backdrop-filter: blur(6px);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #9ca3af;
+        color: #7dd3fc;
         font-size: 12px;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
+        box-shadow: 0 1px 6px rgba(14,165,233,.18);
         z-index: 2;
     }
 
     /* ===== IMAGE PLACEHOLDER ===== */
     .img-placeholder {
-        background: #f3f4f6;
+        background: linear-gradient(135deg, #e0f2fe, #bae6fd);
         background-image:
-            linear-gradient(45deg, transparent calc(50% - 1px), #e5e7eb calc(50% - 1px), #e5e7eb calc(50% + 1px), transparent calc(50% + 1px)),
-            linear-gradient(-45deg, transparent calc(50% - 1px), #e5e7eb calc(50% - 1px), #e5e7eb calc(50% + 1px), transparent calc(50% + 1px));
-        color: #d1d5db;
+            linear-gradient(45deg, transparent calc(50% - 1px), rgba(125,211,252,.4) calc(50% - 1px), rgba(125,211,252,.4) calc(50% + 1px), transparent calc(50% + 1px)),
+            linear-gradient(-45deg, transparent calc(50% - 1px), rgba(125,211,252,.4) calc(50% - 1px), rgba(125,211,252,.4) calc(50% + 1px), transparent calc(50% + 1px));
+        color: #7dd3fc;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -567,26 +1122,28 @@
     }
 
     .news-card {
-        background: #fff;
-        border: 1px solid #ebebeb;
-        border-radius: 10px;
+        background: rgba(255,255,255,.82);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(186,230,253,.6);
+        border-radius: 12px;
         overflow: hidden;
         text-decoration: none;
         color: #000;
-        transition: box-shadow .25s, transform .25s;
+        transition: box-shadow .25s, transform .25s, border-color .25s;
         display: block;
     }
 
     .news-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 18px rgba(0, 0, 0, .08);
-        border-color: transparent;
+        transform: translateY(-4px);
+        box-shadow: 0 10px 28px rgba(14,165,233,.16);
+        border-color: #7dd3fc;
     }
 
     .news-card-img {
         height: 160px;
         overflow: hidden;
-        background: #fff;
+        background: linear-gradient(160deg, #f0f9ff 0%, #e0f2fe 100%);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -607,7 +1164,7 @@
     .news-card-title {
         font-size: 13px;
         font-weight: 600;
-        color: #1e293b;
+        color: #0c4a6e;
         line-height: 1.5;
         min-height: 40px;
         display: -webkit-box;
@@ -628,7 +1185,8 @@
     }
 
     .news-card-meta {
-        color: #9ca3af;
+        color: #0284c7;
+        opacity: .7;
         font-size: 11px;
     }
 
@@ -649,6 +1207,10 @@
     /* ===== RESPONSIVE ===== */
     @media(max-width:1100px) {
         .products-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .brands-grid {
             grid-template-columns: repeat(4, 1fr);
         }
     }
@@ -677,6 +1239,10 @@
         .footer-grid {
             grid-template-columns: repeat(2, 1fr);
         }
+
+        .brands-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
     }
 
     @media(max-width:540px) {
@@ -691,12 +1257,19 @@
         .trust-bar .inner {
             grid-template-columns: repeat(2, 1fr);
         }
+
+        .brands-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
     }
 </style>
 @endpush
 
 @section('content')
 <div class="page-body">
+
+    {{-- Sky canvas (clouds) --}}
+    <canvas id="sky-canvas" aria-hidden="true"></canvas>
 
     {{-- ===== HERO SLIDER ===== --}}
     @if($banners->isNotEmpty())
@@ -762,7 +1335,7 @@
     </section>
     @endif
 
-    {{-- ===== SỰ KIỆN / KHUYẾN MÃI (hiển thị ngay dưới banner, khớp xem trước ở trang admin) ===== --}}
+    {{-- ===== SỰ KIỆN / KHUYẾN MÃI ===== --}}
     @if(isset($events) && $events->isNotEmpty())
     <div class="events-strip">
         @foreach($events as $event)
@@ -811,6 +1384,41 @@
         </div>
     </div>
 
+    {{-- ===== DANH MỤC THƯƠNG HIỆU ===== --}}
+    @if(isset($brands) && $brands->isNotEmpty())
+    <div class="brands-section">
+        <div class="brands-bg">
+            <div class="brands-header">
+                <div class="brands-title-wrap">
+                    <div class="brands-title-icon">
+                        <i class="fas fa-tag"></i>
+                    </div>
+                    <div>
+                        <div class="brands-title">Danh mục thương hiệu</div>
+                        <div class="brands-subtitle">Khám phá sản phẩm theo thương hiệu yêu thích</div>
+                    </div>
+                </div>
+                <a href="{{ route('products.index') }}" class="brands-link">Xem tất cả →</a>
+            </div>
+
+            <div class="brands-grid">
+                @foreach($brands as $brand)
+                <a href="{{ route('products.index', ['category' => $brand->slug]) }}" class="brand-chip">
+                    <div class="brand-chip-logo">
+                        @if($brand->image)
+                            <img src="{{ $brand->image }}" alt="{{ $brand->name }}" loading="lazy">
+                        @else
+                            <div class="brand-chip-initials">{{ strtoupper(mb_substr($brand->name, 0, 2)) }}</div>
+                        @endif
+                    </div>
+                    <div class="brand-chip-name">{{ $brand->name }}</div>
+                </a>
+                @endforeach
+            </div>
+        </div>
+    </div>
+    @endif
+
     <div class="container">
 
         {{-- ===== GỢI Ý DÀNH CHO BẠN (AI cá nhân hóa) ===== --}}
@@ -844,7 +1452,7 @@
         @endauth
 
         {{-- ===== SẢN PHẨM MỚI NHẤT ===== --}}
-        <section class="section">
+        <section class="section section--products">
             <div class="section-header">
                 <h2 class="section-title">Sản phẩm mới nhất</h2>
                 <a href="{{ route('products.index') }}" class="section-link">
@@ -910,6 +1518,7 @@
 
             </div>
         </section>
+
         {{-- ===== PROMO BANNERS ===== --}}
         <div class="promo-banners">
             <div class="promo-banner apple">
@@ -940,7 +1549,7 @@
 
         {{-- ===== TIN TỨC CÔNG NGHỆ ===== --}}
         @if($latestNews->isNotEmpty())
-        <section class="section">
+        <section class="section section--news">
 
             <div class="section-header">
                 <h2 class="section-title">Tin tức công nghệ</h2>
@@ -1055,5 +1664,164 @@
 
         resetAutoplay();
     })();
+</script>
+
+<script>
+/* ============================================================
+   HOMEPAGE ANIMATIONS
+   ============================================================ */
+(function () {
+
+    /* ----------------------------------------------------------
+       1. CANVAS CLOUDS
+    ---------------------------------------------------------- */
+    const canvas = document.getElementById('sky-canvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let W, H, clouds = [];
+
+        function resize() {
+            W = canvas.width  = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function makeCloud() {
+            return {
+                x:    Math.random() * W * 1.2,
+                y:    Math.random() * H * .6,
+                r:    60 + Math.random() * 120,
+                dx:   .18 + Math.random() * .28,
+                alpha: .06 + Math.random() * .12,
+            };
+        }
+
+        for (let i = 0; i < 9; i++) clouds.push(makeCloud());
+
+        function drawCloud(c) {
+            const g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r);
+            g.addColorStop(0,   `rgba(255,255,255,${c.alpha})`);
+            g.addColorStop(.6,  `rgba(186,230,253,${c.alpha * .6})`);
+            g.addColorStop(1,   'rgba(186,230,253,0)');
+            ctx.beginPath();
+            ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+            ctx.fillStyle = g;
+            ctx.fill();
+
+            // puff
+            [-.5, .5].forEach(o => {
+                ctx.beginPath();
+                ctx.arc(c.x + c.r * .55 * o, c.y - c.r * .18, c.r * .72, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255,255,255,${c.alpha * .7})`;
+                ctx.fill();
+            });
+        }
+
+        function animateClouds() {
+            ctx.clearRect(0, 0, W, H);
+            clouds.forEach(c => {
+                drawCloud(c);
+                c.x += c.dx;
+                if (c.x - c.r > W * 1.2) { c.x = -c.r * 2; c.y = Math.random() * H * .6; }
+            });
+            requestAnimationFrame(animateClouds);
+        }
+        animateClouds();
+    }
+
+    /* ----------------------------------------------------------
+       2. RISING BUBBLES
+    ---------------------------------------------------------- */
+    function spawnBubble() {
+        const el = document.createElement('div');
+        el.className = 'bubble';
+        const size = 6 + Math.random() * 18;
+        const dur  = 8 + Math.random() * 14;
+        el.style.cssText = [
+            `width:${size}px`, `height:${size}px`,
+            `left:${Math.random() * 100}vw`,
+            `bottom:-${size}px`,
+            `animation-duration:${dur}s`,
+            `animation-delay:${Math.random() * 6}s`,
+        ].join(';');
+        document.querySelector('.page-body').appendChild(el);
+        setTimeout(() => el.remove(), (dur + 6) * 1000);
+    }
+    for (let i = 0; i < 14; i++) spawnBubble();
+    setInterval(spawnBubble, 3000);
+
+    /* ----------------------------------------------------------
+       3. SCROLL REVEAL  (IntersectionObserver)
+    ---------------------------------------------------------- */
+    const revealEls = document.querySelectorAll(
+        '.section, .trust-bar, .brands-section, .promo-banner, .event-card, .events-strip'
+    );
+    revealEls.forEach(el => el.classList.add('reveal'));
+
+    // Products & news grids — stagger
+    document.querySelectorAll('.products-grid, .news-grid, .brands-grid').forEach(el => {
+        el.classList.add('stagger-children');
+    });
+
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                io.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal, .stagger-children').forEach(el => io.observe(el));
+
+    /* ----------------------------------------------------------
+       4. RIPPLE on cards
+    ---------------------------------------------------------- */
+    document.querySelectorAll('.product-card, .news-card, .brand-chip, .event-card').forEach(card => {
+        card.style.position = 'relative';
+        card.style.overflow = 'hidden';
+        card.addEventListener('click', function (e) {
+            const rect = card.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height) * 1.6;
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple-wave';
+            ripple.style.cssText = [
+                `width:${size}px`, `height:${size}px`,
+                `left:${e.clientX - rect.left - size/2}px`,
+                `top:${e.clientY - rect.top  - size/2}px`,
+            ].join(';');
+            card.appendChild(ripple);
+            ripple.addEventListener('animationend', () => ripple.remove());
+        });
+    });
+
+    /* ----------------------------------------------------------
+       5. 3-D TILT on product & news cards
+    ---------------------------------------------------------- */
+    document.querySelectorAll('.product-card, .news-card').forEach(card => {
+        card.addEventListener('mousemove', function (e) {
+            const rect  = card.getBoundingClientRect();
+            const cx    = rect.left + rect.width  / 2;
+            const cy    = rect.top  + rect.height / 2;
+            const dx    = (e.clientX - cx) / (rect.width  / 2);
+            const dy    = (e.clientY - cy) / (rect.height / 2);
+            const rotX  = -dy * 6;
+            const rotY  =  dx * 6;
+            card.style.transform = `perspective(600px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-4px) scale(1.02)`;
+        });
+        card.addEventListener('mouseleave', function () {
+            card.style.transform = '';
+            card.style.transition = 'transform .4s cubic-bezier(.16,1,.3,1), box-shadow .25s, border-color .25s';
+            setTimeout(() => card.style.transition = '', 400);
+        });
+    });
+
+    /* ----------------------------------------------------------
+       6. TRUST BAR — count-up numbers (if any)
+    ---------------------------------------------------------- */
+    // Nothing numeric right now — reserved for future
+
+})();
 </script>
 @endpush

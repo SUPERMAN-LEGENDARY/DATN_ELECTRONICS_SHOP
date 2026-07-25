@@ -66,8 +66,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile/order/{order}/cancel', [OrderController::class, 'cancel'])->name('profile.order.cancel');
     Route::patch('/profile/order/{order}/received', [OrderController::class, 'received'])->name('profile.order.received');
     Route::post('/profile/order/{order}/reorder', [OrderController::class, 'reorder'])->name('profile.order.reorder');
-    Route::get('/profile/order/{order}/review', [ReviewController::class, 'create'])->name('profile.review.create');
-    Route::post('/profile/order/{order}/review', [ReviewController::class, 'store'])->name('profile.review.store');
+// Route::get('/profile/order/{order}/review', [ReviewController::class, 'create'])
+//     ->name('profile.review.create');
+Route::post('/profile/order/{order}/review', [ReviewController::class, 'store'])
+    ->name('profile.review.store');
+    
 
     // ── Voucher ──
     Route::get('/profile/voucher', [VoucherController::class, 'index'])->name('profile.voucher');

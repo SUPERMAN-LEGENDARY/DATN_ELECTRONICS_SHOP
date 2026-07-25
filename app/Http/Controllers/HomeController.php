@@ -21,7 +21,7 @@ class HomeController extends Controller
             ->withCount('visibleReviews as reviews_count')
             ->active()
             ->latest()
-            ->limit(4)
+            ->limit(5)
             ->get();
 
         $categories = Category::categories()->active()->get();
@@ -30,7 +30,7 @@ class HomeController extends Controller
         $latestNews = News::with(['category'])
             ->where('is_active', true)
             ->orderByDesc('published_at')
-            ->limit(4)
+            ->limit(5)
             ->get();
 
         $suggestedProducts = $this->buildSuggestedProducts($newProducts->pluck('id'));
@@ -68,7 +68,7 @@ class HomeController extends Controller
                 ->whereIn('category_id', $viewedCategoryIds)
                 ->whereNotIn('id', $viewedProductIds)
                 ->inRandomOrder()
-                ->limit(4)
+                ->limit(5)
                 ->get();
         }
 
@@ -76,7 +76,7 @@ class HomeController extends Controller
             $suggested = $baseQuery()
                 ->whereNotIn('id', $excludeIds)
                 ->inRandomOrder()
-                ->limit(4)
+                ->limit(5)
                 ->get();
         }
 
