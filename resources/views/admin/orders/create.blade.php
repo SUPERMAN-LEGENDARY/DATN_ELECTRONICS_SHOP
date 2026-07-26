@@ -149,6 +149,12 @@
         background: #f8f9fa;
         border-radius: 6px;
     }
+    #customer_new_block {
+        margin-top: 10px;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 6px;
+    }
     .help-text {
         font-size: 12px;
         color: #6c757d;
@@ -186,6 +192,31 @@
     .summary-box .discount-text {
         color: #dc3545;
     }
+    .product-picker-wrap {
+        max-height: 260px;
+        overflow-y: auto;
+        margin-top: 8px;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+    }
+    .product-picker-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    .product-picker-table thead tr {
+        background: #1565C0;
+        color: #fff;
+    }
+    .product-picker-table th, .product-picker-table td {
+        padding: 8px 12px;
+    }
+    .product-picker-table th {
+        text-align: left;
+    }
+    .product-picker-row:hover td {
+        background: #f0f6ff;
+    }
 </style>
 @endpush
 
@@ -209,19 +240,41 @@
 
             {{-- Khách hàng --}}
             <div class="form-group">
-                <label for="user_id">Khách hàng <span class="required">*</span></label>
-                <select name="user_id" id="user_id" class="form-control @error('user_id') is-invalid @enderror" required>
-                    <option value="">-- Chọn khách hàng --</option>
-                    @foreach($users as $user)
-                        <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
-                            {{ $user->name }} ({{ $user->email }})
-                        </option>
-                    @endforeach
-                </select>
-                @error('user_id')
-                    <div class="error">{{ $message }}</div>
-                @enderror
-                <div class="error" id="user_id-error" style="display:none;"></div>
+                <label>Khách hàng <span class="required">*</span></label>
+                <div class="mb-2">
+                    <div class="form-check-inline">
+                        <input class="form-check-input" type="radio" name="customer_option" id="customer_existing" value="existing" checked>
+                        <label class="form-check-label" for="customer_existing">Khách hàng có sẵn</label>
+                    </div>
+                    <div class="form-check-inline">
+                        <input class="form-check-input" type="radio" name="customer_option" id="customer_new" value="new">
+                        <label class="form-check-label" for="customer_new">Khách hàng mới</label>
+                    </div>
+                </div>
+
+                <div id="customer_existing_block">
+                    <select name="user_id" id="user_id" class="form-control @error('user_id') is-invalid @enderror">
+                        <option value="">-- Chọn khách hàng --</option>
+                        @foreach($users as $user)
+                            <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
+                                {{ $user->name }} ({{ $user->email }})
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('user_id')
+                        <div class="error">{{ $message }}</div>
+                    @enderror
+                    <div class="error" id="user_id-error" style="display:none;"></div>
+                </div>
+
+                <div id="customer_new_block" style="display:none;">
+                    <input type="text" name="customer_name" id="customer_name" class="form-control @error('customer_name') is-invalid @enderror"
+                           placeholder="Nhập tên khách hàng mới" value="{{ old('customer_name') }}">
+                    @error('customer_name')
+                        <div class="error">{{ $message }}</div>
+                    @enderror
+                    <div class="error" id="customer_name-error" style="display:none;"></div>
+                </div>
             </div>
 
             {{-- Địa chỉ --}}
@@ -368,35 +421,40 @@
     @enderror
 </div>
 
-            {{-- Danh sách sản phẩm --}}
+            {{-- Chọn sản phẩm từ bảng --}}
             <div class="form-group">
-                <label>Danh sách sản phẩm <span class="required">*</span></label>
-                <div id="product-list">
-                    <div class="product-row">
-                        <div class="col-md-5">
-                            <select name="items[0][product_id]" class="form-control product-select" required>
-                                <option value="">-- Chọn sản phẩm --</option>
-                                @foreach($products as $product)
-                                    <option value="{{ $product->id }}" data-price="{{ $product->price }}">
-                                        {{ $product->name }} ({{ number_format($product->price, 0, ',', '.') }} VNĐ)
-                                    </option>
-                                @endforeach
-                            </select>
-                            <div class="error product-error" style="display:none;"></div>
-                        </div>
-                        <div class="col-md-2">
-                            <input type="number" name="items[0][quantity]" class="form-control quantity" placeholder="SL" min="1" value="1" required>
-                            <div class="error quantity-error" style="display:none;"></div>
-                        </div>
-                        <div class="col-md-3">
-                            <input type="number" name="items[0][unit_price]" class="form-control unit-price" placeholder="Giá (VNĐ)" step="1000" min="0">
-                        </div>
-                        <div class="col-md-2 text-right">
-                            <button type="button" class="btn btn-danger remove-product">Xóa</button>
-                        </div>
-                    </div>
+                <label>Chọn sản phẩm <span class="required">*</span></label>
+                <input type="text" id="productSearch" class="form-control" placeholder="Tìm sản phẩm theo tên...">
+                <div class="product-picker-wrap">
+                    <table class="product-picker-table">
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th class="text-right">Giá</th>
+                                <th class="text-right">Tồn kho</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="productPickerBody">
+                            @foreach($products as $product)
+                            <tr class="product-picker-row" data-id="{{ $product->id }}" data-name="{{ strtolower($product->name) }}" data-price="{{ $product->price }}">
+                                <td>{{ $product->name }}</td>
+                                <td class="text-right">{{ number_format($product->price) }}đ</td>
+                                <td class="text-right">{{ $product->stock }}</td>
+                                <td class="text-right">
+                                    <button type="button" class="btn btn-info btn-add-product">+ Thêm</button>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-                <button type="button" class="btn btn-info" id="add-product">+ Thêm sản phẩm</button>
+            </div>
+
+            {{-- Sản phẩm đã chọn --}}
+            <div class="form-group">
+                <label>Sản phẩm đã chọn <span class="required">*</span></label>
+                <div id="product-list"></div>
                 <div class="error" id="product-list-error" style="display:none;"></div>
             </div>
 
@@ -441,7 +499,29 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // ─── 1. XỬ LÝ CHỌN/NHẬP ĐỊA CHỈ ──────────────────────────
+        // ─── 1. TOGGLE KHÁCH HÀNG CÓ SẴN / MỚI ──────────────────
+        const customerExistingBlock = document.getElementById('customer_existing_block');
+        const customerNewBlock = document.getElementById('customer_new_block');
+
+        document.querySelectorAll('input[name="customer_option"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'existing') {
+                    customerExistingBlock.style.display = 'block';
+                    customerNewBlock.style.display = 'none';
+                    document.getElementById('customer_name').removeAttribute('required');
+                } else {
+                    customerExistingBlock.style.display = 'none';
+                    customerNewBlock.style.display = 'block';
+                    document.getElementById('customer_name').setAttribute('required', 'required');
+                    // Khách hàng mới thì chắc chắn chưa có địa chỉ lưu sẵn
+                    const addressNewRadio = document.getElementById('address_new');
+                    addressNewRadio.checked = true;
+                    addressNewRadio.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+
+        // ─── 2. XỬ LÝ CHỌN/NHẬP ĐỊA CHỈ ──────────────────────────
         const addressExistingBlock = document.getElementById('address_existing_block');
         const addressNewBlock = document.getElementById('address_new_block');
         const addressOptions = document.querySelectorAll('input[name="address_option"]');
@@ -460,7 +540,7 @@
             });
         });
 
-        // ─── 2. LỌC ĐỊA CHỈ THEO USER ─────────────────────────────
+        // ─── 3. LỌC ĐỊA CHỈ THEO USER ─────────────────────────────
         const userSelect = document.getElementById('user_id');
         const addressSelect = document.getElementById('address_id');
         const allAddressOptions = Array.from(addressSelect.options);
@@ -486,98 +566,92 @@
         userSelect.addEventListener('change', filterAddresses);
         filterAddresses();
 
-        // ─── 3. THÊM / XÓA DÒNG SẢN PHẨM ──────────────────────
-        let itemIndex = 1;
-        document.getElementById('add-product').addEventListener('click', function() {
-            const container = document.getElementById('product-list');
-            const firstRow = container.querySelector('.product-row');
-            const newRow = firstRow.cloneNode(true);
-
-            const selects = newRow.querySelectorAll('select, input');
-            selects.forEach(el => {
-                const name = el.getAttribute('name');
-                if (name) {
-                    el.setAttribute('name', name.replace(/\[\d+\]/, '[' + itemIndex + ']'));
-                }
-                if (el.tagName === 'SELECT') {
-                    el.value = '';
-                } else if (el.type === 'number') {
-                    el.value = (el.classList.contains('quantity')) ? '1' : '';
-                }
-                const error = el.closest('.product-row').querySelector('.product-error, .quantity-error');
-                if (error) error.style.display = 'none';
-                el.classList.remove('is-invalid');
+        // ─── 4. TÌM KIẾM SẢN PHẨM TRONG BẢNG ─────────────────────
+        document.getElementById('productSearch').addEventListener('input', function() {
+            const keyword = this.value.trim().toLowerCase();
+            document.querySelectorAll('.product-picker-row').forEach(row => {
+                row.style.display = row.dataset.name.includes(keyword) ? '' : 'none';
             });
+        });
 
-            container.appendChild(newRow);
+        // ─── 5. THÊM SẢN PHẨM TỪ BẢNG VÀO DANH SÁCH ĐÃ CHỌN ──────
+        let itemIndex = 0;
+        document.getElementById('productPickerBody').addEventListener('click', function(e) {
+            if (!e.target.classList.contains('btn-add-product')) return;
+            const row = e.target.closest('.product-picker-row');
+            const id = row.dataset.id;
+            const name = row.querySelector('td').textContent.trim();
+            const price = row.dataset.price;
+
+            const existing = document.querySelector(`.product-row[data-product-id="${id}"]`);
+            if (existing) {
+                const qtyInput = existing.querySelector('.quantity');
+                qtyInput.value = parseInt(qtyInput.value || 0) + 1;
+                updateSummary();
+                return;
+            }
+
+            const newRow = document.createElement('div');
+            newRow.className = 'product-row';
+            newRow.setAttribute('data-product-id', id);
+            newRow.innerHTML = `
+                <div class="col-md-5">
+                    <strong>${name}</strong>
+                    <input type="hidden" name="items[${itemIndex}][product_id]" value="${id}">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="items[${itemIndex}][quantity]" class="form-control quantity" min="1" value="1" required>
+                    <div class="error quantity-error" style="display:none;"></div>
+                </div>
+                <div class="col-md-3">
+                    <input type="number" name="items[${itemIndex}][unit_price]" class="form-control unit-price" step="1000" min="0" value="${price}">
+                </div>
+                <div class="col-md-2 text-right">
+                    <button type="button" class="btn btn-danger remove-product">Xóa</button>
+                </div>`;
+            document.getElementById('product-list').appendChild(newRow);
             itemIndex++;
             updateSummary();
         });
 
         document.getElementById('product-list').addEventListener('click', function(e) {
             if (e.target.classList.contains('remove-product')) {
-                const row = e.target.closest('.product-row');
-                if (row && document.querySelectorAll('.product-row').length > 1) {
-                    row.remove();
-                    updateSummary();
-                } else {
-                    alert('Phải có ít nhất một sản phẩm.');
-                }
-            }
-        });
-
-        // ─── 4. TỰ ĐỘNG ĐIỀN GIÁ ────────────────────────────────
-        document.getElementById('product-list').addEventListener('change', function(e) {
-            if (e.target.classList.contains('product-select')) {
-                const row = e.target.closest('.product-row');
-                const unitPriceInput = row.querySelector('.unit-price');
-                const selected = e.target.options[e.target.selectedIndex];
-                const price = selected.getAttribute('data-price');
-                if (unitPriceInput && !unitPriceInput.value) {
-                    unitPriceInput.value = price || '';
-                }
+                e.target.closest('.product-row').remove();
                 updateSummary();
             }
         });
 
-        // Lắng nghe thay đổi số lượng và giá
         document.getElementById('product-list').addEventListener('input', function(e) {
             if (e.target.classList.contains('quantity') || e.target.classList.contains('unit-price')) {
                 updateSummary();
             }
         });
 
-        // ─── 5. TÍNH TỔNG ĐƠN HÀNG ──────────────────────────────
+        // ─── 6. TÍNH TỔNG ĐƠN HÀNG ──────────────────────────────
         function updateSummary() {
             let subtotal = 0;
             const rows = document.querySelectorAll('.product-row');
 
             rows.forEach(row => {
-                const productSelect = row.querySelector('.product-select');
-                const quantityInput = row.querySelector('.quantity');
-                const unitPriceInput = row.querySelector('.unit-price');
-
-                if (productSelect && productSelect.value) {
-                    const price = parseFloat(unitPriceInput.value) || parseFloat(productSelect.options[productSelect.selectedIndex]?.getAttribute('data-price')) || 0;
-                    const qty = parseInt(quantityInput.value) || 0;
-                    subtotal += price * qty;
-                }
+                const price = parseFloat(row.querySelector('.unit-price').value) || 0;
+                const qty = parseInt(row.querySelector('.quantity').value) || 0;
+                subtotal += price * qty;
             });
 
             // Tính giảm giá
-let discount = 0;
-const voucherSelect = document.getElementById('voucher_id');
-if (voucherSelect && voucherSelect.value) {
-    const selectedOption = voucherSelect.options[voucherSelect.selectedIndex];
-    const discountPercent = parseFloat(selectedOption.getAttribute('data-discount-percent')) || 0;
-    const minOrder = parseFloat(selectedOption.getAttribute('data-min-order')) || 0;
+            let discount = 0;
+            const voucherSelect = document.getElementById('voucher_id');
+            if (voucherSelect && voucherSelect.value) {
+                const selectedOption = voucherSelect.options[voucherSelect.selectedIndex];
+                const discountPercent = parseFloat(selectedOption.getAttribute('data-discount-percent')) || 0;
+                const minOrder = parseFloat(selectedOption.getAttribute('data-min-order')) || 0;
 
-    if (subtotal >= minOrder) {
-        discount = subtotal * (discountPercent / 100);
-    }
-}
+                if (subtotal >= minOrder) {
+                    discount = subtotal * (discountPercent / 100);
+                }
+            }
 
-const total = Math.max(0, subtotal - discount);
+            const total = Math.max(0, subtotal - discount);
             // Hiển thị
             document.getElementById('subtotal-display').textContent = subtotal.toLocaleString('vi-VN') + ' VNĐ';
             document.getElementById('discount-display').textContent = discount.toLocaleString('vi-VN') + ' VNĐ';
@@ -586,7 +660,7 @@ const total = Math.max(0, subtotal - discount);
 
         document.getElementById('voucher_id').addEventListener('change', updateSummary);
 
-        // ─── 6. VALIDATION CLIENT-SIDE ──────────────────────────
+        // ─── 7. VALIDATION CLIENT-SIDE ──────────────────────────
         const form = document.getElementById('orderForm');
 
         function setError(fieldId, message) {
@@ -621,13 +695,24 @@ const total = Math.max(0, subtotal - discount);
         form.addEventListener('submit', function(e) {
             let isValid = true;
 
-            // User
-            const userId = document.getElementById('user_id');
-            if (!userId.value) {
-                setError('user_id', 'Vui lòng chọn khách hàng.');
-                isValid = false;
+            // Khách hàng
+            const customerOption = document.querySelector('input[name="customer_option"]:checked');
+            if (customerOption.value === 'existing') {
+                const userId = document.getElementById('user_id');
+                if (!userId.value) {
+                    setError('user_id', 'Vui lòng chọn khách hàng.');
+                    isValid = false;
+                } else {
+                    clearError('user_id');
+                }
             } else {
-                clearError('user_id');
+                const customerName = document.getElementById('customer_name');
+                if (!customerName.value.trim()) {
+                    setError('customer_name', 'Vui lòng nhập tên khách hàng.');
+                    isValid = false;
+                } else {
+                    clearError('customer_name');
+                }
             }
 
             // Địa chỉ
@@ -673,36 +758,28 @@ const total = Math.max(0, subtotal - discount);
             // Sản phẩm
             const productRows = document.querySelectorAll('.product-row');
             let hasProductError = false;
-            productRows.forEach((row) => {
-                const productSelect = row.querySelector('.product-select');
-                const quantityInput = row.querySelector('.quantity');
-                const productError = row.querySelector('.product-error');
-                const quantityError = row.querySelector('.quantity-error');
 
-                if (!productSelect.value) {
-                    productError.textContent = 'Chọn sản phẩm.';
-                    productError.style.display = 'block';
-                    productSelect.classList.add('is-invalid');
-                    hasProductError = true;
-                } else {
-                    productError.style.display = 'none';
-                    productSelect.classList.remove('is-invalid');
-                }
-
-                const qty = parseInt(quantityInput.value);
-                if (isNaN(qty) || qty < 1) {
-                    quantityError.textContent = 'Số lượng phải ≥ 1.';
-                    quantityError.style.display = 'block';
-                    quantityInput.classList.add('is-invalid');
-                    hasProductError = true;
-                } else {
-                    quantityError.style.display = 'none';
-                    quantityInput.classList.remove('is-invalid');
-                }
-            });
+            if (productRows.length === 0) {
+                hasProductError = true;
+            } else {
+                productRows.forEach((row) => {
+                    const quantityInput = row.querySelector('.quantity');
+                    const quantityError = row.querySelector('.quantity-error');
+                    const qty = parseInt(quantityInput.value);
+                    if (isNaN(qty) || qty < 1) {
+                        quantityError.textContent = 'Số lượng phải ≥ 1.';
+                        quantityError.style.display = 'block';
+                        quantityInput.classList.add('is-invalid');
+                        hasProductError = true;
+                    } else {
+                        quantityError.style.display = 'none';
+                        quantityInput.classList.remove('is-invalid');
+                    }
+                });
+            }
 
             if (hasProductError) {
-                document.getElementById('product-list-error').textContent = 'Vui lòng kiểm tra lại các sản phẩm.';
+                document.getElementById('product-list-error').textContent = 'Vui lòng chọn ít nhất 1 sản phẩm và kiểm tra lại số lượng.';
                 document.getElementById('product-list-error').style.display = 'block';
                 isValid = false;
             } else {

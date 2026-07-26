@@ -175,7 +175,7 @@ $allowedTransitions = [
     'confirmed'  => ['processing', 'cancelled'],
     'processing' => ['shipped', 'cancelled'],
     'shipped'    => ['delivered', 'cancelled'],
-    'delivered'  => ['returned'],
+    'delivered'  => [], // Không cho phép hoàn trả sau khi đã giao
 ];
 @endphp
 
@@ -222,7 +222,7 @@ $allowedTransitions = [
                 {{-- Trạng thái đơn hàng --}}
                 <td>
                     @php
-                        $isLocked = in_array($order->status, ['cancelled', 'returned']);
+                        $isLocked = in_array($order->status, ['cancelled', 'returned', 'delivered']);
                         $nextOptions = $allowedTransitions[$order->status] ?? [];
                     @endphp
                     <form action="{{ route('admin.orders.update-status', $order) }}" method="POST">

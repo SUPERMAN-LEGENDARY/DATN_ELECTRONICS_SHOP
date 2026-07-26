@@ -198,9 +198,9 @@ $paymentMethods = [
             <span class="value">{{ $order->user->email ?? 'N/A' }}</span>
         </div>
         <div class="info-item">
-            <span class="label">Số điện thoại</span>
-            <span class="value">{{ $order->user->phone ?? 'N/A' }}</span>
-        </div>
+    <span class="label">Số điện thoại</span>
+    <span class="value">{{ $order->address->phone ?? 'N/A' }}</span>
+</div>
         <div class="info-item">
             <span class="label">Địa chỉ giao hàng</span>
             <span class="value">

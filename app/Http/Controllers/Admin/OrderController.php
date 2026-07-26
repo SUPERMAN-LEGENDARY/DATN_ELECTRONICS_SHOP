@@ -11,6 +11,7 @@ use App\Models\Address;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
@@ -52,36 +53,52 @@ class OrderController extends Controller
     // ─── Lưu đơn hàng mới ────────────────────────────────────
     public function store(Request $request)
     {
-       $request->validate([
-    'user_id'          => 'required|exists:users,id',
-    'address_id'       => 'nullable|exists:addresses,id',
-    'address_name'     => 'required_without:address_id|nullable|string|max:255',
-    'address_phone'    => 'required_without:address_id|nullable|string|max:20',
-    'address_detail'   => 'required_without:address_id|nullable|string|max:500',
-    'address_ward'     => 'required_without:address_id|nullable|string|max:100',
-    'address_district' => 'required_without:address_id|nullable|string|max:100',
-    'address_province' => 'required_without:address_id|nullable|string|max:100',
-    'voucher_id'       => 'nullable|exists:vouchers,id',
-    'status'           => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled,returned', // ✅ thêm dòng này
-    'payment_method'   => 'required|in:cod,momo',
-    'payment_status'   => 'required|in:unpaid,paid,refunded',
-    'note'             => 'nullable|string|max:500',
-    'items'            => 'required|array|min:1',
-    'items.*.product_id' => 'required|exists:products,id',
-    'items.*.quantity'   => 'required|integer|min:1',
-    'items.*.unit_price' => 'nullable|numeric|min:0',
-]);
+        $request->validate([
+            'customer_option'  => 'required|in:existing,new',
+            'user_id'          => 'required_if:customer_option,existing|nullable|exists:users,id',
+            'customer_name'    => 'required_if:customer_option,new|nullable|string|max:255',
+            'address_id'       => 'nullable|exists:addresses,id',
+            'address_name'     => 'required_without:address_id|nullable|string|max:255',
+            'address_phone'    => 'required_without:address_id|nullable|string|max:20',
+            'address_detail'   => 'required_without:address_id|nullable|string|max:500',
+            'address_ward'     => 'required_without:address_id|nullable|string|max:100',
+            'address_district' => 'required_without:address_id|nullable|string|max:100',
+            'address_province' => 'required_without:address_id|nullable|string|max:100',
+            'voucher_id'       => 'nullable|exists:vouchers,id',
+            'status'           => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled,returned',
+            'payment_method'   => 'required|in:cod,momo',
+            'payment_status'   => 'required|in:unpaid,paid,refunded',
+            'note'             => 'nullable|string|max:500',
+            'items'            => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity'   => 'required|integer|min:1',
+            'items.*.unit_price' => 'nullable|numeric|min:0',
+        ]);
+
+        // 0. Xác định khách hàng: có sẵn hay tạo mới
+        if ($request->customer_option === 'new') {
+            $user = User::create([
+                'name'     => $request->customer_name,
+                'email'    => 'guest_' . uniqid() . '@noemail.local',
+                'phone'    => null,
+                'role'     => 'user',
+                'password' => bcrypt(Str::random(24)),
+            ]);
+            $userId = $user->id;
+        } else {
+            $userId = $request->user_id;
+        }
 
         // 1. Xử lý địa chỉ
         if ($request->address_id) {
-            $address = Address::where('id', $request->address_id)->where('user_id', $request->user_id)->first();
+            $address = Address::where('id', $request->address_id)->where('user_id', $userId)->first();
             if (!$address) {
                 return back()->with('error', 'Địa chỉ không hợp lệ.')->withInput();
             }
             $addressId = $request->address_id;
         } else {
             $address = Address::create([
-                'user_id'   => $request->user_id,
+                'user_id'   => $userId,
                 'full_name' => $request->address_name,
                 'phone'     => $request->address_phone,
                 'street'    => $request->address_detail,
@@ -110,28 +127,28 @@ class OrderController extends Controller
             ];
         }
 
-       // 3. Tính discount (nếu có voucher)
-$discount = 0;
-if ($request->voucher_id) {
-    $voucher = Voucher::find($request->voucher_id);
-    if ($voucher && $voucher->is_active) {
-        // Kiểm tra điều kiện đơn tối thiểu
-        if ($voucher->min_order_value && $subtotal < $voucher->min_order_value) {
-            $discount = 0;
-        } else {
-            $discount = $subtotal * ($voucher->discount_percent / 100);
+        // 3. Tính discount (nếu có voucher)
+        $discount = 0;
+        if ($request->voucher_id) {
+            $voucher = Voucher::find($request->voucher_id);
+            if ($voucher && $voucher->is_active) {
+                // Kiểm tra điều kiện đơn tối thiểu
+                if ($voucher->min_order_value && $subtotal < $voucher->min_order_value) {
+                    $discount = 0;
+                } else {
+                    $discount = $subtotal * ($voucher->discount_percent / 100);
+                }
+            }
         }
-    }
-}
         // Đảm bảo discount là số
         $discount = (float) $discount;
         $total = $subtotal - $discount;
 
         // 4. Lưu vào DB (transaction)
         $order = null;
-        DB::transaction(function () use ($request, $addressId, $itemsData, $subtotal, $discount, $total, &$order) {
+        DB::transaction(function () use ($request, $userId, $addressId, $itemsData, $subtotal, $discount, $total, &$order) {
             $order = Order::create([
-                'user_id'        => $request->user_id,
+                'user_id'        => $userId,
                 'address_id'     => $addressId,
                 'voucher_id'     => $request->voucher_id,
                 'status'         => $request->status,
@@ -159,10 +176,10 @@ if ($request->voucher_id) {
 
     // ─── Chi tiết đơn hàng ────────────────────────────────────
     public function show(Order $order)
-{
-    $order->load(['items.product', 'items.attributes.attribute', 'user', 'address', 'voucher']);
-    return view('admin.orders.show', compact('order'));
-}
+    {
+        $order->load(['items.product', 'items.attributes.attribute', 'user', 'address', 'voucher']);
+        return view('admin.orders.show', compact('order'));
+    }
 
     // ─── Form chỉnh sửa ──────────────────────────────────────
     public function edit(Order $order)
@@ -220,7 +237,7 @@ if ($request->voucher_id) {
                 'confirmed'  => ['processing', 'cancelled'],
                 'processing' => ['shipped', 'cancelled'],
                 'shipped'    => ['delivered', 'cancelled'],
-                'delivered'  => ['returned'],
+                'delivered'  => [], // Không cho phép hoàn trả sau khi đã giao
             ];
 
             if (!isset($allowedTransitions[$currentStatus]) || !in_array($newStatus, $allowedTransitions[$currentStatus])) {

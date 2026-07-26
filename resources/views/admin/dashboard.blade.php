@@ -295,14 +295,10 @@
         new Chart(ctx1, {
             type: 'bar',
             data: {
-                labels: {
-                    !!json_encode($months) !!
-                },
+                labels: {!! json_encode($months) !!},
                 datasets: [{
                     label: 'Doanh thu (VNĐ)',
-                    data: {
-                        !!json_encode($revenues) !!
-                    },
+                    data: {!! json_encode($revenues) !!},
                     backgroundColor: 'rgba(30, 136, 229, 0.6)',
                     borderColor: 'rgba(30, 136, 229, 1)',
                     borderWidth: 1,
@@ -345,13 +341,9 @@
         new Chart(ctx2, {
             type: 'doughnut',
             data: {
-                labels: {
-                    !!json_encode($statusData['labels']) !!
-                },
+                labels: {!! json_encode($statusData['labels']) !!},
                 datasets: [{
-                    data: {
-                        !!json_encode($statusData['data']) !!
-                    },
+                    data: {!! json_encode($statusData['data']) !!},
                     backgroundColor: [
                         '#FFC107', // pending - vàng
                         '#FF9800', // confirmed - cam
