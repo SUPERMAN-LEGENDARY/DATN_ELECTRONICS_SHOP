@@ -115,6 +115,8 @@
 .btn-vc-remove:hover { background:#FFEBEE; }
 .variant-card-body { padding:14px; }
 .variant-attr-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+.variant-image-block { padding-top:12px; margin-bottom:12px; border-top:1px dashed #E8E8E8; }
+.variant-image-block .image-preview-row img { width:60px; height:60px; object-fit:cover; border-radius:6px; border:1px solid #1565C0; }
 .variant-price-row {
     display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px;
     padding-top:12px; border-top:1px dashed #E8E8E8;
@@ -380,6 +382,45 @@
                             @endforeach
                         </div>
                         <div class="removed-chip-row" id="vcRemovedChips-{{ $vi }}"></div>
+
+                        {{-- Ảnh riêng của biến thể (đại diện + album) --}}
+                        <div class="variant-image-block">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label><i class="fas fa-image"></i> Ảnh đại diện biến thể
+                                        <span style="color:#888;font-weight:400">(để trống sẽ dùng ảnh chung của sản phẩm)</span>
+                                    </label>
+                                    <input type="file" name="variants[{{ $vi }}][thumbnail]" accept="image/*"
+                                           class="variant-thumb-input" data-vidx="{{ $vi }}">
+                                    @if($v->thumbnail)
+                                    <div style="margin-top:6px">
+                                        <img src="{{ $v->thumbnail }}" alt="" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #e0e0e0">
+                                        <p style="font-size:11px;color:#888;margin-top:4px">Tải ảnh mới sẽ thay thế ảnh đại diện biến thể này.</p>
+                                    </div>
+                                    @endif
+                                    <div class="image-preview-row" id="vThumbPreview-{{ $vi }}" style="margin-top:6px"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="fas fa-images"></i> Album ảnh biến thể
+                                        <span style="color:#888;font-weight:400">(tối đa 6 ảnh)</span>
+                                    </label>
+                                    <input type="file" name="variants[{{ $vi }}][images][]" multiple accept="image/*"
+                                           class="variant-images-input" data-vidx="{{ $vi }}">
+                                    @if(!empty($v->images))
+                                    <div style="margin-top:6px">
+                                        <div class="image-preview-row">
+                                            @foreach($v->images as $img)
+                                            <img src="{{ $img }}" alt="" style="width:60px;height:60px">
+                                            @endforeach
+                                        </div>
+                                        <p style="font-size:11px;color:#888;margin-top:4px">Tải ảnh mới sẽ thay thế toàn bộ album ảnh biến thể này.</p>
+                                    </div>
+                                    @endif
+                                    <div class="image-preview-row" id="vImagesPreview-{{ $vi }}" style="margin-top:6px"></div>
+                                </div>
+                            </div>
+                        </div>
+
                         {{-- Giá riêng của biến thể --}}
                         <div class="variant-price-row">
                             <div class="form-group">
@@ -520,6 +561,13 @@ function addVariant() {
     card.className = 'variant-card';
     card.id = 'vc-' + idx;
 
+    // Lấy sẵn giá / giảm giá / tồn kho / trạng thái từ form gốc của sản phẩm
+    // để bê nguyên xuống biến thể mới — người dùng chỉ cần chỉnh ảnh (và sửa lại nếu cần)
+    const basePrice    = document.getElementById('price')?.value || '';
+    const baseDiscount = document.querySelector('[name="discount_percent"]')?.value || '0';
+    const baseStock    = document.querySelector('[name="stock"]')?.value || '0';
+    const baseIsActive = document.getElementById('is_active')?.checked ?? true;
+
     // Build các input thuộc tính — prefill value từ thuộc tính gốc của sản phẩm
     // Bỏ qua những thuộc tính đang bị ẩn ở khu vực base (removedBaseAttrs)
     const attrInputs = ALL_ATTRIBUTES.filter(a => !removedBaseAttrs[a.id] && a.is_variant).map(a => {
@@ -545,7 +593,7 @@ function addVariant() {
                 <i class="fas fa-cubes" style="color:#1565C0;margin-right:4px"></i>
                 Biến thể #${idx + 1}
             </span>
-            <span class="vc-badge" id="vc-badge-${idx}">Chưa nhập giá</span>
+            <span class="vc-badge" id="vc-badge-${idx}">${basePrice ? parseInt(basePrice).toLocaleString('vi-VN') + 'đ' : 'Chưa nhập giá'}</span>
             <div class="vc-actions">
                 <button type="button" class="btn-vc-remove"
                         onclick="event.stopPropagation(); removeVariant(${idx})"
@@ -559,28 +607,51 @@ function addVariant() {
                 ${attrInputs || '<p style="color:#aaa;font-size:12px;grid-column:1/-1">Chưa có thuộc tính. Thêm trong <strong>Quản lý thuộc tính</strong>.</p>'}
             </div>
             <div class="removed-chip-row" id="vcRemovedChips-${idx}"></div>
+
+            <div class="variant-image-block">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-image"></i> Ảnh đại diện biến thể
+                            <span style="color:#888;font-weight:400">(để trống sẽ dùng ảnh chung của sản phẩm)</span>
+                        </label>
+                        <input type="file" name="variants[${idx}][thumbnail]" accept="image/*"
+                               class="variant-thumb-input" data-vidx="${idx}">
+                        <div class="image-preview-row" id="vThumbPreview-${idx}" style="margin-top:6px"></div>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-images"></i> Album ảnh biến thể
+                            <span style="color:#888;font-weight:400">(tối đa 6 ảnh)</span>
+                        </label>
+                        <input type="file" name="variants[${idx}][images][]" multiple accept="image/*"
+                               class="variant-images-input" data-vidx="${idx}">
+                        <div class="image-preview-row" id="vImagesPreview-${idx}" style="margin-top:6px"></div>
+                    </div>
+                </div>
+            </div>
+
             <div class="variant-price-row">
                 <div class="form-group">
                     <label><i class="fas fa-tag"></i> Giá (đ) *</label>
                     <input type="number" name="variants[${idx}][price]"
+                           value="${esc(basePrice)}"
                            placeholder="29990000" min="0" required
                            oninput="updateVariantBadge(${idx})">
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-percent"></i> Giảm giá (%)</label>
                     <input type="number" name="variants[${idx}][discount_percent]"
-                           value="0" min="0" max="100">
+                           value="${esc(baseDiscount)}" min="0" max="100">
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-boxes"></i> Tồn kho</label>
                     <input type="number" name="variants[${idx}][stock]"
-                           value="0" min="0">
+                           value="${esc(baseStock)}" min="0">
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-eye"></i> Hiển thị</label>
                     <div class="toggle-check" style="margin-top:8px">
                         <input type="checkbox" name="variants[${idx}][is_active]"
-                               value="1" id="va-${idx}" checked>
+                               value="1" id="va-${idx}" ${baseIsActive ? 'checked' : ''}>
                         <label for="va-${idx}" style="margin:0;font-size:12px;cursor:pointer">Bật</label>
                     </div>
                 </div>
@@ -1040,6 +1111,43 @@ document.getElementById('imageInput').addEventListener('change', function() {
         };
         reader.readAsDataURL(file);
     });
+});
+
+// ── Preview ảnh riêng của biến thể (đại diện + album) — dùng event delegation
+//    vì các variant-card có thể được thêm động sau khi trang đã load ──
+document.getElementById('variantList').addEventListener('change', function (e) {
+    const target = e.target;
+
+    if (target.classList.contains('variant-thumb-input')) {
+        const idx = target.dataset.vidx;
+        const preview = document.getElementById('vThumbPreview-' + idx);
+        preview.innerHTML = '';
+        if (target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const img = document.createElement('img');
+                img.src = ev.target.result;
+                preview.appendChild(img);
+            };
+            reader.readAsDataURL(target.files[0]);
+        }
+        return;
+    }
+
+    if (target.classList.contains('variant-images-input')) {
+        const idx = target.dataset.vidx;
+        const preview = document.getElementById('vImagesPreview-' + idx);
+        preview.innerHTML = '';
+        Array.from(target.files).slice(0, 6).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const img = document.createElement('img');
+                img.src = ev.target.result;
+                preview.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 });
 </script>
 @endpush

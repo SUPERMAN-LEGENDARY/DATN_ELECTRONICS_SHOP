@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Order;
 use App\Models\ProductAttribute;
 use App\Models\Review;
 use App\Services\AiSearchParser;
@@ -185,9 +186,34 @@ class ProductController extends Controller
             ->limit(5)
             ->get();
 
+        // ── Điều kiện để hiện form đánh giá: đã đăng nhập, đã mua (đơn giao thành công), chưa từng review ──
+        $canReview = false;
+        if (auth()->check()) {
+            $userId = auth()->id();
+
+            $alreadyReviewed = Review::where('product_id', $product->id)
+                ->where('user_id', $userId)
+                ->exists();
+
+            $canReview = !$alreadyReviewed && $this->hasPurchasedAndDelivered($userId, $product->id);
+        }
+
         return view('products.show', compact(
-            'product', 'reviews', 'ratingDistribution', 'relatedProducts'
+            'product', 'reviews', 'ratingDistribution', 'relatedProducts', 'canReview'
         ));
+    }
+
+    /**
+     * Kiểm tra user đã mua sản phẩm và đơn hàng đã giao thành công chưa.
+     */
+    private function hasPurchasedAndDelivered(int $userId, int $productId): bool
+    {
+        return Order::where('user_id', $userId)
+            ->where('status', 'delivered')
+            ->whereHas('items', function ($q) use ($productId) {
+                $q->where('product_id', $productId);
+            })
+            ->exists();
     }
 
     // ─── Gửi đánh giá ────────────────────────────────────────────
@@ -209,6 +235,11 @@ class ProductController extends Controller
 
         if ($exists) {
             return back()->with('error', 'Bạn đã đánh giá sản phẩm này rồi.');
+        }
+
+        // ── Chỉ cho đánh giá nếu đã mua sản phẩm này và đơn hàng đã giao thành công ──
+        if (!$this->hasPurchasedAndDelivered($userId, $productId)) {
+            return back()->with('error', 'Bạn cần mua và nhận hàng thành công sản phẩm này trước khi đánh giá.');
         }
 
         // ── Kiểm tra từ không chuẩn mực ──────────────────────────

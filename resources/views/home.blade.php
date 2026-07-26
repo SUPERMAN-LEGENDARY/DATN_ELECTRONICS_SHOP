@@ -1403,10 +1403,10 @@
 
             <div class="brands-grid">
                 @foreach($brands as $brand)
-                <a href="{{ route('products.index', ['category' => $brand->slug]) }}" class="brand-chip">
+                <a href="{{ route('products.index', ['brand' => $brand->id]) }}" class="brand-chip">
                     <div class="brand-chip-logo">
-                        @if($brand->image)
-                            <img src="{{ $brand->image }}" alt="{{ $brand->name }}" loading="lazy">
+                        @if($brand->logo)
+                            <img src="{{ asset('storage/' . $brand->logo) }}" alt="{{ $brand->name }}" loading="lazy">
                         @else
                             <div class="brand-chip-initials">{{ strtoupper(mb_substr($brand->name, 0, 2)) }}</div>
                         @endif

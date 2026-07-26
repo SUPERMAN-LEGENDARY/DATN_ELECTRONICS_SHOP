@@ -86,12 +86,20 @@ class ProductController extends Controller
 
     public function forceDelete(int $id)
     {
-        $product = Product::onlyTrashed()->findOrFail($id);
+        $product = Product::onlyTrashed()->with('variants')->findOrFail($id);
 
         // Xóa ảnh khỏi storage
         foreach ($product->images ?? [] as $img) {
             $path = str_replace('/storage/', '', $img);
             Storage::disk('public')->delete($path);
+        }
+        if ($product->thumbnail) {
+            Storage::disk('public')->delete(str_replace('/storage/', '', $product->thumbnail));
+        }
+
+        // Xóa ảnh riêng của từng biến thể
+        foreach ($product->variants as $variant) {
+            $this->deleteVariantImages($variant);
         }
 
         $product->forceDelete();
@@ -104,12 +112,18 @@ class ProductController extends Controller
 
     public function emptyTrash()
     {
-        $trashed = Product::onlyTrashed()->get();
+        $trashed = Product::onlyTrashed()->with('variants')->get();
 
         foreach ($trashed as $product) {
             foreach ($product->images ?? [] as $img) {
                 $path = str_replace('/storage/', '', $img);
                 Storage::disk('public')->delete($path);
+            }
+            if ($product->thumbnail) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $product->thumbnail));
+            }
+            foreach ($product->variants as $variant) {
+                $this->deleteVariantImages($variant);
             }
             $product->forceDelete();
         }
@@ -159,7 +173,7 @@ class ProductController extends Controller
             $product = Product::create($data);
 
             $this->syncAttributes($product, $request->input('attributes', []));
-            $this->syncVariants($product, $request->input('variants', []), $request->boolean('has_variants'));
+            $this->syncVariants($request, $product, $request->input('variants', []), $request->boolean('has_variants'));
         });
 
         return redirect()->route('admin.products.index')
@@ -213,23 +227,12 @@ class ProductController extends Controller
                 unset($data['thumbnail']); // giữ nguyên ảnh cũ
             }
 
-            // Xử lý ảnh đại diện
-            if ($request->hasFile('thumbnail')) {
-                if ($product->thumbnail) {
-                    Storage::disk('public')->delete(str_replace('/storage/', '', $product->thumbnail));
-                }
-                $path = $request->file('thumbnail')->store('products', 'public');
-                $data['thumbnail'] = Storage::url($path);
-            } else {
-                unset($data['thumbnail']); // giữ nguyên ảnh cũ
-            }
-
             $data['slug'] = Str::slug($data['name']);
             unset($data['has_variants'], $data['variants'], $data['attributes']);
             $product->update($data);
 
             $this->syncAttributes($product, $request->input('attributes', []));
-            $this->syncVariants($product, $request->input('variants', []), $request->boolean('has_variants'));
+            $this->syncVariants($request, $product, $request->input('variants', []), $request->boolean('has_variants'));
         });
 
         return redirect()->route('admin.products.index')
@@ -286,16 +289,17 @@ class ProductController extends Controller
         }
     }
 
-    // ─── Helper: đồng bộ biến thể ────────────────────────────────
+    // ─── Helper: đồng bộ biến thể (+ ảnh riêng của từng biến thể) ─
 
-    private function syncVariants(Product $product, array $variants, bool $hasVariants): void
+    private function syncVariants(Request $request, Product $product, array $variants, bool $hasVariants): void
     {
-        // Nếu tắt biến thể → xóa tất cả
+        // Nếu tắt biến thể → xóa tất cả (kèm ảnh riêng của chúng)
         if (!$hasVariants || empty($variants)) {
-            $product->variants()->each(function ($v) {
+            foreach ($product->variants as $v) {
+                $this->deleteVariantImages($v);
                 $v->variantAttributes()->delete();
                 $v->delete();
-            });
+            }
             return;
         }
 
@@ -310,7 +314,6 @@ class ProductController extends Controller
             $label = implode(' / ', $labelParts) ?: ('Biến thể ' . ($sortOrder + 1));
 
             $variantData = [
-                'product_id'       => $product->id,
                 'label'            => $label,
                 'price'            => $vData['price'] ?? 0,
                 'discount_percent' => $vData['discount_percent'] ?? 0,
@@ -319,18 +322,45 @@ class ProductController extends Controller
                 'sort_order'       => $sortOrder,
             ];
 
-            if ($variantId) {
-                // Cập nhật variant cũ
-                $variant = ProductVariant::find($variantId);
-                if ($variant && $variant->product_id === $product->id) {
-                    $variant->update($variantData);
-                } else {
-                    // Không hợp lệ → tạo mới
-                    $variant = ProductVariant::create($variantData);
-                }
+            // ── Tìm variant đúng của SẢN PHẨM NÀY qua quan hệ Eloquent
+            //    (thay vì so sánh product_id thủ công — dễ lệch kiểu int/string
+            //    và từng khiến variant cũ bị coi là "không hợp lệ" rồi bị xóa
+            //    mất thuộc tính). whereKey() tự động scope theo product_id. ──
+            $variant = $variantId
+                ? $product->variants()->whereKey($variantId)->first()
+                : null;
+
+            if ($variant) {
+                $variant->update($variantData);
             } else {
-                // Tạo variant mới
-                $variant = ProductVariant::create($variantData);
+                $variant = $product->variants()->create($variantData);
+            }
+
+            // ── Ảnh riêng của biến thể (đại diện + album) ──
+            $thumbKey  = "variants.$sortOrder.thumbnail";
+            $imagesKey = "variants.$sortOrder.images";
+
+            if ($request->hasFile($thumbKey)) {
+                if ($variant->thumbnail) {
+                    Storage::disk('public')->delete(str_replace('/storage/', '', $variant->thumbnail));
+                }
+                $path = $request->file($thumbKey)->store('products/variants', 'public');
+                $variant->thumbnail = Storage::url($path);
+            }
+
+            if ($request->hasFile($imagesKey)) {
+                foreach ((array) $variant->images as $oldImg) {
+                    Storage::disk('public')->delete(str_replace('/storage/', '', $oldImg));
+                }
+                $newImages = [];
+                foreach ($request->file($imagesKey) as $file) {
+                    $newImages[] = Storage::url($file->store('products/variants', 'public'));
+                }
+                $variant->images = $newImages;
+            }
+
+            if ($variant->isDirty()) {
+                $variant->save();
             }
 
             $submittedIds[] = $variant->id;
@@ -347,12 +377,26 @@ class ProductController extends Controller
             }
         }
 
-        // Xóa các variant không còn trong form submit (đã bị remove)
+        // Xóa các variant không còn trong form submit (đã bị remove) + ảnh của chúng
         $product->variants()
             ->whereNotIn('id', $submittedIds)
+            ->get()
             ->each(function ($v) {
+                $this->deleteVariantImages($v);
                 $v->variantAttributes()->delete();
                 $v->delete();
             });
+    }
+
+    // ─── Helper: xóa ảnh riêng (đại diện + album) của 1 biến thể khỏi storage ─
+
+    private function deleteVariantImages(ProductVariant $variant): void
+    {
+        if ($variant->thumbnail) {
+            Storage::disk('public')->delete(str_replace('/storage/', '', $variant->thumbnail));
+        }
+        foreach ($variant->images ?? [] as $img) {
+            Storage::disk('public')->delete(str_replace('/storage/', '', $img));
+        }
     }
 }

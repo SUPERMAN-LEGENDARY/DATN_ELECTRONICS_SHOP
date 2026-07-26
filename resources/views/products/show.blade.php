@@ -254,7 +254,7 @@ body {
     background: rgba(186,230,253,.55);
     box-shadow: 0 0 0 2px rgba(14,165,233,.25) inset;
 }
-.opt-btn-disabled { opacity: .4; text-decoration: line-through; cursor: not-allowed; }
+.opt-btn-disabled { opacity: .4; text-decoration: line-through; cursor: not-allowed; pointer-events: none; }
 
 .action-btns { display: flex; gap: 12px; margin-top: 20px; }
 
@@ -857,30 +857,36 @@ body {
             @endif
 
             @auth
-            <div class="review-form">
-                <h4><i class="fas fa-pen" style="margin-right:8px"></i>Viết đánh giá của bạn</h4>
-                <form action="{{ route('products.review', $product->id) }}" method="POST">
-                    @csrf
-                    <div style="margin-bottom:12px">
-                        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;color:#0c4a6e">Chọn sao:</label>
-                        <div class="star-rating" id="starRating">
-                            @for($i=5;$i>=1;$i--)
-                            <input type="radio" name="rating" id="star{{ $i }}" value="{{ $i }}" {{ old('rating')==$i ? 'checked' : '' }}>
-                            <label for="star{{ $i }}">★</label>
-                            @endfor
+                @if($canReview)
+                <div class="review-form">
+                    <h4><i class="fas fa-pen" style="margin-right:8px"></i>Viết đánh giá của bạn</h4>
+                    <form action="{{ route('products.review', $product->id) }}" method="POST">
+                        @csrf
+                        <div style="margin-bottom:12px">
+                            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;color:#0c4a6e">Chọn sao:</label>
+                            <div class="star-rating" id="starRating">
+                                @for($i=5;$i>=1;$i--)
+                                <input type="radio" name="rating" id="star{{ $i }}" value="{{ $i }}" {{ old('rating')==$i ? 'checked' : '' }}>
+                                <label for="star{{ $i }}">★</label>
+                                @endfor
+                            </div>
+                            @error('rating')<span style="color:#e53935;font-size:12px">{{ $message }}</span>@enderror
                         </div>
-                        @error('rating')<span style="color:#e53935;font-size:12px">{{ $message }}</span>@enderror
-                    </div>
-                    <div>
-                        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;color:#0c4a6e">Nội dung (tuỳ chọn):</label>
-                        <textarea name="content" rows="4" class="form-textarea"
-                                  placeholder="Chia sẻ trải nghiệm của bạn...">{{ old('content') }}</textarea>
-                    </div>
-                    <button type="submit" class="btn-submit-review">
-                        <i class="fas fa-paper-plane"></i> Gửi đánh giá
-                    </button>
-                </form>
-            </div>
+                        <div>
+                            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;color:#0c4a6e">Nội dung (tuỳ chọn):</label>
+                            <textarea name="content" rows="4" class="form-textarea"
+                                      placeholder="Chia sẻ trải nghiệm của bạn...">{{ old('content') }}</textarea>
+                        </div>
+                        <button type="submit" class="btn-submit-review">
+                            <i class="fas fa-paper-plane"></i> Gửi đánh giá
+                        </button>
+                    </form>
+                </div>
+                @else
+                <div style="background:rgba(186,230,253,.3);border-radius:10px;padding:20px;margin-top:24px;text-align:center;font-size:14px;color:#0369a1">
+                    <i class="fas fa-info-circle"></i> Bạn cần mua và nhận hàng thành công sản phẩm này trước khi đánh giá.
+                </div>
+                @endif
             @else
             <div style="background:rgba(186,230,253,.3);border-radius:10px;padding:20px;margin-top:24px;text-align:center;font-size:14px;color:#0369a1">
                 <a href="{{ route('login') }}" style="color:#0c4a6e;font-weight:700">Đăng nhập</a> để viết đánh giá.
@@ -962,6 +968,8 @@ $variantsForJs = $product->variants->map(function($v) {
         'discount_percent' => (int)   $v->discount_percent,
         'stock'            => (int)   $v->stock,
         'is_active'        => (bool)  $v->is_active,
+        'thumbnail'        => $v->display_thumbnail,
+        'images'           => $v->display_images,
         'attrs'            => $v->variantAttributes
             ->filter(fn($va) => $va->attribute->is_variant)
             ->mapWithKeys(function($va) {
@@ -969,6 +977,7 @@ $variantsForJs = $product->variants->map(function($v) {
             })->toArray(),
     ];
 })->values()->toArray();
+$baseGalleryForJs = $galleryImages->values()->toArray();
 @endphp
 
 @if($product->variants->isNotEmpty())
@@ -979,6 +988,8 @@ $variantsForJs = $product->variants->map(function($v) {
     const BASE_PRICE    = {{ (float)$product->price }};
     const BASE_DISCOUNT = {{ (int)$product->discount_percent }};
     const BASE_STOCK    = {{ (int)$product->stock }};
+    const BASE_THUMBNAIL = {!! json_encode($product->thumbnail) !!};
+    const BASE_GALLERY   = {!! json_encode($baseGalleryForJs, JSON_UNESCAPED_UNICODE) !!};
 
     function fmt(n) { return Math.round(n).toLocaleString('vi-VN') + 'đ'; }
     function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -987,7 +998,7 @@ $variantsForJs = $product->variants->map(function($v) {
     MAIN_ATTR_NAMES.forEach(name => { if (BASE_ATTRS[name] !== undefined) BASE_MAIN_ATTRS[name] = BASE_ATTRS[name]; });
 
     const ALL_OPTIONS = [
-        { id: null, price: BASE_PRICE, discount_percent: BASE_DISCOUNT, stock: BASE_STOCK, is_active: true, attrs: BASE_MAIN_ATTRS },
+        { id: null, price: BASE_PRICE, discount_percent: BASE_DISCOUNT, stock: BASE_STOCK, is_active: true, attrs: BASE_MAIN_ATTRS, thumbnail: BASE_THUMBNAIL, images: BASE_GALLERY },
         ...VARIANTS,
     ];
 
@@ -1043,6 +1054,24 @@ $variantsForJs = $product->variants->map(function($v) {
         renderPrice(option.price, option.discount_percent);
         renderStock(option.stock);
         renderSpecs(option.attrs);
+        renderGallery(option);
+    }
+
+    function renderGallery(option) {
+        const mainImg = document.getElementById('mainImg');
+        const thumbsWrap = document.querySelector('.gallery-thumbs');
+        if (!mainImg || !thumbsWrap) return;
+
+        const gallery = [];
+        if (option.thumbnail) gallery.push(option.thumbnail);
+        (option.images || []).forEach(img => { if (img && !gallery.includes(img)) gallery.push(img); });
+        if (gallery.length === 0) return; // giữ nguyên ảnh hiện tại nếu biến thể không có ảnh nào
+
+        mainImg.src = gallery[0];
+        thumbsWrap.innerHTML = gallery.map((img, i) => `
+            <div class="thumb ${i === 0 ? 'active' : ''}" onclick="switchImage(this, '${img}')">
+                <img src="${img}" alt="">
+            </div>`).join('');
     }
 
     function renderSpecs(currentAttrs) {
@@ -1078,8 +1107,9 @@ $variantsForJs = $product->variants->map(function($v) {
                 btn.type = 'button';
                 btn.className = 'opt-btn' + (selectedAttrs[key] === value ? ' active' : '');
                 btn.textContent = value;
-                if (!isValueAvailable(key, value)) { btn.classList.add('opt-btn-disabled'); btn.title = 'Hết hàng / không khả dụng'; }
+                if (!isValueAvailable(key, value)) { btn.classList.add('opt-btn-disabled'); btn.title = 'Hết hàng / không khả dụng'; btn.disabled = true; }
                 btn.addEventListener('click', function () {
+                    if (this.classList.contains('opt-btn-disabled') || this.disabled) return; // chặn chọn biến thể hết hàng
                     selectedAttrs[key] = value;
                     btnWrap.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
