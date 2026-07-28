@@ -935,11 +935,15 @@ body {
                     <div class="product-card-body">
                         <div class="product-card-name">{{ $product->name }}</div>
                         <div>
-                            <span class="product-card-price">{{ number_format($product->sale_price) }}đ</span>
-                            @if($product->discount_percent > 0)
-                                <span style="font-size:12px;color:#7dd3fc;text-decoration:line-through;margin-left:4px">
-                                    {{ number_format($product->price) }}đ
-                                </span>
+                            @if($product->has_price_range)
+                                <span class="product-card-price">Từ {{ number_format($product->min_price) }}đ</span>
+                            @else
+                                <span class="product-card-price">{{ number_format($product->sale_price) }}đ</span>
+                                @if($product->discount_percent > 0)
+                                    <span style="font-size:12px;color:#7dd3fc;text-decoration:line-through;margin-left:4px">
+                                        {{ number_format($product->price) }}đ
+                                    </span>
+                                @endif
                             @endif
                         </div>
                         <div class="stars">

@@ -18,8 +18,9 @@ class ProductRequest extends FormRequest
             'category_id'      => 'required|exists:categories,id',
             'brand_id'         => 'required|exists:categories,id',
             'description'      => 'nullable|string',
+            'cost_price'       => 'required|numeric|min:1',
+            'list_price'       => 'required|numeric|min:0',
             'price'            => 'required|numeric|min:0',
-            'discount_percent' => 'nullable|integer|min:0|max:100',
             'stock'            => 'nullable|integer|min:0',
             'is_active'        => 'nullable|boolean',
             'images'           => 'nullable|array|max:6',
@@ -30,8 +31,9 @@ class ProductRequest extends FormRequest
             'has_variants'            => 'nullable|boolean',
             'variants'                => 'nullable|array',
             'variants.*.id'           => 'nullable|integer|exists:product_variants,id',
+            'variants.*.cost_price'   => 'required_with:variants|numeric|min:1',
+            'variants.*.list_price'   => 'required_with:variants|numeric|min:0',
             'variants.*.price'        => 'required_with:variants|numeric|min:0',
-            'variants.*.discount_percent' => 'nullable|integer|min:0|max:100',
             'variants.*.stock'        => 'nullable|integer|min:0',
             'variants.*.is_active'    => 'nullable|boolean',
             'variants.*.attrs'        => 'nullable|array',
@@ -47,6 +49,10 @@ class ProductRequest extends FormRequest
             'category_id.exists'   => 'Danh mục không hợp lệ.',
             'brand_id.required'    => 'Vui lòng chọn thương hiệu.',
             'brand_id.exists'      => 'Thương hiệu không hợp lệ.',
+            'cost_price.required'  => 'Giá vốn không được bỏ trống.',
+            'cost_price.numeric'   => 'Giá vốn phải là số.',
+            'list_price.required'  => 'Giá niêm yết không được bỏ trống.',
+            'list_price.numeric'   => 'Giá niêm yết phải là số.',
             'price.required'       => 'Giá sản phẩm không được bỏ trống.',
             'price.numeric'        => 'Giá phải là số.',
             'images.*.image'       => 'File tải lên phải là ảnh.',
@@ -58,17 +64,13 @@ class ProductRequest extends FormRequest
     {
         $this->merge([
             'is_active'        => $this->boolean('is_active'),
-            'discount_percent' => $this->input('discount_percent', 0),
             'stock'            => $this->input('stock', 0),
             'has_variants'     => $this->boolean('has_variants'),
         ]);
 
-        // Đặt discount_percent mặc định = 0 cho từng variant nếu không truyền
+        // Đặt stock mặc định = 0 cho từng variant nếu không truyền
         $variants = $this->input('variants', []);
         foreach ($variants as $idx => $v) {
-            if (!isset($v['discount_percent'])) {
-                $variants[$idx]['discount_percent'] = 0;
-            }
             if (!isset($v['stock'])) {
                 $variants[$idx]['stock'] = 0;
             }

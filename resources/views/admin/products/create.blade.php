@@ -118,7 +118,7 @@
 .variant-image-block { padding-top:12px; margin-bottom:12px; border-top:1px dashed #E8E8E8; }
 .variant-image-block .image-preview-row img { width:60px; height:60px; object-fit:cover; border-radius:6px; border:1px solid #1565C0; }
 .variant-price-row {
-    display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px;
+    display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr; gap:10px;
     padding-top:12px; border-top:1px dashed #E8E8E8;
 }
 .variant-price-row .form-group { margin-bottom:0; }
@@ -162,8 +162,11 @@
         <div class="form-group">
             <label>Tên sản phẩm <span style="color:#E53935">*</span></label>
             <input type="text" name="name" id="name" value="{{ old('name', $product->name ?? '') }}"
-                placeholder="VD: iPhone 15 Pro Max 256GB Titan Tự Nhiên">
+                placeholder="VD: iPhone 15 Pro Max 256GB Titan Tự Nhiên" autocomplete="off">
             <div class="error" id="name-error">@error('name'){{ $message }}@enderror</div>
+            <div class="error" id="name-duplicate-warning" style="display:none">
+                <i class="fas fa-triangle-exclamation"></i> Đã tồn tại sản phẩm khác có tên này. Vui lòng đặt tên khác.
+            </div>
         </div>
         <div class="form-row">
             <div class="form-group">
@@ -195,7 +198,7 @@
         </div>
         <div class="form-group">
             <label>Mô tả sản phẩm</label>
-            <textarea name="description" rows="5"
+            <textarea name="description" id="description" rows="5"
                 placeholder="Nhập mô tả chi tiết sản phẩm...">{{ old('description', $product->description ?? '') }}</textarea>
         </div>
     </div>
@@ -205,18 +208,29 @@
         <h3>Giá & Tồn kho</h3>
         <div class="form-row three">
             <div class="form-group">
-                <label>Giá gốc (đ) <span style="color:#E53935">*</span></label>
-                <input type="number" name="price" id="price" value="{{ old('price', $product->price ?? '') }}"
-                    placeholder="29990000" min="0">
-                <div class="error" id="price-error">@error('price'){{ $message }}@enderror</div>
+                <label>Giá vốn (đ) <span style="color:#E53935">*</span></label>
+                <input type="number" name="cost_price" id="cost_price"
+                    value="{{ old('cost_price', $product->cost_price ?? '') }}"
+                    placeholder="18000000" min="1" oninput="validatePriceRules()">
+                <div class="error" id="cost_price-error">@error('cost_price'){{ $message }}@enderror</div>
             </div>
             <div class="form-group">
-                <label>Giảm giá (%)</label>
-                <input type="number" name="discount_percent"
-                    value="{{ old('discount_percent', $product->discount_percent ?? 0) }}"
-                    min="0" max="100">
-                @error('discount_percent')<div class="error">{{ $message }}</div>@enderror
+                <label>Giá niêm yết (đ) <span style="color:#E53935">*</span></label>
+                <input type="number" name="list_price" id="list_price"
+                    value="{{ old('list_price', $product->list_price ?? '') }}"
+                    placeholder="29990000" min="0" oninput="validatePriceRules()">
+                <div class="error" id="list_price-error">@error('list_price'){{ $message }}@enderror</div>
             </div>
+            <div class="form-group">
+                <label>Giá bán (đ) <span style="color:#E53935">*</span></label>
+                <input type="number" name="price" id="price"
+                    value="{{ old('price', $product->price ?? '') }}"
+                    placeholder="24990000" min="0" oninput="validatePriceRules()">
+                <div class="error" id="price-error">@error('price'){{ $message }}@enderror</div>
+            </div>
+        </div>
+        <div class="error" id="price-rules-warning" style="display:none;margin:-6px 0 14px"></div>
+        <div class="form-row">
             <div class="form-group">
                 <label>Số Lượng</label>
                 <input type="number" name="stock"
@@ -296,11 +310,14 @@
                 </label>
                 <input type="text"
                     name="attributes[{{ $attr->id }}]"
+                    list="attr-values-{{ $attr->id }}"
                     value="{{ old('attributes.' . $attr->id, $savedAttrs[$attr->id]->value ?? '') }}"
-                    placeholder="Nhập {{ strtolower($attr->name) }}...">
+                    placeholder="Chọn hoặc nhập {{ strtolower($attr->name) }}...">
             </div>
             @endforeach
         </div>
+        {{-- Chứa các <datalist> gợi ý giá trị cho từng thuộc tính, sinh ra bởi JS --}}
+        <div id="attrDatalists" style="display:none"></div>
 
         <p style="color:#999;font-size:12px;margin-top:8px">
             <i class="fas fa-circle-info"></i>
@@ -376,6 +393,7 @@
                                 </label>
                                 <input type="text"
                                        name="variants[{{ $vi }}][attrs][{{ $attr->id }}]"
+                                       list="attr-values-{{ $attr->id }}"
                                        value="{{ old("variants.$vi.attrs.$attr->id", $va->value ?? '') }}"
                                        placeholder="{{ $attr->name }}...">
                             </div>
@@ -424,16 +442,25 @@
                         {{-- Giá riêng của biến thể --}}
                         <div class="variant-price-row">
                             <div class="form-group">
-                                <label><i class="fas fa-tag"></i> Giá (đ) *</label>
-                                <input type="number" name="variants[{{ $vi }}][price]"
-                                       value="{{ old("variants.$vi.price", $v->price) }}"
-                                       placeholder="29990000" min="0" required>
+                                <label><i class="fas fa-coins"></i> Giá vốn (đ) *</label>
+                                <input type="number" name="variants[{{ $vi }}][cost_price]"
+                                       value="{{ old("variants.$vi.cost_price", $v->cost_price) }}"
+                                       placeholder="18000000" min="1" required
+                                       oninput="validateVariantPrice({{ $vi }})">
                             </div>
                             <div class="form-group">
-                                <label><i class="fas fa-percent"></i> Giảm giá (%)</label>
-                                <input type="number" name="variants[{{ $vi }}][discount_percent]"
-                                       value="{{ old("variants.$vi.discount_percent", $v->discount_percent) }}"
-                                       min="0" max="100">
+                                <label><i class="fas fa-tag"></i> Giá niêm yết (đ) *</label>
+                                <input type="number" name="variants[{{ $vi }}][list_price]"
+                                       value="{{ old("variants.$vi.list_price", $v->list_price) }}"
+                                       placeholder="29990000" min="0" required
+                                       oninput="validateVariantPrice({{ $vi }})">
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-tags"></i> Giá bán (đ) *</label>
+                                <input type="number" name="variants[{{ $vi }}][price]"
+                                       value="{{ old("variants.$vi.price", $v->price) }}"
+                                       placeholder="24990000" min="0" required
+                                       oninput="updateVariantBadge({{ $vi }}); validateVariantPrice({{ $vi }})">
                             </div>
                             <div class="form-group">
                                 <label><i class="fas fa-boxes"></i> Tồn kho</label>
@@ -451,6 +478,7 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="error" id="variant-price-warning-{{ $vi }}" style="display:none;margin-top:6px"></div>
                     </div>
                 </div>
                 @endforeach
@@ -513,6 +541,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.ckeditor.com/ckeditor5/41.3.1/classic/ckeditor.js"></script>
 <script>
     const CSRF = document.querySelector('meta[name="csrf-token"]').content;
     const ROUTES = {
@@ -520,7 +549,37 @@
         store: '{{ route("admin.attributes.store") }}',
         destroy: '{{ url("admin/thuoc-tinh") }}/__ID__',
         toggleVariant: '{{ url("admin/thuoc-tinh") }}/__ID__/toggle-variant',
+        checkName: '{{ route("admin.products.check-name") }}',
     };
+
+// ══════════════════════════════════════════════════════════════
+// PHẦN MÔ TẢ SẢN PHẨM (CKEditor)
+// ══════════════════════════════════════════════════════════════
+let descriptionEditor = null;
+ClassicEditor
+    .create(document.querySelector('#description'), {
+        toolbar: [
+            'heading', '|',
+            'bold', 'italic', 'link', '|',
+            'bulletedList', 'numberedList', '|',
+            'blockQuote', 'insertTable', '|',
+            'undo', 'redo'
+        ],
+        language: 'vi',
+    })
+    .then(editor => {
+        descriptionEditor = editor;
+    })
+    .catch(error => {
+        console.error('Không thể khởi tạo CKEditor:', error);
+    });
+
+// Đồng bộ nội dung CKEditor vào textarea gốc trước khi form được gửi đi
+document.getElementById('productForm').addEventListener('submit', function () {
+    if (descriptionEditor) {
+        document.querySelector('#description').value = descriptionEditor.getData();
+    }
+});
 
 // ══════════════════════════════════════════════════════════════
 // PHẦN BIẾN THỂ (VARIANTS)
@@ -531,6 +590,43 @@ const ALL_ATTRIBUTES = @json($attributes->map(fn($a) => ['id' => $a->id, 'name' 
 
 // Value đã lưu trong ProductAttribute — prefill cho biến thể mới
 const SAVED_ATTR_VALUES = @json($savedAttrs->mapWithKeys(fn($pa, $attrId) => [(string)$attrId => $pa->value]));
+
+// ══════════════════════════════════════════════════════════════
+// GỢI Ý GIÁ TRỊ THUỘC TÍNH (datalist) — chọn nhanh, vẫn gõ được giá trị mới
+// ══════════════════════════════════════════════════════════════
+const ATTR_VALUE_PRESETS = [
+    { match: ['màu sắc', 'màu'],                         values: ['Đen', 'Trắng', 'Xám', 'Bạc', 'Xanh dương', 'Xanh lá', 'Xanh navy', 'Đỏ', 'Vàng', 'Hồng', 'Tím', 'Be', 'Gold'] },
+    { match: ['ram', 'bộ nhớ ram'],                       values: ['4GB', '6GB', '8GB', '12GB', '16GB', '32GB', '64GB'] },
+    { match: ['rom', 'bộ nhớ trong', 'dung lượng lưu trữ', 'ổ cứng'], values: ['32GB', '64GB', '128GB', '256GB', '512GB', '1TB', '2TB'] },
+    { match: ['pin', 'dung lượng pin'],                   values: ['3000mAh', '4000mAh', '5000mAh', '6000mAh', '8000mAh', '10000mAh'] },
+    { match: ['màn hình', 'kích thước màn hình'],         values: ['5.5 inch', '6.1 inch', '6.5 inch', '6.7 inch', '13 inch', '14 inch', '15.6 inch', '17 inch'] },
+    { match: ['cpu', 'chip', 'vi xử lý', 'chipset'],      values: ['Snapdragon 8 Gen 3', 'Apple A17', 'Apple M3', 'Intel Core i5', 'Intel Core i7', 'Intel Core i9', 'AMD Ryzen 5', 'AMD Ryzen 7'] },
+    { match: ['hệ điều hành', 'os'],                      values: ['Android', 'iOS', 'Windows', 'macOS', 'Linux'] },
+    { match: ['chất liệu'],                               values: ['Nhựa', 'Kim loại', 'Kính cường lực', 'Da', 'Vải', 'Gỗ'] },
+    { match: ['kích cỡ', 'size', 'kích thước'],           values: ['S', 'M', 'L', 'XL', 'XXL'] },
+    { match: ['bảo hành'],                                values: ['6 tháng', '12 tháng', '24 tháng', '36 tháng'] },
+];
+
+function getPresetValuesForAttr(name) {
+    const n = String(name).toLowerCase();
+    const preset = ATTR_VALUE_PRESETS.find(p => p.match.some(m => n.includes(m)));
+    return preset ? preset.values : [];
+}
+
+// Tạo (hoặc cập nhật) 1 thẻ <datalist> dùng chung cho mọi input của thuộc tính này,
+// dùng để gợi ý giá trị có sẵn nhưng vẫn cho gõ giá trị mới nếu không có trong danh sách.
+function ensureAttrDatalist(id, name) {
+    let dl = document.getElementById('attr-values-' + id);
+    if (!dl) {
+        dl = document.createElement('datalist');
+        dl.id = 'attr-values-' + id;
+        document.getElementById('attrDatalists').appendChild(dl);
+    }
+    dl.innerHTML = getPresetValuesForAttr(name).map(v => `<option value="${esc(v)}">`).join('');
+}
+
+// Khởi tạo datalist cho tất cả thuộc tính đã có sẵn khi tải trang
+ALL_ATTRIBUTES.forEach(a => ensureAttrDatalist(a.id, a.name));
 
 // ── Theo dõi thuộc tính bị "x" (ẩn riêng cho sp/biến thể), để có thể thêm lại ──
 const removedBaseAttrs    = {};  // { [attrId]: { name, value } }
@@ -561,12 +657,13 @@ function addVariant() {
     card.className = 'variant-card';
     card.id = 'vc-' + idx;
 
-    // Lấy sẵn giá / giảm giá / tồn kho / trạng thái từ form gốc của sản phẩm
+    // Lấy sẵn giá vốn / niêm yết / bán / tồn kho / trạng thái từ form gốc của sản phẩm
     // để bê nguyên xuống biến thể mới — người dùng chỉ cần chỉnh ảnh (và sửa lại nếu cần)
-    const basePrice    = document.getElementById('price')?.value || '';
-    const baseDiscount = document.querySelector('[name="discount_percent"]')?.value || '0';
-    const baseStock    = document.querySelector('[name="stock"]')?.value || '0';
-    const baseIsActive = document.getElementById('is_active')?.checked ?? true;
+    const baseCost      = document.getElementById('cost_price')?.value || '';
+    const baseList      = document.getElementById('list_price')?.value || '';
+    const basePrice     = document.getElementById('price')?.value || '';
+    const baseStock     = document.querySelector('[name="stock"]')?.value || '0';
+    const baseIsActive  = document.getElementById('is_active')?.checked ?? true;
 
     // Build các input thuộc tính — prefill value từ thuộc tính gốc của sản phẩm
     // Bỏ qua những thuộc tính đang bị ẩn ở khu vực base (removedBaseAttrs)
@@ -582,6 +679,7 @@ function addVariant() {
                 </button>
             </label>
             <input type="text" name="variants[${idx}][attrs][${a.id}]"
+                   list="attr-values-${a.id}"
                    value="${esc(prefill)}"
                    placeholder="${esc(a.name)}...">
         </div>`;
@@ -631,16 +729,25 @@ function addVariant() {
 
             <div class="variant-price-row">
                 <div class="form-group">
-                    <label><i class="fas fa-tag"></i> Giá (đ) *</label>
-                    <input type="number" name="variants[${idx}][price]"
-                           value="${esc(basePrice)}"
-                           placeholder="29990000" min="0" required
-                           oninput="updateVariantBadge(${idx})">
+                    <label><i class="fas fa-coins"></i> Giá vốn (đ) *</label>
+                    <input type="number" name="variants[${idx}][cost_price]"
+                           value="${esc(baseCost)}"
+                           placeholder="18000000" min="1" required
+                           oninput="validateVariantPrice(${idx})">
                 </div>
                 <div class="form-group">
-                    <label><i class="fas fa-percent"></i> Giảm giá (%)</label>
-                    <input type="number" name="variants[${idx}][discount_percent]"
-                           value="${esc(baseDiscount)}" min="0" max="100">
+                    <label><i class="fas fa-tag"></i> Giá niêm yết (đ) *</label>
+                    <input type="number" name="variants[${idx}][list_price]"
+                           value="${esc(baseList)}"
+                           placeholder="29990000" min="0" required
+                           oninput="validateVariantPrice(${idx})">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-tags"></i> Giá bán (đ) *</label>
+                    <input type="number" name="variants[${idx}][price]"
+                           value="${esc(basePrice)}"
+                           placeholder="24990000" min="0" required
+                           oninput="updateVariantBadge(${idx}); validateVariantPrice(${idx})">
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-boxes"></i> Tồn kho</label>
@@ -656,10 +763,12 @@ function addVariant() {
                     </div>
                 </div>
             </div>
+            <div class="error" id="variant-price-warning-${idx}" style="display:none;margin-top:6px"></div>
         </div>`;
 
     document.getElementById('variantList').appendChild(card);
     document.getElementById('variantEmptyMsg')?.remove();
+    validateVariantPrice(idx);
 }
 
 function removeVariant(idx) {
@@ -845,6 +954,109 @@ function updateVariantBadge(idx) {
     badge.textContent = v ? v.toLocaleString('vi-VN') + 'đ' : 'Chưa nhập giá';
 }
 
+// ── Cảnh báo (client-side, không thay thế validate ở server):
+//    Giá vốn > 0, Giá niêm yết >= Giá vốn, Giá bán >= Giá vốn, Giá bán <= Giá niêm yết
+//    + Giá bán biến thể không được nhỏ hơn giá bán sản phẩm ──
+function checkPriceRules(cost, list, price) {
+    const messages = [];
+    if (cost !== null && cost <= 0) {
+        messages.push('Giá vốn phải lớn hơn 0.');
+    }
+    if (cost !== null && list !== null && list < cost) {
+        messages.push(`Giá niêm yết (${list.toLocaleString('vi-VN')}đ) không được nhỏ hơn giá vốn (${cost.toLocaleString('vi-VN')}đ).`);
+    }
+    if (cost !== null && price !== null && price < cost) {
+        messages.push(`Giá bán (${price.toLocaleString('vi-VN')}đ) không được nhỏ hơn giá vốn (${cost.toLocaleString('vi-VN')}đ).`);
+    }
+    if (list !== null && price !== null && price > list) {
+        messages.push(`Giá bán (${price.toLocaleString('vi-VN')}đ) không được lớn hơn giá niêm yết (${list.toLocaleString('vi-VN')}đ).`);
+    }
+    return messages;
+}
+
+function validateVariantPrice(idx) {
+    const warnEl = document.getElementById('variant-price-warning-' + idx);
+    if (!warnEl) return;
+
+    const costEl  = document.querySelector(`[name="variants[${idx}][cost_price]"]`);
+    const listEl  = document.querySelector(`[name="variants[${idx}][list_price]"]`);
+    const priceEl = document.querySelector(`[name="variants[${idx}][price]"]`);
+    const cost  = costEl?.value !== '' ? parseFloat(costEl.value) : null;
+    const list  = listEl?.value !== '' ? parseFloat(listEl.value) : null;
+    const price = priceEl?.value !== '' ? parseFloat(priceEl.value) : null;
+
+    const messages = checkPriceRules(cost, list, price);
+
+    const productPrice = parseFloat(document.getElementById('price')?.value || '0');
+    if (productPrice > 0 && price !== null && price < productPrice) {
+        messages.push(`Giá bán biến thể (${price.toLocaleString('vi-VN')}đ) không được nhỏ hơn giá bán sản phẩm (${productPrice.toLocaleString('vi-VN')}đ).`);
+    }
+
+    if (messages.length) {
+        warnEl.innerHTML = messages.map(m => `<i class="fas fa-triangle-exclamation"></i> ${m}`).join('<br>');
+        warnEl.style.display = 'block';
+    } else {
+        warnEl.style.display = 'none';
+    }
+}
+
+// Khi sửa giá bán sản phẩm, kiểm tra lại tất cả biến thể đang có
+document.getElementById('price')?.addEventListener('input', function () {
+    document.querySelectorAll('.variant-card').forEach(card => {
+        const idx = card.id.replace('vc-', '');
+        validateVariantPrice(idx);
+    });
+});
+
+// ── Cảnh báo quy tắc giá của sản phẩm (Giá vốn / Giá niêm yết / Giá bán) ──
+function validatePriceRules() {
+    const warnEl = document.getElementById('price-rules-warning');
+    if (!warnEl) return;
+
+    const costEl  = document.getElementById('cost_price');
+    const listEl  = document.getElementById('list_price');
+    const priceEl = document.getElementById('price');
+    const cost  = costEl?.value !== '' ? parseFloat(costEl.value) : null;
+    const list  = listEl?.value !== '' ? parseFloat(listEl.value) : null;
+    const price = priceEl?.value !== '' ? parseFloat(priceEl.value) : null;
+
+    const messages = checkPriceRules(cost, list, price);
+
+    if (messages.length) {
+        warnEl.innerHTML = messages.map(m => `<i class="fas fa-triangle-exclamation"></i> ${m}`).join('<br>');
+        warnEl.style.display = 'block';
+    } else {
+        warnEl.style.display = 'none';
+    }
+}
+
+// ── Cảnh báo trùng tên sản phẩm (gọi AJAX, có debounce) ──
+let nameCheckTimer = null;
+const nameInputEl = document.getElementById('name');
+if (nameInputEl) {
+    nameInputEl.addEventListener('input', function () {
+        clearTimeout(nameCheckTimer);
+        const name = this.value.trim();
+        const warnEl = document.getElementById('name-duplicate-warning');
+        if (!name) { warnEl.style.display = 'none'; return; }
+
+        nameCheckTimer = setTimeout(() => {
+            const params = new URLSearchParams({ name });
+            @if(isset($product))
+            params.set('ignore_id', '{{ $product->id }}');
+            @endif
+            fetch(ROUTES.checkName + '?' + params.toString(), {
+                headers: { 'Accept': 'application/json' }
+            })
+                .then(r => r.json())
+                .then(data => {
+                    warnEl.style.display = data.exists ? 'block' : 'none';
+                })
+                .catch(() => {});
+        }, 400);
+    });
+}
+
 // ══════════════════════════════════════════════════════════════
 // MODAL QUẢN LÝ THUỘC TÍNH (giữ nguyên logic cũ)
 // ══════════════════════════════════════════════════════════════
@@ -973,6 +1185,7 @@ function addAttr() {
         input.value = '';
         // Thêm vào danh sách ALL_ATTRIBUTES (để variant mới có field này)
         ALL_ATTRIBUTES.push({ id: data.id, name: data.name, is_variant: data.is_variant });
+        ensureAttrDatalist(data.id, data.name);
         addFieldToForm(data.id, data.name, data.is_variant);
         if (data.is_variant) addAttrToAllVariants(data.id, data.name);
         loadAttrList();
@@ -1020,8 +1233,9 @@ function addFieldToForm(id, name, isVariant) {
                 <i class="fas fa-times"></i>
             </button>
         </label>
-        <input type="text" name="attributes[${id}]" placeholder="Nhập ${esc(name.toLowerCase())}...">`;
+        <input type="text" name="attributes[${id}]" list="attr-values-${id}" placeholder="Chọn hoặc nhập ${esc(name.toLowerCase())}...">`;
     document.getElementById('attrGrid').appendChild(div);
+    ensureAttrDatalist(id, name);
 }
 function removeFieldFromForm(id) {
     document.getElementById('attr-field-' + id)?.remove();
@@ -1056,7 +1270,7 @@ function addAttrToAllVariants(id, name) {
                     <i class="fas fa-times"></i>
                 </button>
             </label>
-            <input type="text" name="variants[${vcIdx}][attrs][${id}]" placeholder="${esc(name)}...">`;
+            <input type="text" name="variants[${vcIdx}][attrs][${id}]" list="attr-values-${id}" placeholder="${esc(name)}...">`;
         grid.appendChild(div);
     });
 }
@@ -1081,6 +1295,31 @@ function hideModalError() {
 function esc(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+// ── Kiểm tra cảnh báo giá ngay khi tải trang (áp dụng cho biến thể đã lưu sẵn khi sửa) ──
+validatePriceRules();
+document.querySelectorAll('.variant-card').forEach(card => {
+    validateVariantPrice(card.id.replace('vc-', ''));
+});
+
+// ── Tính lại toàn bộ cảnh báo giá khi trang được khôi phục từ bộ nhớ đệm
+//    (bấm nút Back/Forward của trình duyệt) — tránh cảnh báo cũ bị "kẹt" lại
+//    không khớp với giá trị hiện tại trên form ──
+function revalidateAllPrices() {
+    validatePriceRules();
+    document.querySelectorAll('.variant-card').forEach(card => {
+        validateVariantPrice(card.id.replace('vc-', ''));
+    });
+}
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted) revalidateAllPrices();
+});
+
+// ── Phòng trường hợp trình duyệt tự động điền (autofill) giá trị mà không
+//    bắn sự kiện 'input' — vẫn tính lại cảnh báo khi có 'change' ──
+['cost_price', 'list_price', 'price'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', validatePriceRules);
+});
 
 // ── Preview ảnh ───────────────────────────────────────────────
 document.getElementById('thumbnailInput').addEventListener('change', function() {

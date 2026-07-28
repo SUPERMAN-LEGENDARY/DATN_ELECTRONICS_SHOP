@@ -40,7 +40,9 @@ class ProductController extends Controller
             $attributes = $requestAttributes;
         }
 
-        $query = Product::with(['category', 'brand'])
+        // Eager-load 'variants' để accessor min_price/has_price_range (giá thấp nhất
+        // hiển thị cho user) không phát sinh N+1 query cho từng sản phẩm trong danh sách.
+        $query = Product::with(['category', 'brand', 'variants'])
             ->withCount(['visibleReviews as reviews_count'])
             ->active()
             ->search($keywords)
@@ -54,7 +56,7 @@ class ProductController extends Controller
         // chỉ giữ từ khóa gốc + khoảng giá để không trả về trang trống.
         // Chỉ áp dụng nới lỏng khi thuộc tính đến từ AI (không nới lỏng khi user tự chọn checkbox).
         if (!empty($ai['attributes']) && empty($requestAttributes) && (clone $query)->count() === 0) {
-            $query = Product::with(['category', 'brand'])
+            $query = Product::with(['category', 'brand', 'variants'])
                 ->withCount(['visibleReviews as reviews_count'])
                 ->active()
                 ->search($request->q)
@@ -178,7 +180,8 @@ class ProductController extends Controller
             ->pluck('count', 'rating');
 
         // Sản phẩm liên quan (cùng category, khác bản thân)
-        $relatedProducts = Product::with('brand')
+        // Eager-load 'variants' để hiển thị giá thấp nhất trên card sản phẩm liên quan.
+        $relatedProducts = Product::with(['brand', 'variants'])
             ->active()
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)

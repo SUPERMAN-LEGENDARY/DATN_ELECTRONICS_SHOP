@@ -180,6 +180,19 @@ body {
 .thumb img { width: 100%; height: 100%; object-fit: contain; padding: 4px; box-sizing: border-box; }
 
 /* ============================================================
+   PRODUCT DESCRIPTION (nội dung CKEditor)
+   ============================================================ */
+.product-description-content :where(h1,h2,h3,h4) { color: #0c4a6e; margin: 18px 0 10px; }
+.product-description-content p { margin: 0 0 12px; }
+.product-description-content ul, .product-description-content ol { margin: 0 0 12px 22px; }
+.product-description-content img { max-width: 100%; border-radius: 10px; margin: 10px 0; }
+.product-description-content table { border-collapse: collapse; margin: 12px 0; }
+.product-description-content table td, .product-description-content table th {
+    border: 1px solid rgba(186,230,253,.8); padding: 6px 10px;
+}
+.product-description-content a { color: #0ea5e9; }
+
+/* ============================================================
    PRODUCT INFO
    ============================================================ */
 .product-info {
@@ -663,13 +676,19 @@ body {
             </div>
 
             <div class="price-block" id="priceBlock">
-                <span class="price-current" id="priceDisplay">{{ number_format($product->sale_price) }}đ</span>
-                @if($product->discount_percent > 0)
-                    <span class="price-old" id="priceOldDisplay">{{ number_format($product->price) }}đ</span>
-                    <span class="price-pct" id="pricePctDisplay">-{{ $product->discount_percent }}%</span>
-                @else
+                @if($product->has_price_range)
+                    <span class="price-current" id="priceDisplay">Từ {{ number_format($product->min_price) }}đ</span>
                     <span class="price-old" id="priceOldDisplay" style="display:none"></span>
                     <span class="price-pct" id="pricePctDisplay" style="display:none"></span>
+                @else
+                    <span class="price-current" id="priceDisplay">{{ number_format($product->sale_price) }}đ</span>
+                    @if($product->discount_percent > 0)
+                        <span class="price-old" id="priceOldDisplay">{{ number_format($product->price) }}đ</span>
+                        <span class="price-pct" id="pricePctDisplay">-{{ $product->discount_percent }}%</span>
+                    @else
+                        <span class="price-old" id="priceOldDisplay" style="display:none"></span>
+                        <span class="price-pct" id="pricePctDisplay" style="display:none"></span>
+                    @endif
                 @endif
             </div>
 
@@ -684,7 +703,7 @@ body {
             @if($product->variants->isNotEmpty())
             <div id="variantSelector"></div>
             <div id="variantAlert" style="display:none;color:#e53935;font-size:13px;margin-bottom:10px">
-                <i class="fas fa-exclamation-triangle"></i> Phiên bản này hiện không có sẵn.
+                <i class="fas fa-exclamation-triangle"></i> <span id="variantAlertText">Phiên bản này hiện không có sẵn.</span>
             </div>
             @endif
 
@@ -782,8 +801,12 @@ body {
     <div id="tab-desc" class="tab-panel active">
         <div class="tab-panel-inner">
             @if($product->description)
-                <div style="font-size:14px;line-height:1.8;color:#0369a1;max-width:800px">
-                    {!! nl2br(e($product->description)) !!}
+                {{-- Mô tả được soạn bằng trình soạn thảo (CKEditor) ở trang admin nên đã
+                     chứa sẵn thẻ HTML (đoạn văn, danh sách, in đậm...). Nội dung này đã
+                     được làm sạch (purify) phía server khi lưu ở admin, nên hiển thị
+                     trực tiếp ở đây mà không escape để giữ định dạng. --}}
+                <div class="product-description-content" style="font-size:14px;line-height:1.8;color:#0369a1;max-width:800px">
+                    {!! $product->description !!}
                 </div>
             @else
                 <p style="color:#7dd3fc;padding:24px 0">Chưa có mô tả cho sản phẩm này.</p>
@@ -914,7 +937,9 @@ body {
                 </div>
                 <div class="product-card-body">
                     <div class="product-card-name">{{ $p->name }}</div>
-                    <div class="product-card-price">{{ number_format($p->sale_price) }}đ</div>
+                    <div class="product-card-price">
+                        {{ $p->has_price_range ? 'Từ ' : '' }}{{ number_format($p->min_price) }}đ
+                    </div>
                     <div class="stars">
                         @for($i=1;$i<=5;$i++){{ $i <= round($p->avg_rating) ? '★' : '☆' }}@endfor
                         <span style="color:#7dd3fc">({{ $p->reviews_count }})</span>
@@ -1015,27 +1040,89 @@ $baseGalleryForJs = $galleryImages->values()->toArray();
         return vals;
     }
 
+    function optionFinalPrice(o) { return o.price * (1 - o.discount_percent / 100); }
+    function isOptionAvailable(o) { return o.is_active !== false && o.stock > 0; }
+
+    /**
+     * Option có đủ giá trị cho MỌI thuộc tính phân biệt hay không. "Sản phẩm gốc" (id: null)
+     * thường KHÔNG khai đủ các thuộc tính này (chỉ biến thể mới có), nên nếu chọn nó làm mặc
+     * định thì mỗi thuộc tính sẽ bị fallback độc lập -> ra 1 tổ hợp không khớp biến thể thật nào
+     * -> các nút bị khoá hết, không bấm đổi được. Vì vậy khi có DIFF_KEYS, chỉ ưu tiên các option
+     * "đầy đủ" (biến thể thật) làm lựa chọn mặc định.
+     */
+    function isCompleteOption(o) {
+        return DIFF_KEYS.every(key => o.attrs[key] !== undefined && o.attrs[key] !== '');
+    }
+
+    /** Chọn mặc định option còn hàng, đầy đủ thuộc tính, có giá thấp nhất */
+    function findCheapestAvailableOption() {
+        let pool = ALL_OPTIONS.filter(o => isOptionAvailable(o) && (DIFF_KEYS.length === 0 || isCompleteOption(o)));
+        if (pool.length === 0) pool = ALL_OPTIONS.filter(isOptionAvailable);
+        if (pool.length === 0) pool = ALL_OPTIONS;
+        return pool.reduce((min, o) => (optionFinalPrice(o) < optionFinalPrice(min) ? o : min), pool[0]);
+    }
+
+    const defaultOption = findCheapestAvailableOption();
     const selectedAttrs = {};
-    DIFF_KEYS.forEach(key => { selectedAttrs[key] = BASE_ATTRS[key] ?? valuesForKey(key)[0]; });
+    DIFF_KEYS.forEach(key => { selectedAttrs[key] = defaultOption.attrs[key] ?? valuesForKey(key)[0]; });
 
     function findMatchingOption() {
         return ALL_OPTIONS.find(o => DIFF_KEYS.every(key => (o.attrs[key] ?? '') === selectedAttrs[key])) || null;
     }
 
+    /**
+     * Giá trị `value` của thuộc tính `key` có khả dụng hay không, XÉT THEO các thuộc tính
+     * khác đang được chọn — tức là chỉ cho phép chọn nếu tồn tại 1 tổ hợp còn hàng khớp
+     * với lựa chọn hiện tại + giá trị này. Nhờ vậy không thể chọn ra 1 tổ hợp không tồn tại.
+     */
     function isValueAvailable(key, value) {
-        return ALL_OPTIONS.some(o => o.attrs[key] === value && o.is_active !== false && o.stock > 0);
+        return ALL_OPTIONS.some(o => {
+            if ((o.attrs[key] ?? '') !== value) return false;
+            if (!isOptionAvailable(o)) return false;
+            return DIFF_KEYS.every(k => k === key || !selectedAttrs[k] || (o.attrs[k] ?? '') === selectedAttrs[k]);
+        });
+    }
+
+    /** Đã chọn đủ giá trị cho tất cả thuộc tính phân biệt chưa (option có thể bị bỏ chọn) */
+    function isSelectionComplete() {
+        return DIFF_KEYS.every(key => !!selectedAttrs[key]);
+    }
+
+    /**
+     * Tìm 1 option "tạm khớp" với những thuộc tính ĐÃ chọn (không cần khớp hết) để lấy ảnh
+     * preview — nhờ vậy vừa đổi màu là ảnh đổi ngay, không cần đợi chọn xong hết các thuộc tính
+     * còn lại (dung lượng, size...).
+     */
+    function findPreviewOption() {
+        const selectedKeys = DIFF_KEYS.filter(k => selectedAttrs[k]);
+        if (selectedKeys.length === 0) return null;
+
+        const candidates = ALL_OPTIONS.filter(o => selectedKeys.every(k => (o.attrs[k] ?? '') === selectedAttrs[k]));
+        if (candidates.length === 0) return null;
+
+        return candidates.find(o => isOptionAvailable(o) && (o.thumbnail || (o.images && o.images.length)))
+            || candidates.find(o => o.thumbnail || (o.images && o.images.length))
+            || candidates[0];
     }
 
     function applyOption(option) {
-        const alertEl    = document.getElementById('variantAlert');
-        const actionBtns = document.getElementById('actionBtns');
-        const addBtn     = document.getElementById('btnAddCart');
-        const buyBtn     = document.getElementById('btnBuyNow');
+        const alertEl     = document.getElementById('variantAlert');
+        const alertTextEl = document.getElementById('variantAlertText');
+        const actionBtns  = document.getElementById('actionBtns');
+        const addBtn      = document.getElementById('btnAddCart');
+        const buyBtn      = document.getElementById('btnBuyNow');
 
         if (!option) {
+            if (alertTextEl) {
+                alertTextEl.textContent = isSelectionComplete()
+                    ? 'Phiên bản này hiện không có sẵn.'
+                    : 'Vui lòng chọn đầy đủ các tuỳ chọn để xem giá và mua hàng.';
+            }
             if (alertEl) alertEl.style.display = '';
             if (actionBtns) actionBtns.style.display = 'none';
             renderSpecs(selectedAttrs);
+            const preview = findPreviewOption();
+            renderGallery(preview || { thumbnail: BASE_THUMBNAIL, images: BASE_GALLERY });
             return;
         }
 
@@ -1091,6 +1178,17 @@ $baseGalleryForJs = $galleryImages->values()->toArray();
         if (emptyEl) emptyEl.style.display = 'none';
     }
 
+    const optionButtons = []; // { key, value, btn } — dùng để refresh trạng thái disabled sau mỗi lần chọn
+
+    function refreshOptionAvailability() {
+        optionButtons.forEach(({ key, value, btn }) => {
+            const available = isValueAvailable(key, value);
+            btn.disabled = !available;
+            btn.classList.toggle('opt-btn-disabled', !available);
+            btn.title = available ? '' : 'Hết hàng / không khả dụng';
+        });
+    }
+
     const selector = document.getElementById('variantSelector');
     if (selector && DIFF_KEYS.length > 0) {
         DIFF_KEYS.forEach(key => {
@@ -1107,20 +1205,32 @@ $baseGalleryForJs = $galleryImages->values()->toArray();
                 btn.type = 'button';
                 btn.className = 'opt-btn' + (selectedAttrs[key] === value ? ' active' : '');
                 btn.textContent = value;
-                if (!isValueAvailable(key, value)) { btn.classList.add('opt-btn-disabled'); btn.title = 'Hết hàng / không khả dụng'; btn.disabled = true; }
                 btn.addEventListener('click', function () {
-                    if (this.classList.contains('opt-btn-disabled') || this.disabled) return; // chặn chọn biến thể hết hàng
-                    selectedAttrs[key] = value;
+                    if (this.classList.contains('opt-btn-disabled') || this.disabled) return; // hết hàng / không khả dụng -> không cho bấm
+
+                    const wasActive = this.classList.contains('active');
                     btnWrap.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    document.getElementById(`lbl-${key}`).textContent = value;
+
+                    if (wasActive) {
+                        // Bấm lại option đang chọn -> bỏ chọn (kiểu checkbox)
+                        delete selectedAttrs[key];
+                        document.getElementById(`lbl-${key}`).textContent = 'Chưa chọn';
+                    } else {
+                        selectedAttrs[key] = value;
+                        this.classList.add('active');
+                        document.getElementById(`lbl-${key}`).textContent = value;
+                    }
+
+                    refreshOptionAvailability(); // các giá trị của thuộc tính khác có thể đổi trạng thái khả dụng
                     applyOption(findMatchingOption());
                 });
                 btnWrap.appendChild(btn);
+                optionButtons.push({ key, value, btn });
             });
             group.appendChild(btnWrap);
             selector.appendChild(group);
         });
+        refreshOptionAvailability();
     }
 
     function renderPrice(price, discount) {
@@ -1145,7 +1255,7 @@ $baseGalleryForJs = $galleryImages->values()->toArray();
             : `<div class="out-of-stock"><i class="fas fa-times-circle"></i> Hết hàng</div>`;
     }
 
-    (function initVariant() { applyOption(findMatchingOption() || ALL_OPTIONS[0]); })();
+    (function initVariant() { applyOption(findMatchingOption() || defaultOption); })();
 })();
 @endif
 

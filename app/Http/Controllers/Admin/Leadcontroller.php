@@ -3,15 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ScoreAllCustomerAiProfilesJob;
 use App\Models\CustomerAiProfile;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductView;
 use App\Models\User;
 use App\Models\Voucher;
+use App\Services\CustomerAiScoringService;
 use App\Services\CustomerAiSummaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class LeadController extends Controller
@@ -98,9 +101,9 @@ class LeadController extends Controller
             ->get();
 
         // Danh sách sản phẩm để admin chọn khi đề xuất thủ công (giới hạn để không quá nặng)
-        // Lưu ý: cột "sale_price" không tồn tại trong bảng products (schema thực là price + discount_percent),
-        // đã sửa lại để tránh lỗi SQL "Unknown column" khi mở trang này.
-        $productOptions = Product::active()->orderBy('name')->limit(500)->get(['id', 'name', 'price', 'discount_percent']);
+        // Lưu ý: bảng products KHÔNG có cột discount_percent (cũng không có sale_price) — schema
+        // thực chỉ có price/cost_price/list_price. Bỏ cột không tồn tại để hết lỗi SQL "Unknown column".
+        $productOptions = Product::active()->orderBy('name')->limit(500)->get(['id', 'name', 'price']);
 
         return view('admin.leads.show', compact(
             'user', 'profile', 'suggestedProducts', 'recentViews',
@@ -239,5 +242,70 @@ class LeadController extends Controller
         }
 
         return back()->with('success', $message);
+    }
+
+    /**
+     * Chấm điểm AI lại cho TOÀN BỘ khách hàng — chạy nền qua Queue vì có thể
+     * mất nhiều phút nếu số lượng khách lớn (tránh timeout HTTP request).
+     * Có khoá cache để chặn bấm trùng khi đang chạy.
+     */
+    public function recalculateAll(Request $request, CustomerAiScoringService $service)
+    {
+        if (Cache::get(ScoreAllCustomerAiProfilesJob::CACHE_KEY_RUNNING)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Đang có 1 tiến trình chấm điểm chạy rồi, vui lòng đợi hoàn tất.',
+            ], 409);
+        }
+
+        // Khoá ngay tại đây (không đợi job bắt đầu chạy) để 2 request gần như
+        // đồng thời không cùng lọt qua điều kiện check phía trên.
+        Cache::put(ScoreAllCustomerAiProfilesJob::CACHE_KEY_RUNNING, true, now()->addMinutes(35));
+
+        // TẠM THỜI chạy ĐỒNG BỘ ngay trong request này, không qua Job/Queue/Batch
+        // nữa (dùng khi môi trường chưa có queue worker chạy nền). Nếu sau này
+        // deploy production với lượng khách hàng lớn, nên quay lại dùng
+        // ScoreAllCustomerAiProfilesJob::dispatch() + chạy queue worker thật
+        // (Supervisor/Horizon) để tránh timeout HTTP khi chấm điểm quá lâu.
+        set_time_limit(0);
+
+        try {
+            $userIds = $service->eligibleUserIds();
+
+            if ($userIds->isNotEmpty()) {
+                $service->scoreUsers($userIds->all());
+            }
+
+            Cache::forget(ScoreAllCustomerAiProfilesJob::CACHE_KEY_RUNNING);
+            Cache::put(ScoreAllCustomerAiProfilesJob::CACHE_KEY_LAST_DONE, now()->toDateTimeString(), now()->addDay());
+            Cache::forget(ScoreAllCustomerAiProfilesJob::CACHE_KEY_LAST_ERROR);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Đã chấm điểm lại xong {$userIds->count()} khách hàng.",
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+
+            Cache::forget(ScoreAllCustomerAiProfilesJob::CACHE_KEY_RUNNING);
+            Cache::put(ScoreAllCustomerAiProfilesJob::CACHE_KEY_LAST_ERROR, $e->getMessage(), now()->addDay());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi khi chấm điểm: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * FE gọi định kỳ (polling) để biết job chấm điểm hàng loạt đã xong chưa.
+     */
+    public function recalculateAllStatus(Request $request)
+    {
+        return response()->json([
+            'running'           => (bool) Cache::get(ScoreAllCustomerAiProfilesJob::CACHE_KEY_RUNNING),
+            'last_completed_at' => Cache::get(ScoreAllCustomerAiProfilesJob::CACHE_KEY_LAST_DONE),
+            'last_error'        => Cache::get(ScoreAllCustomerAiProfilesJob::CACHE_KEY_LAST_ERROR),
+        ]);
     }
 }

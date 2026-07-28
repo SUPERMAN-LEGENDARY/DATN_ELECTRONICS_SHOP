@@ -26,6 +26,11 @@ class CustomerAiProfile extends Model
         'voucher_recommended',
         'voucher_reason',
         'scored_at',
+        // Nhận định AI (Gemini) sinh ra sau mỗi lần tính lại điểm — trước đó thiếu 2 dòng
+        // này trong $fillable nên $profile->update(['ai_summary' => ...]) bị Eloquent
+        // chặn mass-assignment và không bao giờ lưu được vào DB.
+        'ai_summary',
+        'ai_summary_generated_at',
     ];
 
     protected $casts = [
@@ -36,6 +41,7 @@ class CustomerAiProfile extends Model
         'voucher_recommended'     => 'boolean',
         'scored_at'               => 'datetime',
         'predicted_repurchase_at' => 'datetime',
+        'ai_summary_generated_at' => 'datetime',
     ];
 
     public function user()

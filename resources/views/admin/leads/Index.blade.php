@@ -14,12 +14,31 @@
     @endif
 
     {{-- ── Tiêu đề ─────────────────────────────────────────── --}}
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap">
         <div>
             <h1 style="font-size:22px;font-weight:700;margin:0">Phân tích khách hàng tiềm năng</h1>
             <p style="color:#888;font-size:13px;margin:4px 0 0">Dữ liệu hành vi & điểm AI từ hệ thống</p>
         </div>
+        <div style="text-align:right">
+            <input type="hidden" id="csrf-token-all" value="{{ csrf_token() }}">
+            <button id="btn-recalculate-all"
+                data-url="{{ route('admin.leads.recalculate-all') }}"
+                data-status-url="{{ route('admin.leads.recalculate-all.status') }}"
+                style="background:#1E88E5;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px">
+                <span id="btn-recalc-all-spinner" style="display:none;width:13px;height:13px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite"></span>
+                <span id="btn-recalc-all-label">🔄 Chấm điểm lại toàn bộ</span>
+            </button>
+            <div id="recalc-all-note" style="font-size:11px;color:#9ca3af;margin-top:6px">
+                @if(($lastScoredAll ?? null))
+                    Lần chạy gần nhất: {{ $lastScoredAll }}
+                @endif
+            </div>
+        </div>
     </div>
+
+    <style>
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 
     {{-- ── Stats cards ─────────────────────────────────────── --}}
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px">
@@ -169,4 +188,84 @@
     @endif
 
 </div>
+
+<script>
+(function () {
+    const btn = document.getElementById('btn-recalculate-all');
+    const spinner = document.getElementById('btn-recalc-all-spinner');
+    const label = document.getElementById('btn-recalc-all-label');
+    const note = document.getElementById('recalc-all-note');
+    const csrfToken = document.getElementById('csrf-token-all').value;
+
+    let pollTimer = null;
+
+    function setRunningUI(isRunning) {
+        btn.disabled = isRunning;
+        spinner.style.display = isRunning ? 'inline-block' : 'none';
+        label.textContent = isRunning ? 'Đang chấm điểm toàn bộ...' : '🔄 Chấm điểm lại toàn bộ';
+    }
+
+    function pollStatus() {
+        fetch(btn.dataset.statusUrl, { headers: { 'Accept': 'application/json' } })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                setRunningUI(data.running);
+
+                if (data.last_error) {
+                    note.textContent = 'Lỗi lần chạy gần nhất: ' + data.last_error;
+                    note.style.color = '#b91c1c';
+                } else if (data.last_completed_at) {
+                    note.textContent = 'Lần chạy gần nhất: ' + data.last_completed_at;
+                    note.style.color = '#9ca3af';
+                }
+
+                if (data.running) {
+                    pollTimer = setTimeout(pollStatus, 4000);
+                } else if (pollTimer) {
+                    clearTimeout(pollTimer);
+                    pollTimer = null;
+                    // Job vừa xong -> tải lại danh sách để thấy điểm mới nhất
+                    if (btn.dataset.wasPolling === '1') {
+                        window.location.reload();
+                    }
+                }
+            })
+            .catch(function () {
+                // Bỏ qua lỗi polling tạm thời, không làm phiền admin
+            });
+    }
+
+    btn.addEventListener('click', function () {
+        if (btn.disabled) return;
+        setRunningUI(true);
+
+        fetch(btn.dataset.url, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
+        .then(function (result) {
+            if (!result.data.success) {
+                throw new Error(result.data.message || 'Có lỗi xảy ra');
+            }
+            note.textContent = result.data.message;
+            note.style.color = '#9ca3af';
+            btn.dataset.wasPolling = '1';
+            pollTimer = setTimeout(pollStatus, 3000);
+        })
+        .catch(function (err) {
+            setRunningUI(false);
+            note.textContent = err.message || 'Không thể bắt đầu chấm điểm, vui lòng thử lại.';
+            note.style.color = '#b91c1c';
+        });
+    });
+
+    // Nếu vào trang mà job đang chạy sẵn (do admin khác bấm), tự động hiện trạng thái
+    pollStatus();
+})();
+</script>
 @endsection

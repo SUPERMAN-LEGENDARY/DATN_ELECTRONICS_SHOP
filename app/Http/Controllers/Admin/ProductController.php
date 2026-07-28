@@ -132,6 +132,25 @@ class ProductController extends Controller
             ->with('success', 'Đã dọn sạch thùng rác.');
     }
 
+    // ─── Kiểm tra trùng tên sản phẩm (AJAX, gọi khi người dùng gõ tên) ─
+
+    public function checkName(Request $request)
+    {
+        $name = trim((string) $request->query('name'));
+        $ignoreId = $request->query('ignore_id');
+
+        if ($name === '') {
+            return response()->json(['exists' => false]);
+        }
+
+        $exists = Product::query()
+            ->whereRaw('LOWER(name) = ?', [mb_strtolower($name)])
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->exists();
+
+        return response()->json(['exists' => $exists]);
+    }
+
     // ─── Form tạo mới ────────────────────────────────────────────
 
     public function create()
@@ -147,6 +166,17 @@ class ProductController extends Controller
 
     public function store(ProductRequest $request)
     {
+        // ── Cảnh báo trùng tên sản phẩm (không phân biệt hoa/thường) ──
+        $this->assertNameNotDuplicate($request->input('name'));
+
+        // ── Cảnh báo quy tắc giá: Giá vốn > 0, Giá niêm yết >= Giá vốn,
+        //    Giá bán >= Giá vốn, Giá bán <= Giá niêm yết ──
+        $this->assertProductPriceRules(
+            $request->input('cost_price'),
+            $request->input('list_price'),
+            $request->input('price')
+        );
+
         DB::transaction(function () use ($request) {
             $data = $request->validated();
 
@@ -198,6 +228,17 @@ class ProductController extends Controller
 
     public function update(ProductRequest $request, Product $product)
     {
+        // ── Cảnh báo trùng tên sản phẩm (bỏ qua chính sản phẩm đang sửa) ──
+        $this->assertNameNotDuplicate($request->input('name'), $product->id);
+
+        // ── Cảnh báo quy tắc giá: Giá vốn > 0, Giá niêm yết >= Giá vốn,
+        //    Giá bán >= Giá vốn, Giá bán <= Giá niêm yết ──
+        $this->assertProductPriceRules(
+            $request->input('cost_price'),
+            $request->input('list_price'),
+            $request->input('price')
+        );
+
         DB::transaction(function () use ($request, $product) {
             $data = $request->validated();
 
@@ -313,13 +354,30 @@ class ProductController extends Controller
             $labelParts = array_filter(array_values($attrs), fn($v) => $v !== null && $v !== '');
             $label = implode(' / ', $labelParts) ?: ('Biến thể ' . ($sortOrder + 1));
 
+            // ── Lấy giá biến thể từ form ──
+            $variantCost  = (float) ($vData['cost_price'] ?? 0);
+            $variantList  = (float) ($vData['list_price'] ?? 0);
+            $variantPrice = (float) ($vData['price'] ?? 0);
+
+            // ── Quy tắc giá của chính biến thể: Giá vốn > 0, Giá niêm yết >= Giá vốn,
+            //    Giá bán >= Giá vốn, Giá bán <= Giá niêm yết ──
+            $this->assertVariantPriceRules($label, $sortOrder, $variantCost, $variantList, $variantPrice);
+
+            // ── Giá bán biến thể không được nhỏ hơn giá bán của sản phẩm ──
+            if ($variantPrice < (float) $product->price) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    "variants.$sortOrder.price" => "Giá bán biến thể \"{$label}\" ({$this->formatVnd($variantPrice)}) không được nhỏ hơn giá bán sản phẩm ({$this->formatVnd($product->price)}).",
+                ]);
+            }
+
             $variantData = [
-                'label'            => $label,
-                'price'            => $vData['price'] ?? 0,
-                'discount_percent' => $vData['discount_percent'] ?? 0,
-                'stock'            => $vData['stock'] ?? 0,
-                'is_active'        => isset($vData['is_active']) ? (bool) $vData['is_active'] : true,
-                'sort_order'       => $sortOrder,
+                'label'      => $label,
+                'cost_price' => $variantCost,
+                'list_price' => $variantList,
+                'price'      => $variantPrice,
+                'stock'      => $vData['stock'] ?? 0,
+                'is_active'  => isset($vData['is_active']) ? (bool) $vData['is_active'] : true,
+                'sort_order' => $sortOrder,
             ];
 
             // ── Tìm variant đúng của SẢN PHẨM NÀY qua quan hệ Eloquent
@@ -386,6 +444,86 @@ class ProductController extends Controller
                 $v->variantAttributes()->delete();
                 $v->delete();
             });
+    }
+
+    // ─── Helper: cảnh báo trùng tên sản phẩm ─────────────────────
+
+    private function assertNameNotDuplicate(string $name, ?int $ignoreId = null): void
+    {
+        $exists = Product::query()
+            ->whereRaw('LOWER(name) = ?', [mb_strtolower(trim($name))])
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->exists();
+
+        if ($exists) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'name' => "Đã tồn tại sản phẩm khác có tên \"{$name}\". Vui lòng đặt tên khác.",
+            ]);
+        }
+    }
+
+    // ─── Helper: cảnh báo quy tắc giá sản phẩm ───────────────────
+    //    Giá vốn > 0, Giá niêm yết >= Giá vốn, Giá bán >= Giá vốn, Giá bán <= Giá niêm yết
+
+    private function assertProductPriceRules($cost, $list, $price): void
+    {
+        $cost  = (float) $cost;
+        $list  = (float) $list;
+        $price = (float) $price;
+
+        if ($cost <= 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'cost_price' => 'Giá vốn phải lớn hơn 0.',
+            ]);
+        }
+        if ($list < $cost) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'list_price' => 'Giá niêm yết (' . $this->formatVnd($list) . ') không được nhỏ hơn giá vốn (' . $this->formatVnd($cost) . ').',
+            ]);
+        }
+        if ($price < $cost) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'price' => 'Giá bán (' . $this->formatVnd($price) . ') không được nhỏ hơn giá vốn (' . $this->formatVnd($cost) . ').',
+            ]);
+        }
+        if ($price > $list) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'price' => 'Giá bán (' . $this->formatVnd($price) . ') không được lớn hơn giá niêm yết (' . $this->formatVnd($list) . ').',
+            ]);
+        }
+    }
+
+    // ─── Helper: cảnh báo quy tắc giá của 1 biến thể (cùng 4 quy tắc như trên) ──
+
+    private function assertVariantPriceRules(string $label, int $sortOrder, float $cost, float $list, float $price): void
+    {
+        if ($cost <= 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                "variants.$sortOrder.cost_price" => "Giá vốn biến thể \"{$label}\" phải lớn hơn 0.",
+            ]);
+        }
+        if ($list < $cost) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                "variants.$sortOrder.list_price" => "Giá niêm yết biến thể \"{$label}\" ({$this->formatVnd($list)}) không được nhỏ hơn giá vốn ({$this->formatVnd($cost)}).",
+            ]);
+        }
+        if ($price < $cost) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                "variants.$sortOrder.price" => "Giá bán biến thể \"{$label}\" ({$this->formatVnd($price)}) không được nhỏ hơn giá vốn ({$this->formatVnd($cost)}).",
+            ]);
+        }
+        if ($price > $list) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                "variants.$sortOrder.price" => "Giá bán biến thể \"{$label}\" ({$this->formatVnd($price)}) không được lớn hơn giá niêm yết ({$this->formatVnd($list)}).",
+            ]);
+        }
+    }
+
+    // ─── Helper: format số tiền cho thông báo lỗi ───────────────
+
+    private function formatVnd(float $amount): string
+    {
+        return number_format($amount) . 'đ';
     }
 
     // ─── Helper: xóa ảnh riêng (đại diện + album) của 1 biến thể khỏi storage ─

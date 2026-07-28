@@ -128,6 +128,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
         Route::patch('/{product}/them-so-luong', [AdminProductController::class, 'addStock'])->name('add-stock');
         Route::patch('/{id}/khoi-phuc',          [AdminProductController::class, 'restore'])->name('restore');
         Route::delete('/{id}/xoa-vinh-vien',     [AdminProductController::class, 'forceDelete'])->name('force-delete');
+        Route::get('/kiem-tra-ten', [AdminProductController::class, 'checkName'])
+                ->name('check-name');
     });
 
     // ── Danh mục (admin + staff) ──────────────────────────────────
@@ -254,6 +256,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
         Route::post('/{user}/de-xuat-thu-cong',       [AdminLeadController::class, 'updateSuggestions'])->name('update-suggestions');
         Route::post('/{user}/tang-voucher',           [AdminLeadController::class, 'giftVoucher'])->name('gift-voucher');
         Route::post('/{user}/tinh-lai-diem',          [AdminLeadController::class, 'recalculate'])->name('recalculate');
+
+        // ── Chấm điểm AI lại cho TOÀN BỘ khách hàng (chạy nền qua Queue) ──
+        // Lưu ý: đặt 2 route này TRƯỚC nếu sau này thêm route động dạng
+        // /{user}/... khác để tránh xung đột, nhưng vì đường dẫn ở đây
+        // ("tinh-lai-diem-toan-bo") không trùng pattern {user} nên đặt ở
+        // đâu trong group cũng không ảnh hưởng.
+        Route::post('/tinh-lai-diem-toan-bo',         [AdminLeadController::class, 'recalculateAll'])->name('recalculate-all');
+        Route::get('/tinh-lai-diem-toan-bo/trang-thai', [AdminLeadController::class, 'recalculateAllStatus'])->name('recalculate-all.status');
     });
 
     // ── Quản lý voucher (admin + staff) ──────────────────────────

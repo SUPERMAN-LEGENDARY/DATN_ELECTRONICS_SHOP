@@ -15,17 +15,21 @@ use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name', 'slug', 'category_id', 'brand_id',
-        'description', 'thumbnail', 'images', 'price',
-        'discount_percent', 'stock', 'is_active',
+        'description', 'thumbnail', 'images',
+        'cost_price', 'list_price', 'price',
+        'stock', 'is_active',
     ];
 
     protected $casts = [
-        'images'   => 'array',
-        'price'    => 'decimal:0',
-        'is_active' => 'boolean',
+        'images'     => 'array',
+        'cost_price' => 'decimal:0',
+        'list_price' => 'decimal:0',
+        'price'      => 'decimal:0',
+        'is_active'  => 'boolean',
     ];
 
-    // Tự tạo slug từ name
+    // Tự tạo slug từ name + validate giá (Giá vốn > 0, Giá niêm yết >= Giá vốn,
+    // Giá bán >= Giá vốn, Giá bán <= Giá niêm yết)
     protected static function boot(): void
     {
         parent::boot();
@@ -41,6 +45,40 @@ use HasFactory, SoftDeletes;
                 $product->slug = Str::slug($product->name);
             }
         });
+
+        static::saving(function (Product $product) {
+            $product->assertPriceRulesValid();
+        });
+    }
+
+    /**
+     * Lớp bảo vệ cuối cùng ở tầng model cho quy tắc giá.
+     * Đây là lớp phòng thủ cuối; cảnh báo chính hiển thị ở form/controller.
+     */
+    public function assertPriceRulesValid(): void
+    {
+        $cost = (float) $this->cost_price;
+        $list = (float) $this->list_price;
+        $sale = (float) $this->price;
+
+        $errors = [];
+
+        if ($cost <= 0) {
+            $errors['cost_price'] = 'Giá vốn phải lớn hơn 0.';
+        }
+        if ($list < $cost) {
+            $errors['list_price'] = 'Giá niêm yết không được nhỏ hơn giá vốn.';
+        }
+        if ($sale < $cost) {
+            $errors['price'] = 'Giá bán không được nhỏ hơn giá vốn.';
+        }
+        if ($sale > $list) {
+            $errors['price'] = 'Giá bán không được lớn hơn giá niêm yết.';
+        }
+
+        if (!empty($errors)) {
+            throw \Illuminate\Validation\ValidationException::withMessages($errors);
+        }
     }
 
     // ─── Relationships ────────────────────────────────────────────
@@ -77,16 +115,16 @@ use HasFactory, SoftDeletes;
 
     // ─── Accessors ────────────────────────────────────────────────
 
-    /** Giá sau khi giảm */
-    public function getSalePriceAttribute(): float
-    {
-        return $this->price * (1 - $this->discount_percent / 100);
-    }
-
-    /** Giá gốc (trước giảm) */
+    /** Giá niêm yết (dùng để hiển thị giá gạch ngang) */
     public function getOriginalPriceAttribute(): float
     {
-        return (float) $this->price;
+        return (float) $this->list_price;
+    }
+
+    /** Sản phẩm có đang bán rẻ hơn giá niêm yết hay không (để hiển thị giá gạch ngang) */
+    public function getIsOnSaleAttribute(): bool
+    {
+        return (float) $this->price < (float) $this->list_price;
     }
 
     /** Điểm đánh giá trung bình */
@@ -99,6 +137,30 @@ use HasFactory, SoftDeletes;
     public function getFirstImageAttribute(): ?string
     {
         return $this->thumbnail ?? ($this->images[0] ?? null);
+    }
+
+    /**
+     * Giá thấp nhất hiện có (dùng để hiển thị cho user ngoài trang danh sách/chi tiết).
+     * Nếu sản phẩm có biến thể còn hàng thì lấy giá thấp nhất trong các biến thể đó,
+     * ngược lại lấy giá của chính sản phẩm.
+     */
+    public function getMinPriceAttribute(): float
+    {
+        $prices = collect([(float) $this->price]);
+
+        foreach ($this->variants as $variant) {
+            if ($variant->is_active && $variant->stock > 0) {
+                $prices->push($variant->final_price);
+            }
+        }
+
+        return (float) $prices->min();
+    }
+
+    /** Sản phẩm có nhiều mức giá khác nhau (do biến thể) -> nên hiển thị "Từ ..." */
+    public function getHasPriceRangeAttribute(): bool
+    {
+        return $this->variants->isNotEmpty();
     }
 
     // ─── Scopes ───────────────────────────────────────────────────

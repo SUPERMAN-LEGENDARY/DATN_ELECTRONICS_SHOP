@@ -83,8 +83,9 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
                 <th>Tên sản phẩm</th>
                 <th>Danh mục</th>
                 <th>Thương hiệu</th>
-                <th>Giá (đ)</th>
-                <th>Giảm</th>
+                <th>Giá vốn (đ)</th>
+                <th>Giá niêm yết (đ)</th>
+                <th>Giá bán (đ)</th>
                 <th>Số lượng</th>
                 <th>ĐG</th>
                 <th>Hiển thị</th>
@@ -110,8 +111,19 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
                 </td>
                 <td>{{ $product->category->name ?? '—' }}</td>
                 <td>{{ $product->brand->name ?? '—' }}</td>
-                <td>{{ number_format($product->price) }}</td>
-                <td>{{ $product->discount_percent > 0 ? $product->discount_percent.'%' : '—' }}</td>
+                <td style="color:#999">{{ number_format($product->cost_price) }}</td>
+                <td>
+                    @if($product->is_on_sale)
+                        <span style="text-decoration:line-through;color:#aaa">{{ number_format($product->list_price) }}</span>
+                    @else
+                        {{ number_format($product->list_price) }}
+                    @endif
+                </td>
+                <td>
+                    <span style="{{ $product->is_on_sale ? 'color:#E53935;font-weight:600' : '' }}">
+                        {{ number_format($product->price) }}
+                    </span>
+                </td>
                 <td>
                     <span class="stock-wrap" style="{{ $product->stock <= 5 ? 'color:#E53935;font-weight:600' : '' }}">
                         <span class="stock-val">{{ number_format($product->stock) }}</span>
@@ -153,7 +165,7 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
             </tr>
             @empty
             <tr>
-                <td colspan="11" style="text-align:center;padding:40px;color:#aaa">
+                <td colspan="12" style="text-align:center;padding:40px;color:#aaa">
                     Chưa có sản phẩm nào.
                 </td>
             </tr>
