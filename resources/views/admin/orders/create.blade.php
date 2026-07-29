@@ -43,6 +43,11 @@
     .form-control.is-invalid {
         border-color: #dc3545;
     }
+    .form-control[readonly] {
+        background: #f1f3f5;
+        color: #495057;
+        cursor: not-allowed;
+    }
     .error {
         color: #E53935;
         font-size: 12px;
@@ -90,6 +95,24 @@
     }
     .btn-info:hover {
         background: #138496;
+    }
+    .btn-page {
+        background: #fff;
+        color: #1565C0;
+        border: 1px solid #1565C0;
+        padding: 4px 10px;
+        font-size: 12px;
+    }
+    .btn-page:hover {
+        background: #e7f1fd;
+    }
+    .btn-page.active {
+        background: #1565C0;
+        color: #fff;
+    }
+    .btn-page:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
     .checkbox-group {
         display: flex;
@@ -149,11 +172,31 @@
         background: #f8f9fa;
         border-radius: 6px;
     }
-    #customer_new_block {
+    #customer_info_block {
         margin-top: 10px;
-        padding: 12px;
-        background: #f8f9fa;
+        padding: 12px 16px;
+        background: #eef6ff;
+        border: 1px solid #cfe3fb;
         border-radius: 6px;
+        font-size: 13px;
+        display: none;
+    }
+    #customer_info_block .info-row {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 4px;
+    }
+    #customer_info_block .info-row:last-child {
+        margin-bottom: 0;
+    }
+    #customer_info_block .info-label {
+        font-weight: 600;
+        color: #495057;
+        min-width: 90px;
+    }
+    #customer_info_block .info-value {
+        color: #1565C0;
+        font-weight: 500;
     }
     .help-text {
         font-size: 12px;
@@ -193,7 +236,6 @@
         color: #dc3545;
     }
     .product-picker-wrap {
-        max-height: 260px;
         overflow-y: auto;
         margin-top: 8px;
         border: 1px solid #e9ecef;
@@ -217,6 +259,23 @@
     .product-picker-row:hover td {
         background: #f0f6ff;
     }
+    .product-picker-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 8px 12px;
+        border-top: 1px solid #e9ecef;
+        background: #fafafa;
+    }
+    .product-picker-pagination .page-numbers {
+        display: flex;
+        gap: 4px;
+    }
+    .product-picker-pagination .page-info {
+        font-size: 12px;
+        color: #6c757d;
+    }
 </style>
 @endpush
 
@@ -225,7 +284,7 @@
     <h1><i class="fas fa-plus-circle"></i> Thêm đơn hàng mới</h1>
 
     <div class="form-container">
-        {{-- Hiển thị lỗi --}}
+        {{-- Hiển thị lỗi validate (Validator) --}}
     @if($errors->any())
         <div style="background:#fff5f5; border-left:4px solid #dc3545; padding:12px 16px; border-radius:6px; margin-bottom:16px;">
             <ul style="margin:0; padding-left:18px;">
@@ -235,46 +294,71 @@
             </ul>
         </div>
     @endif
+
+        {{-- Hiển thị lỗi nghiệp vụ (return back()->with('error', ...)) — trước đây KHÔNG có đoạn này nên lỗi "Địa chỉ không hợp lệ" bị mất, form fail trong im lặng --}}
+    @if(session('error'))
+        <div style="background:#fff5f5; border-left:4px solid #dc3545; padding:12px 16px; border-radius:6px; margin-bottom:16px; color:#dc3545; font-size:13px; font-weight:600;">
+            <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+        </div>
+    @endif
         <form id="orderForm" action="{{ route('admin.orders.store') }}" method="POST" novalidate>
             @csrf
 
             {{-- Khách hàng --}}
             <div class="form-group">
-                <label>Khách hàng <span class="required">*</span></label>
-                <div class="mb-2">
-                    <div class="form-check-inline">
-                        <input class="form-check-input" type="radio" name="customer_option" id="customer_existing" value="existing" checked>
-                        <label class="form-check-label" for="customer_existing">Khách hàng có sẵn</label>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="customer_phone_input">Số điện thoại <span class="required">*</span></label>
+                            <input type="text" name="customer_phone" id="customer_phone_input" class="form-control @error('customer_phone') is-invalid @enderror"
+                                   placeholder="Nhập số điện thoại khách hàng" value="{{ old('customer_phone') }}" autocomplete="off">
+                            @error('customer_phone')
+                                <div class="error">{{ $message }}</div>
+                            @enderror
+                            <div class="error" id="customer_phone_input-error" style="display:none;"></div>
+                        </div>
                     </div>
-                    <div class="form-check-inline">
-                        <input class="form-check-input" type="radio" name="customer_option" id="customer_new" value="new">
-                        <label class="form-check-label" for="customer_new">Khách hàng mới</label>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="customer_name">Tên khách hàng <span class="required">*</span></label>
+                            <input type="text" name="customer_name" id="customer_name" class="form-control @error('customer_name') is-invalid @enderror"
+                                   placeholder="Nhập tên khách hàng" value="{{ old('customer_name') }}">
+                            @error('customer_name')
+                                <div class="error">{{ $message }}</div>
+                            @enderror
+                            <div class="error" id="customer_name-error" style="display:none;"></div>
+                        </div>
                     </div>
                 </div>
 
-                <div id="customer_existing_block">
-                    <select name="user_id" id="user_id" class="form-control @error('user_id') is-invalid @enderror">
-                        <option value="">-- Chọn khách hàng --</option>
-                        @foreach($users as $user)
-                            <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
-                                {{ $user->name }} ({{ $user->email }})
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('user_id')
-                        <div class="error">{{ $message }}</div>
-                    @enderror
-                    <div class="error" id="user_id-error" style="display:none;"></div>
+                <input type="hidden" name="user_id" id="user_id" value="{{ old('user_id') }}">
+                @error('user_id')
+                    <div class="error">{{ $message }}</div>
+                @enderror
+                <div class="error" id="user_id-error" style="display:none;"></div>
+
+                {{-- Thông tin tự động hiện ra khi SĐT trùng với tài khoản có sẵn --}}
+                <div id="customer_info_block">
+                    <div class="info-row" style="color:#2e7d32; font-weight:600; margin-bottom:6px;">
+                        <i class="fas fa-check-circle"></i>&nbsp;Đã tìm thấy tài khoản với số điện thoại này
+                    </div>
+                    <div class="info-row"><span class="info-label">Tên:</span><span class="info-value" id="customer_info_name"></span></div>
+                    <div class="info-row"><span class="info-label">Email:</span><span class="info-value" id="customer_info_email"></span></div>
+                    <div class="info-row"><span class="info-label">Số điện thoại:</span><span class="info-value" id="customer_info_phone"></span></div>
+                </div>
+                <div id="customer_new_hint" class="help-text" style="display:none;">
+                    Số điện thoại này chưa có tài khoản — hệ thống sẽ tạo khách hàng mới với tên bạn nhập ở trên.
                 </div>
 
-                <div id="customer_new_block" style="display:none;">
-                    <input type="text" name="customer_name" id="customer_name" class="form-control @error('customer_name') is-invalid @enderror"
-                           placeholder="Nhập tên khách hàng mới" value="{{ old('customer_name') }}">
-                    @error('customer_name')
-                        <div class="error">{{ $message }}</div>
-                    @enderror
-                    <div class="error" id="customer_name-error" style="display:none;"></div>
-                </div>
+                {{-- Nguồn dữ liệu khách hàng để JS đối chiếu theo SĐT (không hiển thị) --}}
+                <select id="customerDataSource" style="display:none;" aria-hidden="true">
+                    @foreach($users as $user)
+                        <option value="{{ $user->id }}"
+                            data-name="{{ $user->name }}"
+                            data-email="{{ $user->email }}"
+                            data-phone="{{ $user->phone ?? '' }}"></option>
+                    @endforeach
+                </select>
             </div>
 
             {{-- Địa chỉ --}}
@@ -282,17 +366,17 @@
                 <label>Địa chỉ giao hàng <span class="required">*</span></label>
                 <div class="mb-2">
                     <div class="form-check-inline">
-                        <input class="form-check-input" type="radio" name="address_option" id="address_existing" value="existing" checked>
+                        <input class="form-check-input" type="radio" name="address_option" id="address_existing" value="existing" {{ old('address_option', 'existing') == 'existing' ? 'checked' : '' }}>
                         <label class="form-check-label" for="address_existing">Chọn địa chỉ có sẵn</label>
                     </div>
                     <div class="form-check-inline">
-                        <input class="form-check-input" type="radio" name="address_option" id="address_new" value="new">
+                        <input class="form-check-input" type="radio" name="address_option" id="address_new" value="new" {{ old('address_option') == 'new' ? 'checked' : '' }}>
                         <label class="form-check-label" for="address_new">Nhập địa chỉ mới</label>
                     </div>
                 </div>
 
                 {{-- Dropdown địa chỉ có sẵn --}}
-                <div id="address_existing_block">
+                <div id="address_existing_block" style="{{ old('address_option') == 'new' ? 'display:none;' : '' }}">
                     <select name="address_id" id="address_id" class="form-control @error('address_id') is-invalid @enderror">
                         <option value="">-- Chọn địa chỉ --</option>
                         @foreach($addresses as $address)
@@ -308,7 +392,7 @@
                 </div>
 
                 {{-- Nhập địa chỉ mới --}}
-                <div id="address_new_block" style="display:none;">
+                <div id="address_new_block" style="{{ old('address_option') == 'new' ? '' : 'display:none;' }}">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -403,6 +487,7 @@
     @error('voucher_id')
         <div class="error">{{ $message }}</div>
     @enderror
+    <div class="help-text" id="voucher-warning" style="display:none; color:#dc3545;"></div>
 </div>
             {{-- Trạng thái đơn hàng --}}
 <div class="form-group">
@@ -437,7 +522,7 @@
                         </thead>
                         <tbody id="productPickerBody">
                             @foreach($products as $product)
-                            <tr class="product-picker-row" data-id="{{ $product->id }}" data-name="{{ strtolower($product->name) }}" data-price="{{ $product->price }}">
+                            <tr class="product-picker-row" data-id="{{ $product->id }}" data-name="{{ strtolower($product->name) }}" data-price="{{ $product->price }}" data-stock="{{ $product->stock }}">
                                 <td>{{ $product->name }}</td>
                                 <td class="text-right">{{ number_format($product->price) }}đ</td>
                                 <td class="text-right">{{ $product->stock }}</td>
@@ -448,13 +533,41 @@
                             @endforeach
                         </tbody>
                     </table>
+                    <div class="product-picker-pagination" id="productPickerPagination">
+                        <div class="page-info" id="productPickerInfo"></div>
+                        <div class="page-numbers" id="productPickerPages"></div>
+                    </div>
                 </div>
             </div>
 
             {{-- Sản phẩm đã chọn --}}
             <div class="form-group">
                 <label>Sản phẩm đã chọn <span class="required">*</span></label>
-                <div id="product-list"></div>
+                <div id="product-list">
+                    {{-- Dựng lại danh sách sản phẩm từ old('items') khi submit trước đó bị lỗi,
+                         để nhân viên không phải chọn lại từ đầu mỗi lần validate fail --}}
+                    @foreach(old('items', []) as $idx => $oldItem)
+                        @php $p = $products->firstWhere('id', (int) ($oldItem['product_id'] ?? 0)); @endphp
+                        @if($p)
+                        <div class="product-row" data-product-id="{{ $p->id }}" data-stock="{{ $p->stock }}">
+                            <div class="col-md-5">
+                                <strong>{{ $p->name }}</strong>
+                                <input type="hidden" name="items[{{ $idx }}][product_id]" value="{{ $p->id }}">
+                            </div>
+                            <div class="col-md-2">
+                                <input type="number" name="items[{{ $idx }}][quantity]" class="form-control quantity" min="1" max="{{ $p->stock }}" value="{{ $oldItem['quantity'] ?? 1 }}" required>
+                                <div class="error quantity-error" style="display:none;"></div>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" name="items[{{ $idx }}][unit_price]" class="form-control unit-price" step="1000" min="0" value="{{ $oldItem['unit_price'] ?? $p->price }}" readonly tabindex="-1">
+                            </div>
+                            <div class="col-md-2 text-right">
+                                <button type="button" class="btn btn-danger remove-product">Xóa</button>
+                            </div>
+                        </div>
+                        @endif
+                    @endforeach
+                </div>
                 <div class="error" id="product-list-error" style="display:none;"></div>
             </div>
 
@@ -480,7 +593,8 @@
             {{-- Ghi chú --}}
             <div class="form-group">
                 <label for="note">Ghi chú</label>
-                <textarea name="note" id="note" class="form-control @error('note') is-invalid @enderror" rows="3">{{ old('note') }}</textarea>
+                <textarea name="note" id="note" class="form-control @error('note') is-invalid @enderror" rows="3" maxlength="500">{{ old('note') }}</textarea>
+                <div class="help-text" id="note-counter">0/500</div>
                 @error('note')
                     <div class="error">{{ $message }}</div>
                 @enderror
@@ -499,27 +613,108 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // ─── 1. TOGGLE KHÁCH HÀNG CÓ SẴN / MỚI ──────────────────
-        const customerExistingBlock = document.getElementById('customer_existing_block');
-        const customerNewBlock = document.getElementById('customer_new_block');
+        // ─── 0. LỌC ĐỊA CHỈ THEO USER (khai báo trước vì được gọi ngay bên dưới) ──
+        const userSelect = document.getElementById('user_id');
+        const addressSelect = document.getElementById('address_id');
+        const allAddressOptions = Array.from(addressSelect.options);
 
-        document.querySelectorAll('input[name="customer_option"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                if (this.value === 'existing') {
-                    customerExistingBlock.style.display = 'block';
-                    customerNewBlock.style.display = 'none';
-                    document.getElementById('customer_name').removeAttribute('required');
-                } else {
-                    customerExistingBlock.style.display = 'none';
-                    customerNewBlock.style.display = 'block';
-                    document.getElementById('customer_name').setAttribute('required', 'required');
-                    // Khách hàng mới thì chắc chắn chưa có địa chỉ lưu sẵn
-                    const addressNewRadio = document.getElementById('address_new');
-                    addressNewRadio.checked = true;
-                    addressNewRadio.dispatchEvent(new Event('change'));
+        function filterAddresses() {
+            const userId = userSelect.value;
+            addressSelect.innerHTML = '<option value="">-- Chọn địa chỉ --</option>';
+
+            // QUAN TRỌNG: nếu chưa xác định được user_id (khách mới / SĐT chưa đủ số),
+            // KHÔNG được hiện địa chỉ của người khác. Trước đây điều kiện `userId === ''`
+            // khiến toàn bộ địa chỉ của MỌI khách hàng hiện ra, nhân viên có thể lỡ chọn
+            // nhầm địa chỉ của khách khác -> server từ chối tạo đơn nhưng không có thông
+            // báo lỗi rõ ràng.
+            if (userId === '') {
+                const emptyOpt = document.createElement('option');
+                emptyOpt.value = '';
+                emptyOpt.textContent = '-- Khách hàng mới, vui lòng chọn "Nhập địa chỉ mới" --';
+                addressSelect.appendChild(emptyOpt);
+                return;
+            }
+
+            allAddressOptions.forEach(opt => {
+                if (opt.value === '') return;
+                const dataUser = opt.getAttribute('data-user');
+                if (dataUser == userId) {
+                    addressSelect.appendChild(opt.cloneNode(true));
                 }
             });
-        });
+            if (addressSelect.options.length === 1) {
+                const emptyOpt = document.createElement('option');
+                emptyOpt.value = '';
+                emptyOpt.textContent = '-- Không có địa chỉ, vui lòng nhập mới --';
+                addressSelect.appendChild(emptyOpt);
+            }
+        }
+
+        // ─── 1. NHẬP SĐT → TỰ ĐỘNG DÒ TÀI KHOẢN CÓ SẴN ──────────
+        const customerPhoneInput = document.getElementById('customer_phone_input');
+        const customerNameInput = document.getElementById('customer_name');
+        const userIdInput = document.getElementById('user_id');
+        const customerInfoBlock = document.getElementById('customer_info_block');
+        const customerNewHint = document.getElementById('customer_new_hint');
+        const customerInfoName = document.getElementById('customer_info_name');
+        const customerInfoEmail = document.getElementById('customer_info_email');
+        const customerInfoPhone = document.getElementById('customer_info_phone');
+
+        const customerDataSource = document.getElementById('customerDataSource');
+        const usersData = Array.from(customerDataSource.options).map(opt => ({
+            id: opt.value,
+            name: opt.getAttribute('data-name') || '',
+            email: opt.getAttribute('data-email') || '',
+            phone: (opt.getAttribute('data-phone') || '').trim()
+        }));
+
+        function normalizePhone(str) {
+            return (str || '').replace(/\D/g, '');
+        }
+
+        function lookupCustomerByPhone() {
+            const phone = normalizePhone(customerPhoneInput.value);
+            const addressNewRadio = document.getElementById('address_new');
+
+            // SĐT chưa đủ số, chưa dò
+            if (phone.length < 8) {
+                userIdInput.value = '';
+                customerInfoBlock.style.display = 'none';
+                customerNewHint.style.display = 'none';
+                filterAddresses();
+                return;
+            }
+
+            const matched = usersData.find(u => normalizePhone(u.phone) === phone);
+
+            if (matched) {
+                userIdInput.value = matched.id;
+                customerInfoName.textContent = matched.name;
+                customerInfoEmail.textContent = matched.email;
+                customerInfoPhone.textContent = matched.phone || 'Chưa cập nhật';
+                customerInfoBlock.style.display = 'block';
+                customerNewHint.style.display = 'none';
+                clearError('customer_phone_input');
+
+                // Tự điền tên nếu ô tên đang trống, để nhân viên không phải gõ lại
+                if (!customerNameInput.value.trim()) {
+                    customerNameInput.value = matched.name;
+                }
+            } else {
+                userIdInput.value = '';
+                customerInfoBlock.style.display = 'none';
+                customerNewHint.style.display = 'block';
+
+                // Khách hàng mới → chắc chắn chưa có địa chỉ lưu sẵn
+                addressNewRadio.checked = true;
+                addressNewRadio.dispatchEvent(new Event('change'));
+            }
+
+            filterAddresses();
+        }
+
+        customerPhoneInput.addEventListener('input', lookupCustomerByPhone);
+        lookupCustomerByPhone();
 
         // ─── 2. XỬ LÝ CHỌN/NHẬP ĐỊA CHỈ ──────────────────────────
         const addressExistingBlock = document.getElementById('address_existing_block');
@@ -540,53 +735,107 @@
             });
         });
 
-        // ─── 3. LỌC ĐỊA CHỈ THEO USER ─────────────────────────────
-        const userSelect = document.getElementById('user_id');
-        const addressSelect = document.getElementById('address_id');
-        const allAddressOptions = Array.from(addressSelect.options);
-
-        function filterAddresses() {
-            const userId = userSelect.value;
-            addressSelect.innerHTML = '<option value="">-- Chọn địa chỉ --</option>';
-            allAddressOptions.forEach(opt => {
-                if (opt.value === '') return;
-                const dataUser = opt.getAttribute('data-user');
-                if (dataUser == userId || userId === '') {
-                    addressSelect.appendChild(opt.cloneNode(true));
-                }
-            });
-            if (addressSelect.options.length === 1) {
-                const emptyOpt = document.createElement('option');
-                emptyOpt.value = '';
-                emptyOpt.textContent = '-- Không có địa chỉ, vui lòng nhập mới --';
-                addressSelect.appendChild(emptyOpt);
-            }
-        }
-
-        userSelect.addEventListener('change', filterAddresses);
+        // ─── 3. GỌI LỌC ĐỊA CHỈ LẦN ĐẦU (hàm filterAddresses đã khai báo ở trên) ──
         filterAddresses();
 
-        // ─── 4. TÌM KIẾM SẢN PHẨM TRONG BẢNG ─────────────────────
-        document.getElementById('productSearch').addEventListener('input', function() {
-            const keyword = this.value.trim().toLowerCase();
-            document.querySelectorAll('.product-picker-row').forEach(row => {
-                row.style.display = row.dataset.name.includes(keyword) ? '' : 'none';
+        // ─── 4. TÌM KIẾM + PHÂN TRANG SẢN PHẨM TRONG BẢNG ────────
+        const PAGE_SIZE = 10;
+        let currentPage = 1;
+        const allProductRows = Array.from(document.querySelectorAll('#productPickerBody .product-picker-row'));
+        const productSearchInput = document.getElementById('productSearch');
+        const pickerPagesEl = document.getElementById('productPickerPages');
+        const pickerInfoEl = document.getElementById('productPickerInfo');
+
+        function getFilteredRows() {
+            const keyword = productSearchInput.value.trim().toLowerCase();
+            if (keyword === '') return allProductRows;
+            return allProductRows.filter(row => row.dataset.name.includes(keyword));
+        }
+
+        function renderProductPicker() {
+            const filtered = getFilteredRows();
+            const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIdx = (currentPage - 1) * PAGE_SIZE;
+            const endIdx = startIdx + PAGE_SIZE;
+            const visibleSet = new Set(filtered.slice(startIdx, endIdx));
+
+            // Ẩn tất cả trước, chỉ hiện các dòng thuộc trang hiện tại
+            allProductRows.forEach(row => {
+                row.style.display = visibleSet.has(row) ? '' : 'none';
             });
+
+            // Thông tin số lượng
+            if (filtered.length === 0) {
+                pickerInfoEl.textContent = 'Không tìm thấy sản phẩm nào';
+            } else {
+                pickerInfoEl.textContent = `Hiển thị ${startIdx + 1}-${Math.min(endIdx, filtered.length)} / ${filtered.length} sản phẩm`;
+            }
+
+            // Vẽ lại các nút phân trang
+            pickerPagesEl.innerHTML = '';
+
+            const prevBtn = document.createElement('button');
+            prevBtn.type = 'button';
+            prevBtn.className = 'btn btn-page';
+            prevBtn.textContent = '‹';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.addEventListener('click', () => { currentPage--; renderProductPicker(); });
+            pickerPagesEl.appendChild(prevBtn);
+
+            for (let p = 1; p <= totalPages; p++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.type = 'button';
+                pageBtn.className = 'btn btn-page' + (p === currentPage ? ' active' : '');
+                pageBtn.textContent = p;
+                pageBtn.addEventListener('click', () => { currentPage = p; renderProductPicker(); });
+                pickerPagesEl.appendChild(pageBtn);
+            }
+
+            const nextBtn = document.createElement('button');
+            nextBtn.type = 'button';
+            nextBtn.className = 'btn btn-page';
+            nextBtn.textContent = '›';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.addEventListener('click', () => { currentPage++; renderProductPicker(); });
+            pickerPagesEl.appendChild(nextBtn);
+        }
+
+        productSearchInput.addEventListener('input', function() {
+            currentPage = 1;
+            renderProductPicker();
         });
 
+        renderProductPicker();
+
         // ─── 5. THÊM SẢN PHẨM TỪ BẢNG VÀO DANH SÁCH ĐÃ CHỌN ──────
-        let itemIndex = 0;
+        // Bắt đầu đếm từ sau các dòng đã được dựng lại từ old('items') ở trên,
+        // để tránh trùng index với input name="items[n][...]" đã có sẵn.
+        let itemIndex = {{ count(old('items', [])) }};
         document.getElementById('productPickerBody').addEventListener('click', function(e) {
             if (!e.target.classList.contains('btn-add-product')) return;
             const row = e.target.closest('.product-picker-row');
             const id = row.dataset.id;
             const name = row.querySelector('td').textContent.trim();
             const price = row.dataset.price;
+            const stock = parseInt(row.dataset.stock) || 0;
+
+            if (stock < 1) {
+                alert('Sản phẩm "' + name + '" đã hết hàng, không thể thêm.');
+                return;
+            }
 
             const existing = document.querySelector(`.product-row[data-product-id="${id}"]`);
             if (existing) {
                 const qtyInput = existing.querySelector('.quantity');
-                qtyInput.value = parseInt(qtyInput.value || 0) + 1;
+                const nextQty = parseInt(qtyInput.value || 0) + 1;
+                if (nextQty > stock) {
+                    alert('Số lượng "' + name + '" đã đạt tối đa tồn kho (' + stock + ').');
+                    return;
+                }
+                qtyInput.value = nextQty;
                 updateSummary();
                 return;
             }
@@ -594,17 +843,18 @@
             const newRow = document.createElement('div');
             newRow.className = 'product-row';
             newRow.setAttribute('data-product-id', id);
+            newRow.setAttribute('data-stock', stock);
             newRow.innerHTML = `
                 <div class="col-md-5">
                     <strong>${name}</strong>
                     <input type="hidden" name="items[${itemIndex}][product_id]" value="${id}">
                 </div>
                 <div class="col-md-2">
-                    <input type="number" name="items[${itemIndex}][quantity]" class="form-control quantity" min="1" value="1" required>
+                    <input type="number" name="items[${itemIndex}][quantity]" class="form-control quantity" min="1" max="${stock}" value="1" required>
                     <div class="error quantity-error" style="display:none;"></div>
                 </div>
                 <div class="col-md-3">
-                    <input type="number" name="items[${itemIndex}][unit_price]" class="form-control unit-price" step="1000" min="0" value="${price}">
+                    <input type="number" name="items[${itemIndex}][unit_price]" class="form-control unit-price" step="1000" min="0" value="${price}" readonly tabindex="-1">
                 </div>
                 <div class="col-md-2 text-right">
                     <button type="button" class="btn btn-danger remove-product">Xóa</button>
@@ -622,6 +872,12 @@
         });
 
         document.getElementById('product-list').addEventListener('input', function(e) {
+            if (e.target.classList.contains('quantity')) {
+                const max = parseInt(e.target.getAttribute('max'));
+                if (!isNaN(max) && parseInt(e.target.value) > max) {
+                    e.target.value = max;
+                }
+            }
             if (e.target.classList.contains('quantity') || e.target.classList.contains('unit-price')) {
                 updateSummary();
             }
@@ -641,6 +897,9 @@
             // Tính giảm giá
             let discount = 0;
             const voucherSelect = document.getElementById('voucher_id');
+            const voucherWarning = document.getElementById('voucher-warning');
+            voucherWarning.style.display = 'none';
+
             if (voucherSelect && voucherSelect.value) {
                 const selectedOption = voucherSelect.options[voucherSelect.selectedIndex];
                 const discountPercent = parseFloat(selectedOption.getAttribute('data-discount-percent')) || 0;
@@ -648,6 +907,9 @@
 
                 if (subtotal >= minOrder) {
                     discount = subtotal * (discountPercent / 100);
+                } else if (minOrder > 0) {
+                    voucherWarning.textContent = `Đơn tối thiểu ${minOrder.toLocaleString('vi-VN')} VNĐ để áp dụng voucher này (hiện tại: ${subtotal.toLocaleString('vi-VN')} VNĐ). Giảm giá sẽ không được áp dụng.`;
+                    voucherWarning.style.display = 'block';
                 }
             }
 
@@ -659,6 +921,15 @@
         }
 
         document.getElementById('voucher_id').addEventListener('change', updateSummary);
+
+        // ─── 6b. ĐẾM KÝ TỰ GHI CHÚ ───────────────────────────────
+        const noteInput = document.getElementById('note');
+        const noteCounter = document.getElementById('note-counter');
+        function updateNoteCounter() {
+            noteCounter.textContent = noteInput.value.length + '/500';
+        }
+        noteInput.addEventListener('input', updateNoteCounter);
+        updateNoteCounter();
 
         // ─── 7. VALIDATION CLIENT-SIDE ──────────────────────────
         const form = document.getElementById('orderForm');
@@ -692,27 +963,31 @@
             });
         });
 
+        function isValidVNPhone(value) {
+            return /^(0|\+84)\d{9,10}$/.test((value || '').trim());
+        }
+
         form.addEventListener('submit', function(e) {
             let isValid = true;
 
-            // Khách hàng
-            const customerOption = document.querySelector('input[name="customer_option"]:checked');
-            if (customerOption.value === 'existing') {
-                const userId = document.getElementById('user_id');
-                if (!userId.value) {
-                    setError('user_id', 'Vui lòng chọn khách hàng.');
-                    isValid = false;
-                } else {
-                    clearError('user_id');
-                }
+            // Khách hàng: bắt buộc có SĐT và tên (dù là khách có sẵn hay khách mới)
+            const phoneField = document.getElementById('customer_phone_input');
+            if (!phoneField.value.trim()) {
+                setError('customer_phone_input', 'Vui lòng nhập số điện thoại khách hàng.');
+                isValid = false;
+            } else if (!isValidVNPhone(phoneField.value)) {
+                setError('customer_phone_input', 'Số điện thoại không hợp lệ (VD: 0912345678).');
+                isValid = false;
             } else {
-                const customerName = document.getElementById('customer_name');
-                if (!customerName.value.trim()) {
-                    setError('customer_name', 'Vui lòng nhập tên khách hàng.');
-                    isValid = false;
-                } else {
-                    clearError('customer_name');
-                }
+                clearError('customer_phone_input');
+            }
+
+            const customerNameField = document.getElementById('customer_name');
+            if (!customerNameField.value.trim()) {
+                setError('customer_name', 'Vui lòng nhập tên khách hàng.');
+                isValid = false;
+            } else {
+                clearError('customer_name');
             }
 
             // Địa chỉ
@@ -731,6 +1006,9 @@
                     const input = document.getElementById(field);
                     if (!input.value.trim()) {
                         setError(field, 'Vui lòng nhập ' + input.placeholder.toLowerCase());
+                        isValid = false;
+                    } else if (field === 'address_phone' && !isValidVNPhone(input.value)) {
+                        setError(field, 'Số điện thoại không hợp lệ (VD: 0912345678).');
                         isValid = false;
                     } else {
                         clearError(field);
@@ -766,8 +1044,15 @@
                     const quantityInput = row.querySelector('.quantity');
                     const quantityError = row.querySelector('.quantity-error');
                     const qty = parseInt(quantityInput.value);
+                    const maxStock = parseInt(row.getAttribute('data-stock'));
+
                     if (isNaN(qty) || qty < 1) {
                         quantityError.textContent = 'Số lượng phải ≥ 1.';
+                        quantityError.style.display = 'block';
+                        quantityInput.classList.add('is-invalid');
+                        hasProductError = true;
+                    } else if (!isNaN(maxStock) && qty > maxStock) {
+                        quantityError.textContent = 'Vượt quá tồn kho (còn ' + maxStock + ').';
                         quantityError.style.display = 'block';
                         quantityInput.classList.add('is-invalid');
                         hasProductError = true;

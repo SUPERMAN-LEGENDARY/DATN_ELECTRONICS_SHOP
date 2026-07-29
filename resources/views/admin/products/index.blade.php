@@ -8,7 +8,7 @@
 .btn-primary { background:#1565C0; color:#fff; border:none; padding:9px 18px; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
 .btn-primary:hover { background:#0D47A1; }
 .btn-danger  { background:#E53935; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-size:12px; font-weight:600; cursor:pointer; }
-.btn-warning { background:#F57C00; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-size:12px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; }
+ 
 .btn-trash   { background:#fff; color:#757575; border:1px solid #e0e0e0; padding:9px 18px; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; position:relative; }
 .btn-trash:hover { background:#fafafa; border-color:#bdbdbd; }
 .trash-badge { background:#E53935; color:#fff; border-radius:10px; font-size:11px; font-weight:700; padding:1px 7px; margin-left:4px; }
@@ -26,6 +26,45 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
 .status-off { background:#FFEBEE; color:#C62828; }
 .toggle-btn { background:none; border:none; cursor:pointer; font-size:18px; }
 .alert-success { background:#E8F5E9; border:1px solid #A5D6A7; color:#2E7D32; padding:10px 16px; border-radius:6px; margin-bottom:16px; font-size:14px; }
+
+/* ── Phân trang ──
+   Project này không load Tailwind CSS, nên view pagination mặc định của Laravel
+   (dùng class Tailwind như h-5 w-5 cho icon SVG mũi tên) bị mất kích thước và
+   hiển thị icon to bất thường. Đã chuyển sang view "bootstrap-4" (chữ « » thay
+   vì SVG) và style lại thủ công cho khớp giao diện admin hiện tại. */
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+.pagination .page-item .page-link {
+    display: inline-block;
+    padding: 6px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    color: #1565C0;
+    font-size: 13px;
+    text-decoration: none;
+    background: #fff;
+    cursor: pointer;
+}
+.pagination .page-item .page-link:hover {
+    background: #f0f6ff;
+    border-color: #1565C0;
+}
+.pagination .page-item.active .page-link {
+    background: #1565C0;
+    border-color: #1565C0;
+    color: #fff;
+}
+.pagination .page-item.disabled .page-link {
+    color: #bdbdbd;
+    cursor: not-allowed;
+    background: #fafafa;
+}
 </style>
 @endpush
 
@@ -174,7 +213,7 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
     </table>
 </div>
 
-<div style="margin-top:16px">{{ $products->links() }}</div>
+<div style="margin-top:16px">{{ $products->links('pagination::bootstrap-4') }}</div>
 @endsection
 
 @push('scripts')

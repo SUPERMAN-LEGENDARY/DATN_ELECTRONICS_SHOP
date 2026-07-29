@@ -129,6 +129,45 @@ table.data-table {
     transition: background 0.15s;
 }
 .btn-del:hover { background: #ffcdd2; }
+
+/* ── Phân trang ──
+   Project này không load Tailwind CSS, nên view pagination mặc định của Laravel
+   (dùng class Tailwind như h-5 w-5 cho icon SVG mũi tên) bị mất kích thước và
+   hiển thị icon to bất thường. Đã chuyển sang view "bootstrap-4" (chữ « » thay
+   vì SVG) và style lại thủ công cho khớp giao diện admin hiện tại. */
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+.pagination .page-item .page-link {
+    display: inline-block;
+    padding: 6px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    color: #1565C0;
+    font-size: 13px;
+    text-decoration: none;
+    background: #fff;
+    cursor: pointer;
+}
+.pagination .page-item .page-link:hover {
+    background: #f0f6ff;
+    border-color: #1565C0;
+}
+.pagination .page-item.active .page-link {
+    background: #1565C0;
+    border-color: #1565C0;
+    color: #fff;
+}
+.pagination .page-item.disabled .page-link {
+    color: #bdbdbd;
+    cursor: not-allowed;
+    background: #fafafa;
+}
 </style>
 @endpush
 
@@ -228,7 +267,7 @@ $allowedTransitions = [
                     <form action="{{ route('admin.orders.update-status', $order) }}" method="POST">
                         @csrf @method('PATCH')
                         <select name="status" class="status-select badge-{{ $order->status }}"
-                                onchange="this.form.submit()" @if($isLocked) disabled @endif>
+                                onchange="handleOrderStatusChange(this)" @if($isLocked) disabled @endif>
                             <option value="{{ $order->status }}" selected>
                                 {{ $statusLabels[$order->status] ?? $order->status }}
                             </option>
@@ -236,7 +275,7 @@ $allowedTransitions = [
                                 <option value="{{ $st }}">{{ $statusLabels[$st] ?? $st }}</option>
                             @endforeach
                         </select>
-                        <input type="hidden" name="payment_status" value="{{ $order->payment_status }}">
+                        <input type="hidden" name="payment_status" class="payment-status-field" value="{{ $order->payment_status }}">
                     </form>
                 </td>
 
@@ -289,9 +328,22 @@ $allowedTransitions = [
     </table>
 </div>
 
-<div style="margin-top:16px">{{ $orders->links() }}</div>
+<div style="margin-top:16px">{{ $orders->links('pagination::bootstrap-4') }}</div>
 @endsection
 
 @push('scripts')
-<script></script>
+<script>
+    // Khi đổi trạng thái đơn hàng sang "Đã giao" (delivered),
+    // tự động chuyển thanh toán sang "Đã thanh toán" (paid) trước khi gửi form.
+    function handleOrderStatusChange(selectEl) {
+        const form = selectEl.form;
+        if (selectEl.value === 'delivered') {
+            const paymentField = form.querySelector('.payment-status-field');
+            if (paymentField) {
+                paymentField.value = 'paid';
+            }
+        }
+        form.submit();
+    }
+</script>
 @endpush

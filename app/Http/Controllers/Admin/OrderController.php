@@ -29,11 +29,13 @@ class OrderController extends Controller
         }
 
         if ($request->filled('q')) {
-            $query->where('id', $request->q)
-                  ->orWhereHas('user', fn($q) => $q->where('name', 'like', "%{$request->q}%"));
+            $query->where(function ($sub) use ($request) {
+                $sub->where('id', $request->q)
+                    ->orWhereHas('user', fn($u) => $u->where('name', 'like', "%{$request->q}%"));
+            });
         }
 
-        $orders = $query->latest('created_at')->paginate(20)->withQueryString();
+        $orders = $query->latest('created_at')->paginate(10)->withQueryString();
         $trashedCount = Order::onlyTrashed()->count();
 
         return view('admin.orders.index', compact('orders', 'trashedCount'));
@@ -54,9 +56,9 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'customer_option'  => 'required|in:existing,new',
-            'user_id'          => 'required_if:customer_option,existing|nullable|exists:users,id',
-            'customer_name'    => 'required_if:customer_option,new|nullable|string|max:255',
+            'customer_phone'   => 'required|string|max:20',
+            'customer_name'    => 'required|string|max:255',
+            'user_id'          => 'nullable|exists:users,id',
             'address_id'       => 'nullable|exists:addresses,id',
             'address_name'     => 'required_without:address_id|nullable|string|max:255',
             'address_phone'    => 'required_without:address_id|nullable|string|max:20',
@@ -75,18 +77,19 @@ class OrderController extends Controller
             'items.*.unit_price' => 'nullable|numeric|min:0',
         ]);
 
-        // 0. Xác định khách hàng: có sẵn hay tạo mới
-        if ($request->customer_option === 'new') {
+        // 0. Xác định khách hàng: nếu SĐT đã khớp tài khoản có sẵn (JS đã tự điền user_id)
+        // thì dùng lại tài khoản đó; ngược lại tạo khách hàng mới từ SĐT + tên đã nhập.
+        if ($request->filled('user_id')) {
+            $userId = $request->user_id;
+        } else {
             $user = User::create([
                 'name'     => $request->customer_name,
                 'email'    => 'guest_' . uniqid() . '@noemail.local',
-                'phone'    => null,
+                'phone'    => $request->customer_phone,
                 'role'     => 'user',
                 'password' => bcrypt(Str::random(24)),
             ]);
             $userId = $user->id;
-        } else {
-            $userId = $request->user_id;
         }
 
         // 1. Xử lý địa chỉ
@@ -298,8 +301,10 @@ class OrderController extends Controller
     {
         $query = Order::onlyTrashed()->with(['user', 'address', 'voucher']);
         if ($request->filled('q')) {
-            $query->where('id', $request->q)
-                  ->orWhereHas('user', fn($q) => $q->where('name', 'like', "%{$request->q}%"));
+            $query->where(function ($sub) use ($request) {
+                $sub->where('id', $request->q)
+                    ->orWhereHas('user', fn($u) => $u->where('name', 'like', "%{$request->q}%"));
+            });
         }
         $orders = $query->latest('deleted_at')->paginate(20)->withQueryString();
         $trashedCount = Order::onlyTrashed()->count();
