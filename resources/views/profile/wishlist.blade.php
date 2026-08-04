@@ -4,28 +4,27 @@
 @push('styles')
 <style>
 /* ============================================================
-   PAGE BACKGROUND — sky gradient (khớp các trang profile khác)
+   PAGE BACKGROUND — Samsung Minimalist (Light Gray)
    ============================================================ */
 body {
-    background: linear-gradient(180deg,
-        #bae6fd 0%, #e0f2fe 18%, #f0f9ff 38%,
-        #e0f2fe 62%, #bae6fd 100%) fixed;
+    background: #f4f4f4;
     background-attachment: fixed;
+    color: #111111;
 }
 #sky-canvas {
     position: fixed; inset: 0; width: 100%; height: 100%;
-    pointer-events: none; z-index: 0; opacity: .42;
+    pointer-events: none; z-index: 0; opacity: .6;
 }
 .bubble {
     position: fixed; border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,.8), rgba(186,230,253,.3));
-    border: 1px solid rgba(125,211,252,.4);
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,1), rgba(0,0,0,0.03));
+    border: 1px solid rgba(0,0,0,0.04);
     pointer-events: none; z-index: 0;
     animation: bubbleRise linear infinite;
 }
 @keyframes bubbleRise {
     0%   { transform: translateY(0) scale(1);    opacity: .7; }
-    80%  { opacity: .4; }
+    80%  { opacity: .3; }
     100% { transform: translateY(-110vh) scale(1.1); opacity: 0; }
 }
 
@@ -53,11 +52,11 @@ body {
    BREADCRUMB
    ============================================================ */
 .breadcrumb-row {
-    font-size: 13px; color: #0369a1;
+    font-size: 13px; color: #555555;
     margin-bottom: 24px;
 }
-.breadcrumb-row a { color: #0c4a6e; font-weight: 600; text-decoration: none; }
-.breadcrumb-row a:hover { text-decoration: underline; }
+.breadcrumb-row a { color: #111111; font-weight: 600; text-decoration: none; }
+.breadcrumb-row a:hover { text-decoration: underline; color: #0381fe; }
 
 /* ============================================================
    LAYOUT (sidebar + content)
@@ -73,30 +72,28 @@ body {
 }
 
 /* ============================================================
-   CONTENT CARD
+   CONTENT CARD — Clean White
    ============================================================ */
 .content-card {
-    background: rgba(255,255,255,.72);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(186,230,253,.6);
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
     border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(14,116,144,.08);
+    box-shadow: 0 4px 20px rgba(0,0,0,.03);
     padding: 28px 32px;
 }
 
 .content-card h1 {
     font-size: 22px;
     font-weight: 800;
-    color: #0c4a6e;
+    color: #000000;
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 6px;
 }
-.content-card h1 i { color: #ef4444; font-size: 20px; }
+.content-card h1 i { color: #000000; font-size: 20px; }
 .content-card .sub {
-    font-size: 13.5px; color: #0369a1;
+    font-size: 13.5px; color: #555555;
     margin-bottom: 24px;
 }
 
@@ -110,42 +107,44 @@ body {
 }
 
 /* ============================================================
-   PRODUCT CARD (style riêng trong trang wishlist)
+   PRODUCT CARD (Sleek Style)
    ============================================================ */
 .wl-card {
-    background: rgba(255,255,255,.85);
+    background: #ffffff;
     border-radius: 16px;
-    border: 1px solid rgba(186,230,253,.55);
-    box-shadow: 0 4px 18px rgba(14,116,144,.07);
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 2px 10px rgba(0,0,0,.02);
     overflow: hidden;
-    transition: transform .25s, box-shadow .25s;
+    transition: transform .25s, box-shadow .25s, border-color .25s;
     position: relative;
     display: flex;
     flex-direction: column;
 }
 .wl-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 32px rgba(14,116,144,.15);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(0,0,0,.06);
+    border-color: #d1d5db;
 }
 
 .wl-card-img {
     width: 100%;
     aspect-ratio: 1;
-    background: #f0f9ff;
+    background: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    border-bottom: 1px solid #f4f4f4;
 }
 .wl-card-img img {
-    width: 100%; height: 100%;
+    width: 90%; height: 90%;
     object-fit: contain;
     transition: transform .35s;
 }
-.wl-card:hover .wl-card-img img { transform: scale(1.06); }
+.wl-card:hover .wl-card-img img { transform: scale(1.04); }
 
 .wl-card-body {
-    padding: 12px 14px 14px;
+    padding: 14px;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -154,23 +153,27 @@ body {
 .wl-card-name {
     font-size: 14px;
     font-weight: 600;
-    color: #0c4a6e;
+    color: #000000;
     line-height: 1.35;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    transition: color .2s;
+}
+.wl-card:hover .wl-card-name {
+    color: #0381fe;
 }
 .wl-card-price {
     font-size: 16px;
-    font-weight: 700;
-    color: #0369a1;
+    font-weight: 800;
+    color: #000000;
 }
 .wl-card-stars {
     font-size: 12px;
     color: #f59e0b;
 }
-.wl-card-stars span { color: #94a3b8; font-size: 11px; }
+.wl-card-stars span { color: #9ca3af; font-size: 11px; }
 
 .wl-card-actions {
     display: flex;
@@ -185,41 +188,46 @@ body {
     justify-content: center;
     gap: 6px;
     padding: 8px 12px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #0ea5e9, #0369a1);
-    color: #fff;
+    border-radius: 20px; /* Pill shape */
+    background: #000000;
+    color: #ffffff;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     text-decoration: none;
     border: none;
     cursor: pointer;
-    transition: opacity .2s, transform .15s;
+    transition: background .2s, transform .15s;
 }
-.wl-btn-view:hover { opacity: .88; transform: translateY(-1px); color: #fff; }
+.wl-btn-view:hover { background: #333333; transform: translateY(-1px); color: #fff; }
 
 .wl-btn-remove {
     width: 38px;
     height: 38px;
-    border-radius: 10px;
-    border: 1.5px solid rgba(239,68,68,.4);
-    background: rgba(254,226,226,.6);
-    color: #ef4444;
+    border-radius: 50%; /* Circle */
+    border: 1px solid #e5e5e5;
+    background: #f8f9fa;
+    color: #555555;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-size: 14px;
     cursor: pointer;
-    transition: background .2s, transform .15s;
+    transition: all .2s;
     flex-shrink: 0;
 }
-.wl-btn-remove:hover { background: rgba(239,68,68,.15); transform: scale(1.07); }
+.wl-btn-remove:hover { 
+    background: #fef2f2; 
+    border-color: #fecaca; 
+    color: #ef4444; 
+    transform: scale(1.07); 
+}
 
 /* Badge giảm giá */
 .wl-badge {
     position: absolute;
     top: 10px; left: 10px;
-    background: linear-gradient(135deg, #f59e0b, #ef4444);
-    color: #fff;
+    background: #0381fe; /* Samsung Blue */
+    color: #ffffff;
     font-size: 11px;
     font-weight: 700;
     padding: 3px 8px;
@@ -233,18 +241,18 @@ body {
 .empty-wishlist {
     text-align: center;
     padding: 60px 20px;
-    color: #64748b;
+    color: #555555;
 }
 .empty-wishlist i {
     font-size: 56px;
-    color: #e2e8f0;
+    color: #d1d5db;
     margin-bottom: 18px;
     display: block;
 }
 .empty-wishlist h3 {
     font-size: 20px;
     font-weight: 700;
-    color: #475569;
+    color: #000000;
     margin-bottom: 8px;
 }
 .empty-wishlist p { font-size: 14px; margin-bottom: 22px; }
@@ -253,15 +261,20 @@ body {
     align-items: center;
     gap: 8px;
     padding: 12px 28px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #0ea5e9, #0369a1);
-    color: #fff;
-    font-weight: 600;
-    font-size: 15px;
+    border-radius: 24px; /* Pill shape */
+    background: #000000;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 14.5px;
     text-decoration: none;
-    transition: opacity .2s;
+    transition: background .2s, transform .15s, box-shadow .2s;
 }
-.empty-wishlist a:hover { opacity: .88; color: #fff; }
+.empty-wishlist a:hover { 
+    background: #333333; 
+    color: #ffffff; 
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0,0,0,.15);
+}
 
 /* ============================================================
    PAGINATION
@@ -275,21 +288,21 @@ body {
 .page-item .page-link {
     display: flex; align-items: center; justify-content: center;
     width: 38px; height: 38px;
-    border-radius: 10px;
-    background: rgba(255,255,255,.7);
-    border: 1px solid rgba(186,230,253,.6);
-    color: #0369a1;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    color: #111111;
     font-weight: 600;
     font-size: 14px;
     text-decoration: none;
-    transition: background .2s;
+    transition: all .2s;
 }
 .page-item.active .page-link, .page-item .page-link:hover {
-    background: linear-gradient(135deg, #0ea5e9, #0369a1);
-    color: #fff;
-    border-color: transparent;
+    background: #000000;
+    color: #ffffff;
+    border-color: #000000;
 }
-.page-item.disabled .page-link { opacity: .45; pointer-events: none; }
+.page-item.disabled .page-link { opacity: .45; pointer-events: none; background: #f8f9fa; }
 
 /* ============================================================
    TOAST NOTIFICATION
@@ -297,12 +310,12 @@ body {
 .wl-toast {
     position: fixed;
     bottom: 28px; right: 28px;
-    background: rgba(15,23,42,.92);
-    color: #fff;
-    padding: 12px 20px;
+    background: #111111;
+    color: #ffffff;
+    padding: 14px 22px;
     border-radius: 12px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -311,10 +324,11 @@ body {
     transform: translateY(12px);
     transition: opacity .3s, transform .3s;
     pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,.15);
 }
 .wl-toast.show { opacity: 1; transform: translateY(0); }
-.wl-toast i { color: #34d399; font-size: 16px; }
-.wl-toast.error i { color: #f87171; }
+.wl-toast i { color: #10b981; font-size: 16px; }
+.wl-toast.error i { color: #ef4444; }
 
 @media (max-width: 600px) {
     .wishlist-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
@@ -378,7 +392,7 @@ body {
                                 @if($product->first_image)
                                     <img src="{{ $product->first_image }}" alt="{{ $product->name }}" loading="lazy">
                                 @else
-                                    <i class="fas fa-image fa-3x" style="color:#cbd5e1"></i>
+                                    <i class="fas fa-image fa-3x" style="color:#d1d5db"></i>
                                 @endif
                             </a>
 
@@ -461,7 +475,7 @@ body {
 
 @push('scripts')
 <script>
-// ─── Sky canvas ───────────────────────────────────────────────────────
+// ─── Sky canvas (Subtle Gray Theme) ──────────────────────────────────
 (function() {
     const canvas = document.getElementById('sky-canvas');
     if (!canvas) return;
@@ -472,15 +486,15 @@ body {
     function initClouds() {
         clouds = Array.from({ length: 7 }, () => ({
             x: Math.random() * W, y: Math.random() * H * .6,
-            r: 60 + Math.random() * 90, vx: .08 + Math.random() * .12, op: .12 + Math.random() * .14
+            r: 60 + Math.random() * 90, vx: .08 + Math.random() * .12, op: .01 + Math.random() * .03
         }));
     }
     function draw() {
         ctx.clearRect(0, 0, W, H);
         clouds.forEach(c => {
             const g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r);
-            g.addColorStop(0, `rgba(255,255,255,${c.op})`);
-            g.addColorStop(1, 'rgba(255,255,255,0)');
+            g.addColorStop(0, `rgba(0,0,0,${c.op})`);
+            g.addColorStop(1, 'rgba(0,0,0,0)');
             ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
             ctx.fillStyle = g; ctx.fill();
             c.x += c.vx;

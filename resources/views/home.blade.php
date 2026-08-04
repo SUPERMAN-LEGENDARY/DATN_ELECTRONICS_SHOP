@@ -399,7 +399,7 @@
 }
 .sm-section-head .sm-h3 { margin: 0; }
 
-.sm-products { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.sm-products { display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; }
 .sm-product {
     position: relative; display: flex; flex-direction: column;
     background: #fff; border-radius: var(--sm-radius);

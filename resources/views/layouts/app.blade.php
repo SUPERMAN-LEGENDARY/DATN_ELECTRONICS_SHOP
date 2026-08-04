@@ -29,7 +29,7 @@
             --sm-surface:#f7f7f7;   /* section bg */
             --sm-white:  #ffffff;
             --sm-blue:   #2189ff;   /* accent / eyebrow */
-            --sm-blue-d: #1428a0;   /* Samsung deep blue */
+            --sm-blue-d: #1428a0;   /* ElectronicShop deep blue */
             --sm-radius: 24px;
             --sm-ease:   cubic-bezier(.25,.46,.45,.94);
             --sm-header-h: 56px;
@@ -522,7 +522,6 @@
     <div class="sm-utility">
         <div class="inner">
             <a href="#">Hỗ trợ</a>
-            <a href="{{ route('contact.index') }}">Liên hệ</a>
             <a href="#" class="hot"><i class="bi bi-telephone-fill"></i> 1900 1234</a>
             <a href="#">For Business <i class="bi bi-arrow-up-right"></i></a>
         </div>
@@ -536,11 +535,8 @@
             <ul class="sm-nav">
                 <li><a href="{{ url('/') }}" class="{{ request()->is('/') ? 'active' : '' }}">Trang chủ</a></li>
                 <li><a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'active' : '' }}">Sản phẩm</a></li>
-                <li><a href="{{ route('products.index') }}">Điện thoại</a></li>
-                <li><a href="{{ route('products.index') }}">Laptop &amp; Màn hình</a></li>
-                <li><a href="{{ route('products.index') }}">Thiết bị đeo</a></li>
-                <li><a href="{{ route('products.index') }}">Phụ kiện</a></li>
                 <li><a href="{{ route('news.index') }}" class="{{ request()->routeIs('news.*') ? 'active' : '' }}">Tin tức</a></li>
+                <li><a href="{{ route('contact.index') }}" class="{{ request()->routeIs('contact.*') ? 'active' : '' }}">Liên hệ</a></li>
             </ul>
 
             <div class="sm-actions">

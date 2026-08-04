@@ -4,28 +4,27 @@
 @push('styles')
 <style>
 /* ============================================================
-   PAGE BACKGROUND — sky gradient
+   PAGE BACKGROUND — Samsung Minimalist (White & Light Gray)
    ============================================================ */
 body {
-    background: linear-gradient(180deg,
-        #bae6fd 0%, #e0f2fe 18%, #f0f9ff 38%,
-        #e0f2fe 62%, #bae6fd 100%) fixed;
+    background: #f4f4f4;
     background-attachment: fixed;
+    color: #111111;
 }
 #sky-canvas {
     position: fixed; inset: 0; width: 100%; height: 100%;
-    pointer-events: none; z-index: 0; opacity: .42;
+    pointer-events: none; z-index: 0; opacity: .6;
 }
 .bubble {
     position: fixed; border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,.8), rgba(186,230,253,.3));
-    border: 1px solid rgba(125,211,252,.4);
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,1), rgba(0,0,0,0.03));
+    border: 1px solid rgba(0,0,0,0.04);
     pointer-events: none; z-index: 0;
     animation: bubbleRise linear infinite;
 }
 @keyframes bubbleRise {
     0%   { transform: translateY(0) scale(1);    opacity: .7; }
-    80%  { opacity: .4; }
+    80%  { opacity: .3; }
     100% { transform: translateY(-110vh) scale(1.1); opacity: 0; }
 }
 
@@ -51,7 +50,7 @@ body {
 /* ripple */
 .ripple-wave {
     position: absolute; border-radius: 50%;
-    background: rgba(125,211,252,.28);
+    background: rgba(0,0,0,0.08);
     transform: scale(0); animation: rippleOut .6s linear;
     pointer-events: none; z-index: 10;
 }
@@ -85,12 +84,12 @@ body {
     animation: alertIn .4s cubic-bezier(.16,1,.3,1);
 }
 @keyframes alertIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:none} }
-.alert-sky-success { background: rgba(220,252,231,.9); color: #166534; border: 1px solid rgba(187,247,208,.8); }
+.alert-sky-success { background: rgba(240,253,244,.9); color: #166534; border: 1px solid rgba(187,247,208,.8); }
 .alert-sky-error   { background: rgba(254,226,226,.92); color: #991b1b; border: 1px solid rgba(252,165,165,.6); }
-.alert-sky-info    { background: rgba(186,230,253,.5); color: #0c4a6e; border: 1px solid rgba(125,211,252,.5); }
+.alert-sky-info    { background: rgba(255,255,255,.9); color: #111111; border: 1px solid #e5e5e5; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
 
 /* ============================================================
-   TOP ROW — back + order id + status
+   TOP ROW
    ============================================================ */
 .order-toprow {
     display: flex; justify-content: space-between; align-items: center;
@@ -98,19 +97,19 @@ body {
 }
 .btn-back {
     display: inline-flex; align-items: center; gap: 7px;
-    padding: 9px 18px; border-radius: 10px;
-    background: rgba(255,255,255,.75); backdrop-filter: blur(8px);
-    border: 1px solid rgba(186,230,253,.65);
-    color: #0369a1; font-weight: 700; font-size: 13.5px;
+    padding: 9px 18px; border-radius: 20px;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    color: #111111; font-weight: 700; font-size: 13.5px;
     text-decoration: none;
     transition: background .2s, transform .18s, box-shadow .2s;
 }
 .btn-back:hover {
-    background: rgba(186,230,253,.5); color: #0c4a6e;
-    transform: translateY(-1px); box-shadow: 0 4px 14px rgba(14,165,233,.14);
+    background: #f8f9fa; color: #000000;
+    transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,.04);
 }
 .order-id-block { text-align: right; }
-.order-id-block h5 { font-size: 16px; font-weight: 800; color: #0c4a6e; margin-bottom: 6px; }
+.order-id-block h5 { font-size: 16px; font-weight: 800; color: #000000; margin-bottom: 6px; }
 
 /* Status badges */
 .status-badge {
@@ -118,105 +117,99 @@ body {
     padding: 5px 14px; border-radius: 20px;
     font-size: 12.5px; font-weight: 700; letter-spacing: .3px;
 }
-.badge-warning   { background:rgba(251,191,36,.18); color:#b45309; border:1px solid rgba(251,191,36,.4); }
-.badge-info      { background:rgba(56,189,248,.18); color:#0369a1; border:1px solid rgba(56,189,248,.4); }
-.badge-primary   { background:rgba(14,165,233,.18); color:#0c4a6e; border:1px solid rgba(14,165,233,.4); }
-.badge-success   { background:rgba(34,197,94,.15);  color:#166534; border:1px solid rgba(34,197,94,.35); }
-.badge-danger    { background:rgba(239,68,68,.12);  color:#b91c1c; border:1px solid rgba(239,68,68,.3); }
-.badge-secondary { background:rgba(148,163,184,.18);color:#475569; border:1px solid rgba(148,163,184,.35);}
+.badge-warning   { background:#fffbea; color:#b45309; border:1px solid #fde68a; }
+.badge-info      { background:#f0f9ff; color:#0381fe; border:1px solid #bae6fd; }
+.badge-primary   { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; }
+.badge-success   { background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; }
+.badge-danger    { background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; }
+.badge-secondary { background:#f8f9fa; color:#475569; border:1px solid #e2e8f0;}
 
 /* ============================================================
-   SECTION CARD — glassmorphism
+   SECTION CARD — Clean Tech
    ============================================================ */
 .section-card {
-    background: rgba(255,255,255,.84);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(186,230,253,.65);
-    border-radius: 18px; overflow: hidden;
-    box-shadow: 0 6px 24px rgba(14,165,233,.1);
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,.02);
     margin-bottom: 20px;
     transition: box-shadow .25s, border-color .25s;
 }
-.section-card:hover { box-shadow: 0 10px 30px rgba(14,165,233,.15); border-color: #7dd3fc; }
+.section-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.04); border-color: #d1d5db; }
 
 .section-card-header {
-    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    background: #f8f9fa;
     padding: 14px 22px;
-    border-bottom: 1px solid rgba(186,230,253,.55);
+    border-bottom: 1px solid #e5e5e5;
     display: flex; align-items: center; gap: 8px;
-    font-size: 14px; font-weight: 800; color: #0c4a6e;
+    font-size: 14px; font-weight: 800; color: #000000;
 }
 .section-card-header .hicon {
     width: 28px; height: 28px; border-radius: 8px;
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
+    background: #000000;
     color: #fff; font-size: 12px;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 2px 8px rgba(14,165,233,.3);
 }
 .section-card-body { padding: 20px 22px; }
 
 /* ============================================================
-   TIMELINE — sky-blue
+   TIMELINE
    ============================================================ */
 .timeline {
     display: flex; align-items: center;
     justify-content: space-between; overflow-x: auto;
-    padding: 6px 0;
+    padding: 10px 0;
 }
 
 .timeline-item { text-align: center; min-width: 90px; }
 
 .timeline-icon {
-    width: 60px; height: 60px; border-radius: 50%;
-    background: rgba(186,230,253,.5);
-    border: 2px solid rgba(125,211,252,.4);
-    color: #7dd3fc; font-size: 22px;
+    width: 50px; height: 50px; border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #e5e5e5;
+    color: #9ca3af; font-size: 18px;
     display: flex; align-items: center; justify-content: center;
     margin: 0 auto; position: relative;
     transition: all .35s cubic-bezier(.34,1.56,.64,1);
 }
 .timeline-item.active .timeline-icon {
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
-    border-color: #0ea5e9;
+    background: #000000;
+    border-color: #000000;
     color: #fff;
-    box-shadow: 0 4px 16px rgba(14,165,233,.38);
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
     transform: scale(1.1);
 }
-/* pulse ring on current active step */
 .timeline-item.current .timeline-icon::after {
     content: ''; position: absolute;
     inset: -6px; border-radius: 50%;
-    border: 2px solid rgba(14,165,233,.4);
+    border: 2px solid rgba(0,0,0,.15);
     animation: pulseRing 1.6s ease-out infinite;
 }
-@keyframes pulseRing { 0%{transform:scale(1);opacity:.7} 100%{transform:scale(1.5);opacity:0} }
+@keyframes pulseRing { 0%{transform:scale(1);opacity:.7} 100%{transform:scale(1.4);opacity:0} }
 
 .timeline-line {
-    flex: 1; height: 4px; min-width: 20px;
-    background: rgba(186,230,253,.5);
+    flex: 1; height: 3px; min-width: 20px;
+    background: #e5e5e5;
     border-radius: 2px; margin: 0 8px;
     transition: background .4s ease;
     position: relative; overflow: hidden;
 }
 .timeline-line.active {
-    background: linear-gradient(90deg, #0369a1, #0ea5e9);
-    box-shadow: 0 1px 6px rgba(14,165,233,.25);
+    background: #000000;
 }
-/* animated fill on active lines */
 .timeline-line.active::after {
     content: ''; position: absolute;
     top: 0; left: -40%; width: 40%; height: 100%;
-    background: rgba(255,255,255,.4);
+    background: rgba(255,255,255,.3);
     animation: lineShimmer 2s linear infinite;
 }
 @keyframes lineShimmer { to { left: 140%; } }
 
 .timeline-text {
-    margin-top: 10px; font-size: 12.5px; font-weight: 700;
-    color: #7dd3fc;
+    margin-top: 12px; font-size: 12.5px; font-weight: 700;
+    color: #9ca3af;
 }
-.timeline-item.active .timeline-text { color: #0c4a6e; }
+.timeline-item.active .timeline-text { color: #000000; }
 
 /* ============================================================
    ADDRESS SECTION
@@ -227,15 +220,14 @@ body {
 .addr-pin {
     width: 44px; height: 44px; flex-shrink: 0;
     border-radius: 12px;
-    background: linear-gradient(135deg, #ef4444, #f87171);
-    color: #fff; font-size: 18px;
+    background: #f4f4f4;
+    color: #000000; font-size: 18px;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 12px rgba(239,68,68,.3);
-    margin-top: 2px;
+    margin-top: 2px; border: 1px solid #e5e5e5;
 }
-.addr-name { font-size: 16px; font-weight: 800; color: #0c4a6e; margin-bottom: 4px; }
-.addr-phone { font-size: 13.5px; color: #0369a1; margin-bottom: 6px; }
-.addr-full  { font-size: 14px; color: #0369a1; opacity: .85; }
+.addr-name { font-size: 16px; font-weight: 800; color: #000000; margin-bottom: 4px; }
+.addr-phone { font-size: 13.5px; color: #555555; margin-bottom: 6px; }
+.addr-full  { font-size: 14px; color: #555555; line-height: 1.5; }
 
 /* ============================================================
    PRODUCT ROWS
@@ -243,32 +235,32 @@ body {
 .product-row {
     display: flex; align-items: center;
     gap: 16px; padding: 16px 0;
-    border-bottom: 1px solid rgba(186,230,253,.4);
+    border-bottom: 1px solid #f3f4f6;
     transition: background .2s;
 }
 .product-row:last-of-type { border-bottom: none; }
-.product-row:hover { background: rgba(186,230,253,.12); border-radius: 10px; padding-left: 8px; padding-right: 8px; }
+.product-row:hover { background: #f8f9fa; border-radius: 10px; padding-left: 8px; padding-right: 8px; }
 
 .product-img {
     width: 82px; height: 82px; flex-shrink: 0;
-    object-fit: contain; border-radius: 12px;
-    border: 1px solid rgba(186,230,253,.6);
-    background: linear-gradient(160deg, #f0f9ff, #e0f2fe);
+    object-fit: contain; border-radius: 10px;
+    border: 1px solid #e5e5e5;
+    background: #ffffff;
     padding: 4px; box-sizing: border-box;
     transition: transform .3s cubic-bezier(.16,1,.3,1);
 }
-.product-row:hover .product-img { transform: scale(1.06); }
+.product-row:hover .product-img { transform: scale(1.04); }
 
 .product-name {
-    font-size: 14.5px; font-weight: 700; color: #0c4a6e;
+    font-size: 14.5px; font-weight: 700; color: #000000;
     text-decoration: none; display: block; margin-bottom: 3px;
     transition: color .15s;
 }
-.product-name:hover { color: #0ea5e9; }
-.product-qty { font-size: 13px; color: #0369a1; opacity: .8; }
+.product-name:hover { color: #0381fe; }
+.product-qty { font-size: 13px; color: #555555; }
 
-.product-unit  { font-size: 14px; color: #0369a1; font-weight: 500; text-align: right; white-space: nowrap; }
-.product-total { font-size: 16px; font-weight: 800; color: #ef4444; text-align: right; white-space: nowrap; }
+.product-unit  { font-size: 14px; color: #555555; font-weight: 500; text-align: right; white-space: nowrap; }
+.product-total { font-size: 16px; font-weight: 800; color: #000000; text-align: right; white-space: nowrap; }
 
 /* ============================================================
    SUMMARY TABLE
@@ -276,34 +268,33 @@ body {
 .summary-section {
     display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
     margin-top: 20px; padding-top: 18px;
-    border-top: 1px solid rgba(186,230,253,.4);
+    border-top: 1px solid #e5e5e5;
 }
 @media (max-width: 640px) { .summary-section { grid-template-columns: 1fr; } }
 
 .summary-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.summary-table td { padding: 8px 0; color: #0369a1; }
-.summary-table td:last-child { text-align: right; font-weight: 600; color: #0c4a6e; }
-.summary-table .total-row td { border-top: 2px solid rgba(186,230,253,.55); padding-top: 12px; }
+.summary-table td { padding: 8px 0; color: #555555; }
+.summary-table td:last-child { text-align: right; font-weight: 600; color: #000000; }
+.summary-table .total-row td { border-top: 2px solid #e5e5e5; padding-top: 12px; }
 .summary-table .total-row td { font-size: 17px; font-weight: 800; }
-.summary-table .total-row td:first-child { color: #0c4a6e; }
-.summary-table .total-row td:last-child  { color: #ef4444; }
+.summary-table .total-row td:first-child { color: #000000; }
+.summary-table .total-row td:last-child  { color: #000000; }
 .discount-val { color: #16a34a !important; }
 
 /* payment info box */
 .payment-box {
-    background: rgba(186,230,253,.22);
-    backdrop-filter: blur(6px);
-    border: 1px solid rgba(125,211,252,.45);
-    border-radius: 14px; padding: 18px;
+    background: #f8f9fa;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px; padding: 18px;
 }
-.payment-box h6 { font-size: 14px; font-weight: 800; color: #0c4a6e; margin-bottom: 12px; }
-.payment-box p  { font-size: 13.5px; color: #0369a1; margin-bottom: 8px; }
+.payment-box h6 { font-size: 14px; font-weight: 800; color: #000000; margin-bottom: 12px; }
+.payment-box p  { font-size: 13.5px; color: #555555; margin-bottom: 8px; }
 .payment-box p:last-child { margin-bottom: 0; }
-.payment-box strong { color: #0c4a6e; }
+.payment-box strong { color: #000000; }
 
-.pay-badge-paid     { background:rgba(34,197,94,.15);  color:#166534; border:1px solid rgba(34,197,94,.35);  padding:3px 10px; border-radius:10px; font-size:12px; font-weight:700; }
-.pay-badge-refunded { background:rgba(148,163,184,.18);color:#475569; border:1px solid rgba(148,163,184,.35);padding:3px 10px; border-radius:10px; font-size:12px; font-weight:700; }
-.pay-badge-pending  { background:rgba(251,191,36,.18); color:#b45309; border:1px solid rgba(251,191,36,.4);  padding:3px 10px; border-radius:10px; font-size:12px; font-weight:700; }
+.pay-badge-paid     { background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; padding:3px 10px; border-radius:10px; font-size:12px; font-weight:700; }
+.pay-badge-refunded { background:#f8f9fa; color:#475569; border:1px solid #e2e8f0; padding:3px 10px; border-radius:10px; font-size:12px; font-weight:700; }
+.pay-badge-pending  { background:#fffbea; color:#b45309; border:1px solid #fde68a; padding:3px 10px; border-radius:10px; font-size:12px; font-weight:700; }
 
 /* ============================================================
    ACTION BUTTONS
@@ -314,41 +305,33 @@ body {
 }
 .btn-action {
     display: inline-flex; align-items: center; gap: 7px;
-    padding: 11px 22px; border-radius: 11px;
+    padding: 11px 24px; border-radius: 24px; /* Samsung pill shape */
     font-size: 14px; font-weight: 700; cursor: pointer;
-    transition: opacity .2s, transform .18s, box-shadow .2s;
+    transition: all .2s;
     border: none; font-family: inherit; text-decoration: none;
     position: relative; overflow: hidden;
 }
-.btn-action::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.28) 50%, transparent 60%);
-    transform: translateX(-120%); transition: transform .5s ease; pointer-events: none;
-}
-.btn-action:hover::after { transform: translateX(120%); }
-.btn-action:hover { opacity:.91; transform:translateY(-2px); }
 
-.btn-cancel   { background:rgba(239,68,68,.12); color:#ef4444; border:1px solid rgba(239,68,68,.3); }
-.btn-cancel:hover   { background:#ef4444; color:#fff; box-shadow:0 5px 16px rgba(239,68,68,.35); }
-.btn-received { background:rgba(34,197,94,.12); color:#16a34a; border:1px solid rgba(34,197,94,.35); }
-.btn-received:hover { background:#22c55e; color:#fff; box-shadow:0 5px 16px rgba(34,197,94,.35); }
-.btn-reorder  { background:linear-gradient(135deg,#0369a1,#0ea5e9); color:#fff; box-shadow:0 3px 14px rgba(14,165,233,.3); }
-.btn-reorder:hover  { box-shadow:0 7px 22px rgba(14,165,233,.45); }
-.btn-review   { background:linear-gradient(135deg,#d97706,#f59e0b); color:#fff; box-shadow:0 3px 14px rgba(245,158,11,.3); }
-.btn-review:hover   { box-shadow:0 7px 22px rgba(245,158,11,.45); }
-.btn-review:hover { color:#fff; }
+.btn-cancel   { background:#ffffff; color:#ef4444; border:1px solid #fecaca; }
+.btn-cancel:hover   { background:#fef2f2; }
+.btn-received { background:#ffffff; color:#16a34a; border:1px solid #bbf7d0; }
+.btn-received:hover { background:#f0fdf4; }
+.btn-reorder  { background:#000000; color:#ffffff; }
+.btn-reorder:hover  { background:#333333; box-shadow:0 4px 14px rgba(0,0,0,.15); }
+.btn-review   { background:#0381fe; color:#ffffff; }
+.btn-review:hover   { background:#026eda; box-shadow:0 4px 14px rgba(3,129,254,.25); color:#ffffff; }
 
 /* ============================================================
-   REVIEW MODAL OVERLAY STYLES (Shopee Premium Dark Glassmorphism)
+   REVIEW MODAL OVERLAY STYLES (Samsung Light/Clean Style)
    ============================================================ */
 .review-modal {
     display: none;
     position: fixed;
     inset: 0;
     z-index: 99999;
-    background: rgba(15, 23, 42, 0.76);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     align-items: center;
     justify-content: center;
     padding: 16px;
@@ -358,13 +341,13 @@ body {
 }
 
 .review-modal-content {
-    background: #18181b;
-    color: #f4f4f5;
+    background: #ffffff;
+    color: #111111;
     width: 650px;
     max-width: 100%;
     max-height: 90vh;
-    border-radius: 16px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -372,7 +355,7 @@ body {
 }
 
 @keyframes modalPopIn {
-    from { opacity: 0; transform: scale(0.92) translateY(16px); }
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
     to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
@@ -381,26 +364,25 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    background: #202024;
+    border-bottom: 1px solid #e5e5e5;
+    background: #ffffff;
 }
 .review-header h4 {
     margin: 0;
     font-size: 19px;
     font-weight: 800;
-    color: #ffffff;
+    color: #000000;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 .review-header h4 i {
-    color: #ffb800;
-    filter: drop-shadow(0 0 6px rgba(255, 184, 0, 0.4));
+    color: #0381fe;
 }
 #closeReviewModal {
-    background: rgba(255, 255, 255, 0.06);
+    background: #f4f4f4;
     border: none;
-    color: #a1a1aa;
+    color: #555555;
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -413,8 +395,8 @@ body {
     transition: all 0.2s ease;
 }
 #closeReviewModal:hover {
-    background: rgba(239, 68, 68, 0.2);
-    color: #ef4444;
+    background: #e5e5e5;
+    color: #000000;
     transform: rotate(90deg);
 }
 
@@ -429,18 +411,18 @@ body {
     width: 6px;
 }
 .review-modal-content form::-webkit-scrollbar-track {
-    background: #18181b;
+    background: #f4f4f4;
 }
 .review-modal-content form::-webkit-scrollbar-thumb {
-    background: #3f3f46;
+    background: #d1d5db;
     border-radius: 3px;
 }
 
 /* Individual product review block container */
 .review-item-card {
-    background: #23232a;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 16px;
     padding: 18px;
     display: flex;
     flex-direction: column;
@@ -448,7 +430,7 @@ body {
     transition: border-color 0.2s;
 }
 .review-item-card:hover {
-    border-color: rgba(238, 77, 45, 0.4);
+    border-color: #000000;
 }
 
 .review-product {
@@ -459,28 +441,27 @@ body {
 .review-image img {
     width: 68px;
     height: 68px;
-    object-fit: cover;
+    object-fit: contain;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: #18181b;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    border: 1px solid #e5e5e5;
+    background: #ffffff;
 }
 .review-info h5 {
     font-size: 15px;
     font-weight: 700;
-    color: #ffffff;
+    color: #000000;
     margin: 0 0 6px;
     line-height: 1.3;
 }
 .review-info small {
     display: inline-block;
-    background: rgba(56, 189, 248, 0.12);
-    color: #38bdf8;
+    background: #f8f9fa;
+    color: #555555;
     font-size: 12px;
     font-weight: 600;
-    padding: 3px 10px;
+    padding: 4px 10px;
     border-radius: 12px;
-    border: 1px solid rgba(56, 189, 248, 0.25);
+    border: 1px solid #e5e5e5;
 }
 
 /* Rating label & stars layout */
@@ -488,15 +469,15 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: #1a1a1e;
-    padding: 10px 16px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: #f8f9fa;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid #e5e5e5;
 }
 .review-rating-title {
-    font-size: 13.5px;
+    font-size: 14px;
     font-weight: 700;
-    color: #d4d4d8;
+    color: #000000;
 }
 
 /* Star rating */
@@ -510,28 +491,27 @@ body {
     display: none;
 }
 .rating-stars label {
-    font-size: 30px;
-    color: #3f3f46;
+    font-size: 28px;
+    color: #d1d5db;
     cursor: pointer;
-    transition: color 0.18s, transform 0.18s, text-shadow 0.18s;
+    transition: color 0.18s, transform 0.18s;
     user-select: none;
     line-height: 1;
 }
 .rating-stars input:checked ~ label,
 .rating-stars label:hover,
 .rating-stars label:hover ~ label {
-    color: #ffb800;
-    text-shadow: 0 0 12px rgba(255, 184, 0, 0.55);
+    color: #0381fe;
 }
 .rating-stars label:hover {
-    transform: scale(1.22);
+    transform: scale(1.15);
 }
 
 .review-modal-content textarea {
-    background: #1a1a1e;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    color: #ffffff;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    color: #111111;
     padding: 14px;
     font-size: 14px;
     outline: none;
@@ -542,56 +522,54 @@ body {
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 .review-modal-content textarea::placeholder {
-    color: #71717a;
+    color: #9ca3af;
 }
 .review-modal-content textarea:focus {
-    border-color: #ee4d2d;
-    box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.18);
+    border-color: #000000;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.05);
 }
 
 .review-footer {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
     padding-top: 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid #e5e5e5;
 }
 #cancelReview {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #a1a1aa;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    color: #111111;
     font-weight: 700;
     font-size: 14px;
     padding: 11px 24px;
-    border-radius: 8px;
+    border-radius: 20px;
     cursor: pointer;
     transition: all 0.18s;
 }
 #cancelReview:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    background: #f4f4f4;
 }
 
 .review-footer .btn-primary {
-    background: linear-gradient(135deg, #ee4d2d 0%, #f05d40 100%);
+    background: #000000;
     border: none;
     color: #ffffff;
     font-weight: 700;
     font-size: 14.5px;
-    padding: 12px 36px;
-    border-radius: 8px;
+    padding: 11px 32px;
+    border-radius: 20px;
     cursor: pointer;
-    box-shadow: 0 6px 20px rgba(238, 77, 45, 0.4);
     transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
     display: inline-flex;
     align-items: center;
     gap: 8px;
 }
 .review-footer .btn-primary:hover {
-    background: linear-gradient(135deg, #f05d40 0%, #ff6b4a 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(238, 77, 45, 0.55);
+    background: #333333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
 }
 
 /* ============================================================
@@ -711,16 +689,16 @@ body {
                     <div>
                         <div class="addr-name">
                             {{ $order->address->full_name }}
-                            <span style="font-weight:400;color:#0369a1;font-size:14px;margin-left:12px">{{ $order->address->phone }}</span>
+                            <span style="font-weight:400;color:#555;font-size:14px;margin-left:12px">{{ $order->address->phone }}</span>
                         </div>
                         <div class="addr-full">
-                            <i class="fas fa-location-dot" style="font-size:12px;margin-right:5px;color:#7dd3fc"></i>
+                            <i class="fas fa-location-dot" style="font-size:12px;margin-right:5px;color:#9ca3af"></i>
                             {{ $order->address->full_address }}
                         </div>
                     </div>
                 </div>
                 @else
-                <p style="color:#7dd3fc;margin:0">Không có thông tin địa chỉ.</p>
+                <p style="color:#555;margin:0">Không có thông tin địa chỉ.</p>
                 @endif
             </div>
         </div>
@@ -740,7 +718,7 @@ body {
                         @if($item->product && $item->product->first_image)
                         <img src="{{ $item->product->first_image }}" class="product-img" alt="{{ $item->product_name }}">
                         @else
-                        <img src="https://placehold.co/82x82/e0f2fe/0369a1?text=SP" class="product-img" alt="{{ $item->product_name }}">
+                        <img src="https://placehold.co/82x82/f4f4f4/555555?text=SP" class="product-img" alt="{{ $item->product_name }}">
                         @endif
                     </div>
                     {{-- Info --}}
@@ -783,7 +761,7 @@ body {
 
                     {{-- Payment info --}}
                     <div class="payment-box">
-                        <h6><i class="fas fa-credit-card" style="margin-right:6px;color:#0ea5e9"></i>Thông tin thanh toán</h6>
+                        <h6><i class="fas fa-credit-card" style="margin-right:6px;color:#000000"></i>Thông tin thanh toán</h6>
                         <p>
                             <strong>Phương thức:</strong>
                             {{ $order->payment_method === 'momo' ? 'Ví MoMo' : 'Thanh toán khi nhận hàng (COD)' }}
@@ -801,7 +779,7 @@ body {
                         @if($order->voucher)
                         <p>
                             <strong>Mã giảm giá:</strong>
-                            <span style="font-family:monospace;background:rgba(186,230,253,.35);padding:2px 8px;border-radius:6px;color:#0369a1;font-weight:700">{{ $order->voucher->code }}</span>
+                            <span style="font-family:monospace;background:#e5e5e5;padding:2px 8px;border-radius:6px;color:#000;font-weight:700">{{ $order->voucher->code }}</span>
                         </p>
                         @endif
                         @if($order->note)
@@ -879,7 +857,7 @@ body {
                         @if($item->product && $item->product->first_image)
                             <img src="{{ $item->product->first_image }}" alt="{{ $item->product_name }}">
                         @else
-                            <img src="https://placehold.co/68x68/1a1a1e/38bdf8?text=SP" alt="{{ $item->product_name }}">
+                            <img src="https://placehold.co/68x68/f4f4f4/555555?text=SP" alt="{{ $item->product_name }}">
                         @endif
                     </div>
 
@@ -925,7 +903,7 @@ body {
 
                 <button type="submit"
                         class="btn btn-primary">
-                    <i class="fas fa-paper-plane"></i> Đánh giá
+                    <i class="fas fa-paper-plane"></i> Gửi đánh giá
                 </button>
             </div>
 
@@ -938,7 +916,7 @@ body {
 @push('scripts')
 <script>
 (function () {
-    /* ---- Canvas clouds ---- */
+    /* ---- Canvas clouds (Subtle Gray theme) ---- */
     const canvas = document.getElementById('sky-canvas');
     if (canvas) {
         const ctx = canvas.getContext('2d');
@@ -947,20 +925,20 @@ body {
         window.addEventListener('resize', resize); resize();
         function makeCloud() {
             return { x: Math.random()*W*1.2, y: Math.random()*H*.6,
-                     r: 50+Math.random()*110, dx: .13+Math.random()*.2, alpha: .05+Math.random()*.1 };
+                     r: 50+Math.random()*110, dx: .13+Math.random()*.2, alpha: .01+Math.random()*.03 };
         }
         for (let i = 0; i < 8; i++) clouds.push(makeCloud());
         function drawCloud(c) {
             const g = ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,c.r);
-            g.addColorStop(0, `rgba(255,255,255,${c.alpha})`);
-            g.addColorStop(.6, `rgba(186,230,253,${c.alpha*.6})`);
-            g.addColorStop(1, 'rgba(186,230,253,0)');
+            g.addColorStop(0, `rgba(0,0,0,${c.alpha})`);
+            g.addColorStop(.6, `rgba(0,0,0,${c.alpha*.6})`);
+            g.addColorStop(1, 'rgba(0,0,0,0)');
             ctx.beginPath(); ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
             ctx.fillStyle = g; ctx.fill();
             [-.5,.5].forEach(o => {
                 ctx.beginPath();
                 ctx.arc(c.x+c.r*.55*o, c.y-c.r*.18, c.r*.72, 0, Math.PI*2);
-                ctx.fillStyle = `rgba(255,255,255,${c.alpha*.7})`; ctx.fill();
+                ctx.fillStyle = `rgba(0,0,0,${c.alpha*.7})`; ctx.fill();
             });
         }
         (function anim() {

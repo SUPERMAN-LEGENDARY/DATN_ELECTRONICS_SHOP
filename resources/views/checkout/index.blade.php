@@ -1,421 +1,486 @@
+{{-- resources/views/checkout/index.blade.php --}}
 @extends('layouts.app')
 @section('title', 'Thanh toán - ElectronicShop')
 
 @push('styles')
 <style>
-/* ============================================================
-   PAGE BACKGROUND — sky gradient (khớp trang chủ)
-   ============================================================ */
-body {
-    background: linear-gradient(180deg,
-        #bae6fd 0%,
-        #e0f2fe 18%,
-        #f0f9ff 38%,
-        #e0f2fe 62%,
-        #bae6fd 100%) fixed;
-    background-attachment: fixed;
-}
+    /* ============================================================
+       SAMSUNG OFFICIAL UI - GIAO DIỆN THANH TOÁN (SAMSUNG BLUE THEME)
+       ============================================================ */
+    :root {
+        --samsung-gray-dark: #363636;
+        --samsung-gray-dark-hover:  #1f1f1f;
+        --samsung-light-gray-dark: #f0f4ff;
+        --samsung-accent-blue: #2189ff;
+        --samsung-black: #000000;
+        --samsung-dark: #111111;
+        --samsung-gray-dark: #363636;
+        --samsung-gray-mid: #707070;
+        --samsung-gray-light: #e0e0e0;
+        --samsung-bg-section: #f8f9fa;
+        --samsung-radius-pill: 30px;
+        --samsung-radius-card: 16px;
+    }
 
-#sky-canvas {
-    position: fixed; inset: 0;
-    width: 100%; height: 100%;
-    pointer-events: none; z-index: 0; opacity: .42;
-}
+    body {
+        background: #ffffff;
+        color: var(--samsung-dark);
+        font-family: "SamsungOne", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+    }
 
-.bubble {
-    position: fixed; border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,.8), rgba(186,230,253,.3));
-    border: 1px solid rgba(125,211,252,.4);
-    pointer-events: none; z-index: 0;
-    animation: bubbleRise linear infinite;
-}
-@keyframes bubbleRise {
-    0%   { transform: translateY(0) scale(1);    opacity: .7; }
-    80%  { opacity: .4; }
-    100% { transform: translateY(-110vh) scale(1.1); opacity: 0; }
-}
+    /* Ẩn các hiệu ứng canvas và bong bóng của bản cũ */
+    #sky-canvas, .bubble, .ripple-wave {
+        display: none !important;
+    }
 
-/* ============================================================
-   SCROLL REVEAL
-   ============================================================ */
-.reveal {
-    opacity: 0; transform: translateY(26px);
-    transition: opacity .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1);
-}
-.reveal.revealed { opacity: 1; transform: translateY(0); }
+    /* Scroll Reveal đơn giản */
+    .reveal {
+        opacity: 0; transform: translateY(15px);
+        transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.revealed { opacity: 1; transform: translateY(0); }
 
-.stagger-children > * {
-    opacity: 0; transform: translateY(18px);
-    transition: opacity .5s cubic-bezier(.16,1,.3,1), transform .5s cubic-bezier(.16,1,.3,1);
-}
-.stagger-children.revealed > *:nth-child(1)  { opacity:1; transform:none; transition-delay:.04s; }
-.stagger-children.revealed > *:nth-child(2)  { opacity:1; transform:none; transition-delay:.09s; }
-.stagger-children.revealed > *:nth-child(3)  { opacity:1; transform:none; transition-delay:.14s; }
-.stagger-children.revealed > *:nth-child(4)  { opacity:1; transform:none; transition-delay:.19s; }
-.stagger-children.revealed > *:nth-child(n+5){ opacity:1; transform:none; transition-delay:.24s; }
+    .samsung-checkout-page {
+        padding: 48px 20px 80px;
+        min-height: 100vh;
+        background: #ffffff;
+    }
 
-/* ripple */
-.ripple-wave {
-    position: absolute; border-radius: 50%;
-    background: rgba(125,211,252,.28);
-    transform: scale(0); animation: rippleOut .6s linear;
-    pointer-events: none; z-index: 10;
-}
-@keyframes rippleOut { to { transform:scale(4); opacity:0; } }
+    .checkout-wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
 
-/* ============================================================
-   PAGE WRAPPER
-   ============================================================ */
-.checkout-page {
-    min-height: 100vh;
-    padding: 28px 0 60px;
-    position: relative; z-index: 1;
-}
+    .checkout-title {
+        font-size: clamp(28px, 4vw, 38px);
+        font-weight: 800;
+        margin-bottom: 36px;
+        letter-spacing: -0.8px;
+        color: var(--samsung-black);
+    }
 
-.checkout-wrap {
-    max-width: 1200px; margin: 0 auto; padding: 0 16px;
-    position: relative; z-index: 1;
-}
+    /* ============================================================
+       ALERTS
+       ============================================================ */
+    .alert-error {
+        background: #fff5f5;
+        color: #d32f2f;
+        border: 1px solid #ffcdd2;
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-bottom: 28px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    .alert-error div {
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .alert-error div:last-child {
+        margin-bottom: 0;
+    }
 
-.checkout-title {
-    font-size: 26px; font-weight: 800; margin-bottom: 24px;
-    color: #0c4a6e; letter-spacing: .5px;
-    display: flex; align-items: center; gap: 10px;
-}
-.checkout-title i {
-    width: 44px; height: 44px; border-radius: 12px;
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
-    color: #fff; font-size: 18px;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 14px rgba(14,165,233,.35);
-}
+    /* ============================================================
+       STEP INDICATOR (SAMSUNG STYLE)
+       ============================================================ */
+    .checkout-step {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 44px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--samsung-gray-mid);
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 8px;
+    }
+    
+    .checkout-step .step {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-/* ============================================================
-   ALERTS
-   ============================================================ */
-.alert-error {
-    background: rgba(254,226,226,.92);
-    backdrop-filter: blur(8px);
-    color: #991b1b;
-    border: 1px solid rgba(252,165,165,.6);
-    padding: 14px 18px; border-radius: 12px;
-    margin-bottom: 22px; font-size: 14px;
-    box-shadow: 0 4px 16px rgba(225,29,72,.1);
-    animation: alertIn .4s cubic-bezier(.16,1,.3,1);
-}
-@keyframes alertIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:none; } }
-.alert-error div { margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
-.alert-error div:last-child { margin-bottom: 0; }
+    .checkout-step .step.active {
+        color: var(--samsung-black);
+        font-weight: 700;
+    }
 
-/* ============================================================
-   STEP INDICATOR — glassmorphism
-   ============================================================ */
-.checkout-step {
-    display: flex; justify-content: center; align-items: center;
-    margin-bottom: 32px;
-    background: rgba(255,255,255,.65);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(186,230,253,.6);
-    border-radius: 16px; padding: 16px 24px;
-    box-shadow: 0 4px 20px rgba(14,165,233,.08);
-}
-.step {
-    display: flex; flex-direction: column; align-items: center;
-    color: #7dd3fc; font-size: 13px; font-weight: 600; gap: 6px;
-    transition: color .2s;
-}
-.step span {
-    width: 38px; height: 38px; border-radius: 50%;
-    background: rgba(186,230,253,.5);
-    color: #0369a1;
-    display: flex; justify-content: center; align-items: center;
-    font-weight: 700; font-size: 14px;
-    transition: all .3s cubic-bezier(.34,1.56,.64,1);
-}
-.step.active { color: #0c4a6e; }
-.step.active span {
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
-    color: #fff;
-    box-shadow: 0 4px 14px rgba(14,165,233,.38);
-    transform: scale(1.08);
-}
-.step.done span {
-    background: linear-gradient(135deg, #16a34a, #4ade80);
-    color: #fff;
-}
-.step-line {
-    width: 100px; height: 3px;
-    background: rgba(186,230,253,.6);
-    margin: 0 14px; border-radius: 2px;
-}
-@media (max-width: 640px) { .step-line { width: 36px; } .step p { display: none; } }
+    .checkout-step .step span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #f1f3f5;
+        color: var(--samsung-gray-mid);
+        font-size: 13px;
+        font-weight: 700;
+        transition: all 0.25s ease;
+    }
 
-/* ============================================================
-   LAYOUT GRID
-   ============================================================ */
-.checkout-layout {
-    display: grid; grid-template-columns: 1fr 380px;
-    gap: 24px; align-items: start;
-}
-@media (max-width: 991px) { .checkout-layout { grid-template-columns: 1fr; } .checkout-right { order: -1; } }
+    .checkout-step .step.active span {
+        background: var(--samsung-gray-dark);
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(20, 40, 160, 0.25);
+    }
 
-/* ============================================================
-   CHECKOUT BOX — glassmorphism card
-   ============================================================ */
-.checkout-box {
-    background: rgba(255,255,255,.82);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(186,230,253,.65);
-    border-radius: 18px; padding: 24px;
-    margin-bottom: 20px;
-    box-shadow: 0 6px 28px rgba(14,165,233,.1);
-    transition: box-shadow .25s;
-}
-.checkout-box:hover { box-shadow: 0 8px 32px rgba(14,165,233,.16); }
+    .checkout-step .step-line {
+        width: 48px;
+        height: 2px;
+        background: var(--samsung-gray-light);
+    }
 
-.checkout-box h2 {
-    font-size: 16px; font-weight: 800;
-    color: #0c4a6e; margin-bottom: 20px;
-    display: flex; align-items: center; gap: 10px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid rgba(186,230,253,.55);
-}
-.checkout-box h2 .num {
-    width: 28px; height: 28px; border-radius: 50%;
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
-    color: #fff; font-size: 13px; font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(14,165,233,.3);
-}
+    /* ============================================================
+       LAYOUT GRID
+       ============================================================ */
+    .checkout-layout {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 56px;
+        align-items: start;
+    }
 
-/* ============================================================
-   ADDRESS SELECTION
-   ============================================================ */
-.addr-option {
-    border: 1.5px solid rgba(186,230,253,.7);
-    border-radius: 14px; padding: 14px 16px;
-    margin-bottom: 10px; cursor: pointer;
-    display: flex; gap: 12px; align-items: flex-start;
-    transition: all .22s cubic-bezier(.16,1,.3,1);
-    background: rgba(255,255,255,.72);
-    backdrop-filter: blur(4px);
-}
-.addr-option:hover {
-    border-color: #0ea5e9;
-    background: rgba(186,230,253,.35);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 14px rgba(14,165,233,.12);
-}
-.addr-option input[type=radio] {
-    width: 18px; height: 18px; margin-top: 3px;
-    accent-color: #0ea5e9; flex-shrink: 0;
-}
-.addr-option .name { font-weight: 700; font-size: 14.5px; color: #0c4a6e; }
-.addr-option .detail { font-size: 13px; color: #0369a1; opacity: .85; margin-top: 3px; }
-.badge-default {
-    background: rgba(186,230,253,.55); color: #0369a1;
-    font-size: 11px; padding: 2px 9px; border-radius: 10px;
-    margin-left: 8px; font-weight: 700; border: 1px solid rgba(125,211,252,.5);
-}
+    @media (max-width: 991px) {
+        .checkout-layout {
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+        .checkout-right {
+            order: -1;
+        }
+    }
 
-/* ============================================================
-   FORM FIELDS
-   ============================================================ */
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.form-grid .full { grid-column: 1 / -1; }
-@media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+    /* ============================================================
+       SECTIONS & HEADINGS
+       ============================================================ */
+    .checkout-box {
+        margin-bottom: 44px;
+    }
 
-.form-group label {
-    display: block; font-size: 13px; font-weight: 600;
-    margin-bottom: 6px; color: #0369a1;
-}
-.form-group input,
-.form-group textarea {
-    width: 100%; padding: 11px 14px;
-    border: 1px solid rgba(125,211,252,.55);
-    border-radius: 10px; font-size: 14px;
-    outline: none; box-sizing: border-box;
-    background: rgba(255,255,255,.75);
-    color: #0c4a6e;
-    transition: border-color .2s, box-shadow .2s, background .2s;
-    font-family: inherit;
-}
-.form-group input::placeholder,
-.form-group textarea::placeholder { color: #7dd3fc; }
+    .checkout-box h2 {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--samsung-black);
+        margin-bottom: 24px;
+        padding-bottom: 14px;
+        border-bottom: 2px solid var(--samsung-black);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        letter-spacing: -0.3px;
+    }
 
-.form-group input:focus,
-.form-group textarea:focus {
-    border-color: #0ea5e9;
-    box-shadow: 0 0 0 3px rgba(14,165,233,.15);
-    background: rgba(255,255,255,.92);
-}
+    .checkout-box h2 .num {
+        display: none;
+    }
 
-/* ============================================================
-   PAYMENT OPTIONS
-   ============================================================ */
-.pay-option {
-    border: 1.5px solid rgba(186,230,253,.7);
-    border-radius: 14px; padding: 16px;
-    margin-bottom: 12px; cursor: pointer;
-    display: flex; align-items: center; gap: 14px;
-    transition: all .22s cubic-bezier(.16,1,.3,1);
-    background: rgba(255,255,255,.72);
-    backdrop-filter: blur(4px);
-}
-.pay-option:hover {
-    border-color: #0ea5e9;
-    background: rgba(186,230,253,.35);
-    transform: translateY(-2px);
-}
-.pay-option.active {
-    border-color: #0ea5e9;
-    background: rgba(186,230,253,.5);
-    box-shadow: 0 0 0 2px rgba(14,165,233,.2) inset, 0 4px 16px rgba(14,165,233,.12);
-}
-.pay-option i {
-    width: 32px; font-size: 24px; text-align: center;
-    color: #0ea5e9; flex-shrink: 0;
-}
-.pay-option .title { font-weight: 700; font-size: 14.5px; color: #0c4a6e; }
-.pay-option .desc { font-size: 12.5px; color: #0369a1; opacity: .8; }
+    /* ============================================================
+       RADIO OPTIONS (ADDRESS & PAYMENT) — SAMSUNG ACTIVE BLUE
+       ============================================================ */
+    .addr-option, .pay-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        border: 1.5px solid var(--samsung-gray-light);
+        border-radius: var(--samsung-radius-card);
+        padding: 20px;
+        margin-bottom: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #ffffff;
+    }
 
-/* ============================================================
-   RIGHT ORDER SUMMARY — glassmorphism
-   ============================================================ */
-.order-box {
-    background: rgba(255,255,255,.84);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(186,230,253,.65);
-    border-radius: 18px; padding: 24px;
-    box-shadow: 0 6px 28px rgba(14,165,233,.12);
-    position: sticky; top: 90px;
-}
-.order-box h2 {
-    font-size: 16px; font-weight: 800;
-    color: #0c4a6e; margin-bottom: 18px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid rgba(186,230,253,.55);
-}
+    .addr-option:hover, .pay-option:hover {
+        border-color: var(--samsung-gray-dark);
+    }
 
-.order-product {
-    display: flex; gap: 12px; margin-bottom: 14px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid rgba(186,230,253,.35);
-}
-.order-product:last-of-type { border-bottom: none; }
+    /* Active state (JS trigger hoặc :has input:checked) */
+    .pay-option.active,
+    .pay-option:has(input[type="radio"]:checked),
+    .addr-option:has(input[type="radio"]:checked) {
+        border-color: var(--samsung-gray-dark);
+        border-width: 2px;
+        background: var(--samsung-light-gray-dark);
+        box-shadow: 0 4px 16px rgba(20, 40, 160, 0.08);
+    }
 
-.order-product img,
-.order-product .no-img {
-    width: 58px; height: 58px;
-    object-fit: contain;
-    background: linear-gradient(160deg, #f0f9ff, #e0f2fe);
-    padding: 3px; box-sizing: border-box;
-    border-radius: 10px;
-    border: 1px solid rgba(186,230,253,.6);
-    flex-shrink: 0;
-}
-.order-product .no-img {
-    display: flex; align-items: center; justify-content: center;
-    color: #7dd3fc; font-size: 18px;
-}
-.order-product .name { font-size: 13.5px; font-weight: 700; margin: 0 0 3px; line-height: 1.3; color: #0c4a6e; }
-.order-product .meta { font-size: 12.5px; color: #0369a1; opacity: .85; }
-.order-product .variant-tag {
-    font-size: 11.5px; color: #0ea5e9; font-weight: 600;
-    background: rgba(186,230,253,.4); border-radius: 4px;
-    padding: 1px 6px; display: inline-block; margin-bottom: 2px;
-}
+    .addr-option input[type=radio], .pay-option input[type=radio] {
+        width: 20px;
+        height: 20px;
+        margin-top: 2px;
+        accent-color: var(--samsung-gray-dark);
+        flex-shrink: 0;
+        cursor: pointer;
+    }
 
-/* Voucher */
-.voucher-row { display: flex; gap: 8px; margin: 16px 0; }
-.voucher-row input {
-    flex: 1; padding: 10px 12px;
-    border: 1px solid rgba(125,211,252,.55);
-    border-radius: 8px; font-size: 13.5px; outline: none;
-    background: rgba(255,255,255,.75); color: #0c4a6e;
-    transition: border-color .2s, box-shadow .2s;
-}
-.voucher-row input::placeholder { color: #7dd3fc; }
-.voucher-row input:focus {
-    border-color: #0ea5e9;
-    box-shadow: 0 0 0 3px rgba(14,165,233,.15);
-}
-.voucher-row button {
-    padding: 0 16px; border: none;
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
-    color: #fff; border-radius: 8px; font-weight: 700;
-    cursor: pointer; font-size: 13.5px;
-    transition: opacity .2s, transform .15s;
-    box-shadow: 0 2px 10px rgba(14,165,233,.3);
-}
-.voucher-row button:hover { opacity: .9; transform: translateY(-1px); }
+    .option-content {
+        flex: 1;
+    }
 
-.summary-row {
-    display: flex; justify-content: space-between;
-    font-size: 14px; margin: 10px 0; color: #0369a1;
-}
-.summary-total {
-    font-size: 18px; font-weight: 800; color: #0c4a6e;
-    border-top: 2px solid rgba(186,230,253,.55);
-    padding-top: 14px; margin-top: 8px;
-    display: flex; justify-content: space-between;
-}
-.summary-total span:last-child { color: #0369a1; }
+    .option-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--samsung-black);
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
-.btn-place-order {
-    display: block; width: 100%; margin-top: 18px; padding: 14px;
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
-    color: #fff; border: none; border-radius: 12px;
-    font-size: 15.5px; font-weight: 700; cursor: pointer;
-    transition: opacity .2s, transform .18s, box-shadow .2s;
-    box-shadow: 0 4px 18px rgba(14,165,233,.38);
-    position: relative; overflow: hidden;
-}
-.btn-place-order::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.28) 50%, transparent 60%);
-    transform: translateX(-120%); transition: transform .5s ease; pointer-events: none;
-}
-.btn-place-order:hover::after { transform: translateX(120%); }
-.btn-place-order:hover {
-    opacity: .92; transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(14,165,233,.48);
-}
+    .option-desc {
+        font-size: 14px;
+        color: var(--samsung-gray-mid);
+        line-height: 1.5;
+    }
 
-.small-box {
-    text-align: center; font-weight: 700; color: #0c4a6e; font-size: 13px;
-    background: rgba(255,255,255,.75); backdrop-filter: blur(10px);
-    border: 1px solid rgba(186,230,253,.6);
-    border-radius: 14px; padding: 14px; margin-top: 14px;
-    box-shadow: 0 4px 16px rgba(14,165,233,.08);
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-}
+    .badge-default {
+        background: #e8f0fe;
+        color: var(--samsung-gray-dark);
+        font-size: 12px;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-weight: 700;
+    }
+
+    .pay-option i {
+        font-size: 24px;
+        color: var(--samsung-gray-dark);
+        margin-top: 2px;
+    }
+    .pay-option#optMomo i { color: #a50064; } /* Brand MoMo Magenta */
+
+    /* ============================================================
+       FORM FIELDS
+       ============================================================ */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        background: var(--samsung-bg-section);
+        padding: 24px;
+        border-radius: var(--samsung-radius-card);
+        border: 1px solid #e9ecef;
+    }
+
+    @media (max-width: 640px) {
+        .form-grid { grid-template-columns: 1fr; }
+    }
+
+    .form-group.full { grid-column: 1 / -1; }
+
+    .form-group label {
+        display: block;
+        font-size: 13.5px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--samsung-gray-dark);
+    }
+
+    .form-group input, .form-group textarea {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1px solid #cccccc;
+        border-radius: 10px;
+        font-size: 14.5px;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        background: #ffffff;
+        color: var(--samsung-black);
+        font-family: inherit;
+    }
+
+    .form-group input:focus, .form-group textarea:focus {
+        border-color: var(--samsung-gray-dark);
+        box-shadow: 0 0 0 3px rgba(20, 40, 160, 0.12);
+    }
+
+    /* ============================================================
+       ORDER SUMMARY BOX — SAMSUNG STYLE
+       ============================================================ */
+    .order-box {
+        background: var(--samsung-bg-section);
+        border-radius: var(--samsung-radius-card);
+        padding: 32px;
+        border: 1px solid #e9ecef;
+        position: sticky;
+        top: 40px;
+    }
+
+    .order-box h2 {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--samsung-black);
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--samsung-gray-light);
+    }
+
+    .order-product {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .order-product:last-of-type {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .order-product img, .order-product .no-img {
+        width: 76px;
+        height: 76px;
+        object-fit: contain;
+        background: #ffffff;
+        border-radius: 10px;
+        border: 1px solid #e5e5e5;
+        padding: 4px;
+        flex-shrink: 0;
+    }
+
+    .order-product .no-img {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--samsung-gray-mid);
+        font-size: 13px;
+    }
+
+    .product-info .name {
+        font-size: 14.5px;
+        font-weight: 700;
+        margin: 0 0 4px;
+        line-height: 1.4;
+        color: var(--samsung-black);
+    }
+
+    .product-info .variant-tag {
+        font-size: 12.5px;
+        color: var(--samsung-gray-dark);
+        background: var(--samsung-light-gray-dark);
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 6px;
+    }
+
+    .product-info .meta {
+        font-size: 14.5px;
+        font-weight: 700;
+        color: var(--samsung-black);
+    }
+
+    /* Voucher Row */
+    .voucher-row {
+        display: flex;
+        gap: 10px;
+        margin: 28px 0 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--samsung-gray-light);
+    }
+
+    .voucher-row input {
+        flex: 1;
+        padding: 13px 16px;
+        border: 1px solid #cccccc;
+        border-radius: 8px;
+        font-size: 14px;
+        outline: none;
+        background: #ffffff;
+    }
+    .voucher-row input:focus { border-color: var(--samsung-gray-dark); }
+
+    .voucher-row button {
+        padding: 0 20px;
+        border: none;
+        background: var(--samsung-gray-dark);
+        color: #ffffff;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.2s ease, transform 0.15s ease;
+    }
+    .voucher-row button:hover {
+        background: var(--samsung-gray-dark);
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14.5px;
+        margin: 14px 0;
+        color: var(--samsung-gray-dark);
+    }
+
+    .summary-total {
+        font-size: 21px;
+        font-weight: 800;
+        color: var(--samsung-black);
+        border-top: 2px solid var(--samsung-black);
+        padding-top: 20px;
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+    }
+    .summary-total span:last-child {
+        color: var(--samsung-gray-dark);
+    }
+
+    /* SAMSUNG PILL BUTTON */
+    .btn-place-order {
+        display: block;
+        width: 100%;
+        margin-top: 28px;
+        padding: 16px;
+        background: var(--samsung-gray-dark);
+        color: #ffffff;
+        border: none;
+        border-radius: var(--samsung-radius-pill);
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.18s ease, box-shadow 0.2s ease;
+        box-shadow: 0 6px 20px rgba(20, 40, 160, 0.25);
+    }
+    .btn-place-order:hover {
+        background: var(--samsung-gray-dark-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(20, 40, 160, 0.35);
+    }
+    .btn-place-order:disabled {
+        background: var(--samsung-gray-dark);
+        box-shadow: none;
+        cursor: not-allowed;
+    }
 </style>
 @endpush
 
 @section('content')
-{{-- Sky Canvas --}}
+{{-- Giữ nguyên HTML element này để script JS không bị lỗi undefined --}}
 <canvas id="sky-canvas" aria-hidden="true"></canvas>
 
-<div class="checkout-page">
+<div class="samsung-checkout-page">
 <div class="checkout-wrap">
-    <h1 class="checkout-title reveal">
-        <i class="fas fa-credit-card"></i>
-        Thanh toán
-    </h1>
+    <h1 class="checkout-title reveal">Thanh toán</h1>
 
     @if(session('error'))
     <div class="alert-error reveal">
-        <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+        <i class="fas fa-exclamation-circle" style="margin-right:6px"></i> {{ session('error') }}
     </div>
     @endif
     @if($errors->any())
     <div class="alert-error reveal">
         @foreach($errors->all() as $e)
-        <div><i class="fas fa-exclamation-circle"></i> {{ $e }}</div>
+        <div><i class="fas fa-exclamation-circle" style="margin-right:6px"></i> {{ $e }}</div>
         @endforeach
     </div>
     @endif
@@ -441,26 +506,29 @@ body {
                     <h2><span class="num">1</span> Địa chỉ giao hàng</h2>
 
                     @if($addresses->count())
-                    @foreach($addresses as $addr)
-                    <label class="addr-option">
-                        <input type="radio" name="address_id" value="{{ $addr->id }}"
-                            {{ $loop->first ? 'checked' : '' }} onchange="toggleNewAddressForm(false)">
-                        <div>
-                            <div class="name">
-                                {{ $addr->full_name }} — {{ $addr->phone }}
-                                @if($addr->is_default)<span class="badge-default">Mặc định</span>@endif
+                        @foreach($addresses as $addr)
+                        <label class="addr-option">
+                            <input type="radio" name="address_id" value="{{ $addr->id }}"
+                                {{ $loop->first ? 'checked' : '' }} onchange="toggleNewAddressForm(false)">
+                            <div class="option-content">
+                                <div class="option-title">
+                                    {{ $addr->full_name }} — {{ $addr->phone }}
+                                    @if($addr->is_default)<span class="badge-default">Mặc định</span>@endif
+                                </div>
+                                <div class="option-desc">{{ $addr->full_address }}</div>
                             </div>
-                            <div class="detail">{{ $addr->full_address }}</div>
-                        </div>
-                    </label>
-                    @endforeach
-                    <label class="addr-option" style="margin-top:4px">
-                        <input type="radio" name="address_id" value="" onchange="toggleNewAddressForm(true)">
-                        <div class="name"><i class="fas fa-plus-circle" style="margin-right:6px;color:#0ea5e9"></i> Giao tới địa chỉ khác</div>
-                    </label>
+                        </label>
+                        @endforeach
+                        
+                        <label class="addr-option">
+                            <input type="radio" name="address_id" value="" onchange="toggleNewAddressForm(true)">
+                            <div class="option-content">
+                                <div class="option-title"><i class="fas fa-plus-circle" style="color:var(--samsung-gray-dark);margin-right:6px"></i> Giao tới địa chỉ khác</div>
+                            </div>
+                        </label>
                     @endif
 
-                    <div id="newAddressForm" class="form-grid" style="{{ $addresses->count() ? 'display:none;' : '' }}margin-top:12px">
+                    <div id="newAddressForm" class="form-grid" style="{{ $addresses->count() ? 'display:none;' : '' }}margin-top:16px">
                         <div class="form-group">
                             <label>Họ tên người nhận</label>
                             <input type="text" name="full_name" value="{{ old('full_name', auth()->user()->name) }}">
@@ -492,30 +560,31 @@ body {
                 <div class="checkout-box">
                     <h2><span class="num">2</span> Phương thức thanh toán</h2>
 
+                    {{-- ID optCod và optMomo được giữ nguyên để trigger active class bằng JS --}}
                     <label class="pay-option active" id="optCod">
                         <input type="radio" name="payment_method" value="cod" checked onchange="selectPay('cod')" style="display:none">
                         <i class="fas fa-money-bill-wave"></i>
-                        <div>
-                            <div class="title">Thanh toán khi nhận hàng (COD)</div>
-                            <div class="desc">Trả tiền mặt trực tiếp cho shipper khi nhận hàng</div>
+                        <div class="option-content">
+                            <div class="option-title">Thanh toán khi nhận hàng (COD)</div>
+                            <div class="option-desc">Trả tiền mặt trực tiếp cho người giao hàng khi nhận hàng</div>
                         </div>
                     </label>
 
                     <label class="pay-option" id="optMomo">
                         <input type="radio" name="payment_method" value="momo" onchange="selectPay('momo')" style="display:none">
-                        <i class="fas fa-wallet" style="color:#d946ef"></i>
-                        <div>
-                            <div class="title">Ví điện tử MoMo</div>
-                            <div class="desc">Thanh toán online qua ứng dụng MoMo</div>
+                        <i class="fas fa-wallet"></i>
+                        <div class="option-content">
+                            <div class="option-title">Ví điện tử MoMo</div>
+                            <div class="option-desc">Thanh toán an toàn & nhanh chóng qua ứng dụng MoMo</div>
                         </div>
                     </label>
                 </div>
 
                 {{-- ─── 3. Ghi chú ─── --}}
                 <div class="checkout-box">
-                    <h2><span class="num">3</span> Ghi chú đơn hàng</h2>
+                    <h2><span class="num">3</span> Ghi chú đơn hàng (Tùy chọn)</h2>
                     <div class="form-group">
-                        <textarea name="note" rows="3" placeholder="Ví dụ: giao giờ hành chính, gọi trước khi giao...">{{ old('note') }}</textarea>
+                        <textarea name="note" rows="4" placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi giao...">{{ old('note') }}</textarea>
                     </div>
                 </div>
 
@@ -531,9 +600,9 @@ body {
                         @if($it['product']->first_image)
                         <img src="{{ $it['product']->first_image }}" alt="{{ $it['product']->name }}">
                         @else
-                        <div class="no-img"><i class="fas fa-image"></i></div>
+                        <div class="no-img">No Image</div>
                         @endif
-                        <div>
+                        <div class="product-info">
                             <p class="name">{{ $it['product']->name }}</p>
                             @if($it['variant'])
                             <span class="variant-tag">{{ $it['variant']->label }}</span>
@@ -554,7 +623,7 @@ body {
                     </div>
                     <div class="summary-row">
                         <span>Phí vận chuyển</span>
-                        <span style="color:#16a34a;font-weight:700">
+                        <span style="font-weight:700;color:#16a34a">
                             <i class="fas fa-check-circle" style="margin-right:4px"></i>Miễn phí
                         </span>
                     </div>
@@ -563,15 +632,11 @@ body {
                         <span>{{ number_format($subtotal) }}đ</span>
                     </div>
 
+                    {{-- Nút Submit giữ nguyên ID để JS xử lý spinner --}}
                     <button type="submit" class="btn-place-order" id="btnPlaceOrder">
-                        <i class="fas fa-shield-alt" style="margin-right:6px"></i>Đặt hàng ngay
+                        Đặt hàng ngay
                     </button>
                 </div>
-
-                <!-- <div class="small-box">
-                    <i class="fas fa-lock" style="color:#0ea5e9"></i>
-                    Thanh toán an toàn &amp; bảo mật 100%
-                </div> -->
             </div>
 
         </div>
@@ -581,6 +646,9 @@ body {
 @endsection
 
 @push('scripts')
+{{-- =========================================================================
+     KHÔNG THAY ĐỔI ĐOẠN SCRIPT DƯỚI ĐÂY ĐỂ ĐẢM BẢO 100% NGHIỆP VỤ NHƯ YÊU CẦU
+     ========================================================================= --}}
 <script>
 function toggleNewAddressForm(show) {
     const el = document.getElementById('newAddressForm');
@@ -616,7 +684,6 @@ document.getElementById('checkoutForm')?.addEventListener('submit', function () 
     if (btn) {
         btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px"></i>Đang xử lý đơn hàng...';
         btn.disabled = true;
-        btn.style.opacity = '.85';
     }
 });
 

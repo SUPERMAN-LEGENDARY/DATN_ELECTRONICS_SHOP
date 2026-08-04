@@ -4,28 +4,27 @@
 @push('styles')
 <style>
 /* ============================================================
-   PAGE BACKGROUND — sky gradient
+   PAGE BACKGROUND — Samsung Minimalist (Light Gray & White)
    ============================================================ */
 body {
-    background: linear-gradient(180deg,
-        #bae6fd 0%, #e0f2fe 18%, #f0f9ff 38%,
-        #e0f2fe 62%, #bae6fd 100%) fixed;
+    background: #f4f4f4;
     background-attachment: fixed;
+    color: #111111;
 }
 #sky-canvas {
     position: fixed; inset: 0; width: 100%; height: 100%;
-    pointer-events: none; z-index: 0; opacity: .42;
+    pointer-events: none; z-index: 0; opacity: .6;
 }
 .bubble {
     position: fixed; border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,.8), rgba(186,230,253,.3));
-    border: 1px solid rgba(125,211,252,.4);
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,1), rgba(0,0,0,0.03));
+    border: 1px solid rgba(0,0,0,0.04);
     pointer-events: none; z-index: 0;
     animation: bubbleRise linear infinite;
 }
 @keyframes bubbleRise {
     0%   { transform: translateY(0) scale(1);    opacity: .7; }
-    80%  { opacity: .4; }
+    80%  { opacity: .3; }
     100% { transform: translateY(-110vh) scale(1.1); opacity: 0; }
 }
 
@@ -51,7 +50,7 @@ body {
 /* ripple */
 .ripple-wave {
     position: absolute; border-radius: 50%;
-    background: rgba(125,211,252,.28);
+    background: rgba(0,0,0,0.08);
     transform: scale(0); animation: rippleOut .6s linear;
     pointer-events: none; z-index: 10;
 }
@@ -83,21 +82,20 @@ body {
     padding: 12px 18px; border-radius: 12px;
     margin-bottom: 18px; font-weight: 600; font-size: 14px;
     animation: alertIn .4s cubic-bezier(.16,1,.3,1);
+    background: rgba(240,253,244,.9); color: #166534; border: 1px solid rgba(187,247,208,.8);
 }
 @keyframes alertIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:none} }
-.alert-sky-success { background: rgba(220,252,231,.9); color: #166534; border: 1px solid rgba(187,247,208,.8); }
+.alert-sky-success { background: rgba(240,253,244,.9); color: #166534; border: 1px solid rgba(187,247,208,.8); }
 
 /* ============================================================
-   MAIN CONTENT WRAPPER — glassmorphism
+   MAIN CONTENT WRAPPER — Clean Tech
    ============================================================ */
 .voucher-page {
-    background: rgba(255,255,255,.78);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(186,230,253,.65);
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
     border-radius: 20px;
     padding: 24px;
-    box-shadow: 0 6px 28px rgba(14,165,233,.1);
+    box-shadow: 0 4px 20px rgba(0,0,0,.03);
 }
 
 /* ============================================================
@@ -109,15 +107,15 @@ body {
     flex-wrap: wrap;
 }
 .voucher-title h2 {
-    margin: 0; font-size: 24px; font-weight: 800; color: #0c4a6e;
+    margin: 0; font-size: 24px; font-weight: 800; color: #000000;
     display: flex; align-items: center; gap: 10px;
 }
 .voucher-title h2 .title-icon {
     width: 40px; height: 40px; border-radius: 11px;
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
+    background: #000000;
     color: #fff; font-size: 16px;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 14px rgba(14,165,233,.35);
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
 }
 
 /* ============================================================
@@ -128,27 +126,31 @@ body {
 }
 .voucher-search input {
     width: 220px; height: 40px;
-    border: 1px solid rgba(125,211,252,.55);
-    border-radius: 10px; padding: 0 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 20px; padding: 0 16px; /* Pill shape */
     outline: none; font-size: 14px;
-    background: rgba(255,255,255,.8); color: #0c4a6e;
+    background: #ffffff; color: gray-dark; /* Samsung gray-dark */
     transition: border-color .2s, box-shadow .2s;
 }
-.voucher-search input::placeholder { color: #7dd3fc; }
+.voucher-search input::placeholder { color: #9ca3af; }
 .voucher-search input:focus {
-    border-color: #0ea5e9;
-    box-shadow: 0 0 0 3px rgba(14,165,233,.15);
+    border-color: gray-dark; /* Samsung gray-dark */
+    box-shadow: 0 0 0 2px rgba(0,0,0,.1);
 }
 .voucher-search button {
-    height: 40px; padding: 0 18px; border: none;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
+    height: 40px; padding: 0 20px; border: none;
+    border-radius: 20px; /* Pill shape */
+    background: gray; /* Samsung gray-dark */
     color: #fff; font-weight: 700; font-size: 13.5px;
     cursor: pointer;
-    box-shadow: 0 3px 12px rgba(14,165,233,.3);
-    transition: opacity .2s, transform .15s;
+    box-shadow: 0 4px 10px rgba(0,0,0,.1);
+    transition: background .2s, transform .15s, box-shadow .2s;
 }
-.voucher-search button:hover { opacity:.9; transform:translateY(-1px); }
+.voucher-search button:hover { 
+    background: var(--samsung-gray-dark-hover); 
+    transform: translateY(-1px); 
+    box-shadow: 0 6px 14px rgba(0,0,0,.15); 
+}
 @media (max-width: 768px) {
     .voucher-title { flex-direction: column; align-items: stretch; }
     .voucher-search { flex-direction: column; }
@@ -164,50 +166,50 @@ body {
 }
 
 /* ============================================================
-   VOUCHER CARD — glassmorphism with dashed divider
+   VOUCHER CARD — Clean White with subtle shadows
    ============================================================ */
 .voucher-card {
     display: flex; align-items: stretch;
-    background: rgba(255,255,255,.88);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(186,230,253,.6);
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
     border-radius: 16px; overflow: hidden;
     min-height: 138px;
-    box-shadow: 0 3px 14px rgba(14,165,233,.08);
+    box-shadow: 0 2px 10px rgba(0,0,0,.02);
     transition: transform .25s cubic-bezier(.16,1,.3,1), box-shadow .25s, border-color .25s;
     position: relative;
 }
+/* A sleek black top line instead of gray-dark gradient */
 .voucher-card::after {
     content: ''; position: absolute; top: 0; left: 0; right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #0369a1, #38bdf8);
+    background: #000000;
     border-radius: 16px 16px 0 0;
 }
 .voucher-card:hover {
-    transform: translateY(-5px) scale(1.005);
-    box-shadow: 0 14px 32px rgba(14,165,233,.18);
-    border-color: #7dd3fc;
+    transform: translateY(-4px) scale(1.005);
+    box-shadow: 0 10px 24px rgba(0,0,0,.06);
+    border-color: #d1d5db;
 }
 
 /* LEFT panel */
 .voucher-left {
     width: 130px; flex-shrink: 0;
-    background: linear-gradient(160deg, #0369a1 0%, #0ea5e9 55%, #38bdf8 100%);
+    background: #111111; /* Sleek black */
     color: #fff;
     display: flex; flex-direction: column;
     justify-content: center; align-items: center; gap: 6px;
     position: relative;
     text-align: center;
 }
-/* scalloped edge */
+/* scalloped edge - matching the white background of the card's center */
 .voucher-left::after {
     content: '';
     position: absolute; right: -10px; top: 0;
     width: 20px; height: 100%;
-    background: radial-gradient(circle at left, rgba(240,249,255,.92) 9px, transparent 10px);
+    background: radial-gradient(circle at left, #ffffff 9px, transparent 10px);
     background-size: 20px 22px;
 }
-.voucher-left i    { font-size: 30px; opacity: .95; }
+.voucher-left i    { font-size: 30px; opacity: .95; color: #ffffff; }
 .voucher-left span { font-size: 13px; font-weight: 800; line-height: 1.4; letter-spacing: .3px; }
 
 /* CENTER */
@@ -216,31 +218,31 @@ body {
     display: flex; flex-direction: column; justify-content: center; gap: 4px;
 }
 .voucher-center h4 {
-    margin: 0 0 8px; font-size: 20px; font-weight: 800; color: #0c4a6e;
+    margin: 0 0 8px; font-size: 20px; font-weight: 800; color: #000000;
 }
 .voucher-code-badge {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 5px 12px; border-radius: 8px;
-    border: 1.5px dashed #0ea5e9;
-    background: rgba(186,230,253,.28);
-    color: #0369a1; font-weight: 800; font-size: 14px;
+    border: 1px dashed #9ca3af;
+    background: #f8f9fa;
+    color: #111111; font-weight: 800; font-size: 14px;
     margin-bottom: 8px; width: fit-content;
     letter-spacing: .5px;
-    transition: background .2s;
+    transition: background .2s, border-color .2s;
 }
-.voucher-code-badge:hover { background: rgba(186,230,253,.5); }
+.voucher-code-badge:hover { background: #f3f4f6; border-color: #555555; }
 .voucher-center p {
-    margin: 0; font-size: 13.5px; color: #0369a1; opacity: .85;
+    margin: 0; font-size: 13.5px; color: #555555;
 }
-.voucher-center strong { color: #0c4a6e; font-weight: 700; }
-.voucher-center small  { font-size: 12px; color: #7dd3fc; }
+.voucher-center strong { color: #000000; font-weight: 700; }
+.voucher-center small  { font-size: 12px; color: #9ca3af; }
 
 .badge-personal {
     display: inline-flex; align-items: center; gap: 3px;
     margin-left: 8px; padding: 2px 8px;
     border-radius: 20px;
-    background: rgba(251,191,36,.2); color: #b45309;
-    border: 1px solid rgba(251,191,36,.4);
+    background: #fffbea; color: #b45309;
+    border: 1px solid #fde68a;
     font-size: 11px; font-weight: 700;
 }
 
@@ -248,30 +250,28 @@ body {
 .voucher-right {
     width: 140px; flex-shrink: 0;
     display: flex; justify-content: center; align-items: center;
-    border-left: 1.5px dashed rgba(186,230,253,.7);
+    border-left: 1.5px dashed #e5e5e5;
     padding: 16px;
 }
 .btn-use {
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
-    color: #fff; border: none; border-radius: 10px;
+    background: gray; /* Samsung gray-dark */
+    color: #fff; border: none; border-radius: 20px; /* Pill shape */
     padding: 9px 14px; font-size: 13px; font-weight: 700;
     cursor: pointer; width: 100%;
     display: flex; align-items: center; justify-content: center; gap: 6px;
-    transition: opacity .2s, transform .15s, box-shadow .2s;
-    box-shadow: 0 3px 12px rgba(14,165,233,.3);
+    transition: background .2s, transform .15s, box-shadow .2s;
+    box-shadow: 0 4px 12px rgba(3,129,254,.2);
     position: relative; overflow: hidden;
     font-family: inherit;
 }
-.btn-use::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.28) 50%, transparent 60%);
-    transform: translateX(-120%); transition: transform .5s ease; pointer-events: none;
+.btn-use:hover { 
+    background: gray-dark-hover; 
+    transform: translateY(-1px); 
+    box-shadow: 0 6px 16px rgba(3,129,254,.3); 
 }
-.btn-use:hover::after { transform: translateX(120%); }
-.btn-use:hover { opacity:.9; transform:translateY(-1px); box-shadow: 0 6px 18px rgba(14,165,233,.4); }
 .btn-use.copied {
-    background: linear-gradient(135deg, #16a34a, #22c55e);
-    box-shadow: 0 3px 12px rgba(22,163,74,.3);
+    background: #16a34a;
+    box-shadow: 0 4px 12px rgba(22,163,74,.3);
 }
 
 /* ============================================================
@@ -282,42 +282,39 @@ body {
 }
 .voucher-empty i {
     font-size: 64px; display: block; margin-bottom: 16px;
-    background: linear-gradient(135deg, #7dd3fc, #bae6fd);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    color: #d1d5db;
     animation: emptyFloat 3s ease-in-out infinite;
 }
 @keyframes emptyFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-.voucher-empty h3 { font-size: 20px; font-weight: 800; color: #0c4a6e; margin-bottom: 8px; }
-.voucher-empty p  { color: #0369a1; font-size: 14px; opacity: .8; margin-bottom: 22px; }
+.voucher-empty h3 { font-size: 20px; font-weight: 800; color: #000000; margin-bottom: 8px; }
+.voucher-empty p  { color: #555555; font-size: 14px; margin-bottom: 22px; }
 .btn-find {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 20px; border-radius: 10px;
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
-    color: #fff; font-size: 13px; font-weight: 700;
+    padding: 10px 24px; border-radius: 24px;
+    background: #000000;
+    color: #fff; font-size: 13.5px; font-weight: 700;
     text-decoration: none;
-    box-shadow: 0 3px 12px rgba(14,165,233,.3);
-    transition: opacity .2s, transform .18s;
+    transition: background .2s, transform .18s, box-shadow .2s;
 }
-.btn-find:hover { opacity:.9; transform:translateY(-1px); color:#fff; }
+.btn-find:hover { background: #333333; transform:translateY(-1px); color:#fff; box-shadow: 0 4px 14px rgba(0,0,0,.15); }
 
 /* ============================================================
    PAGINATION
    ============================================================ */
 .pagination-wrap { margin-top: 20px; }
 .pagination-wrap .pagination .page-link {
-    border: 1px solid rgba(186,230,253,.6);
-    color: #0369a1;
-    background: rgba(255,255,255,.75);
-    backdrop-filter: blur(6px);
+    border: 1px solid #e5e5e5;
+    color: #111111;
+    background: #ffffff;
     border-radius: 8px !important;
     margin: 0 2px; font-weight: 600; font-size: 13.5px;
     transition: all .18s;
 }
-.pagination-wrap .pagination .page-link:hover { background: rgba(186,230,253,.5); color: #0c4a6e; }
+.pagination-wrap .pagination .page-link:hover { background: #f8f9fa; color: #000000; border-color: #d1d5db; }
 .pagination-wrap .pagination .page-item.active .page-link {
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
-    border-color: transparent; color: #fff;
-    box-shadow: 0 3px 10px rgba(14,165,233,.3);
+    background: #000000;
+    border-color: #000000; color: #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,.15);
 }
 
 /* ============================================================
@@ -327,7 +324,7 @@ body {
     .voucher-card    { flex-direction: column; }
     .voucher-left    { width: 100%; height: 90px; flex-direction: row; gap: 10px; }
     .voucher-left::after { display: none; }
-    .voucher-right   { width: 100%; border-left: none; border-top: 1.5px dashed rgba(186,230,253,.7); padding: 14px; }
+    .voucher-right   { width: 100%; border-left: none; border-top: 1.5px dashed #e5e5e5; padding: 14px; }
     .btn-use         { width: 100%; }
     .voucher-center  { padding: 16px; }
 }
@@ -473,7 +470,7 @@ function copyVoucher(code, btn) {
 }
 
 (function () {
-    /* ---- Canvas clouds ---- */
+    /* ---- Canvas clouds (Subtle Gray theme) ---- */
     const canvas = document.getElementById('sky-canvas');
     if (canvas) {
         const ctx = canvas.getContext('2d');
@@ -482,20 +479,20 @@ function copyVoucher(code, btn) {
         window.addEventListener('resize', resize); resize();
         function makeCloud() {
             return { x: Math.random()*W*1.2, y: Math.random()*H*.6,
-                     r: 50+Math.random()*110, dx: .13+Math.random()*.2, alpha: .05+Math.random()*.1 };
+                     r: 50+Math.random()*110, dx: .13+Math.random()*.2, alpha: .01+Math.random()*.03 };
         }
         for (let i = 0; i < 8; i++) clouds.push(makeCloud());
         function drawCloud(c) {
             const g = ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,c.r);
-            g.addColorStop(0, `rgba(255,255,255,${c.alpha})`);
-            g.addColorStop(.6, `rgba(186,230,253,${c.alpha*.6})`);
-            g.addColorStop(1, 'rgba(186,230,253,0)');
+            g.addColorStop(0, `rgba(0,0,0,${c.alpha})`);
+            g.addColorStop(.6, `rgba(0,0,0,${c.alpha*.6})`);
+            g.addColorStop(1, 'rgba(0,0,0,0)');
             ctx.beginPath(); ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
             ctx.fillStyle = g; ctx.fill();
             [-.5,.5].forEach(o => {
                 ctx.beginPath();
                 ctx.arc(c.x+c.r*.55*o, c.y-c.r*.18, c.r*.72, 0, Math.PI*2);
-                ctx.fillStyle = `rgba(255,255,255,${c.alpha*.7})`; ctx.fill();
+                ctx.fillStyle = `rgba(0,0,0,${c.alpha*.7})`; ctx.fill();
             });
         }
         (function anim() {
