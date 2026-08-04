@@ -232,12 +232,15 @@
 .sm-trust-item span { font-size: 12.5px; color: var(--sm-gray); }
 
 /* ============================================================
-   4. STICKY SHOWCASE (visual dính + text cuộn)
+   4. SHOWCASE SLIDER (auto-fade, ảnh trái + text phải)
    ============================================================ */
 .sm-showcase { position: relative; }
-.sm-showcase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 5vw, 80px); align-items: start; }
+.sm-showcase-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: clamp(24px, 5vw, 80px); align-items: center;
+}
 .sm-showcase-visual {
-    position: sticky; top: calc(var(--sm-header-h) + 40px);
+    position: relative;
     aspect-ratio: 4/5;
     border-radius: var(--sm-radius); overflow: hidden;
     background: var(--sm-surface);
@@ -250,19 +253,60 @@
     transition: opacity .7s var(--sm-ease), transform .7s var(--sm-ease);
 }
 .sm-showcase-visual img.on { opacity: 1; transform: scale(1); }
-.sm-showcase-steps { display: flex; flex-direction: column; }
+
+/* Steps xếp chồng, fade in/out */
+.sm-showcase-steps { position: relative; min-height: 280px; }
 .sm-step {
-    min-height: 72svh; display: flex; flex-direction: column; justify-content: center;
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: center;
     padding: 30px 0;
-    opacity: .28; transition: opacity .55s var(--sm-ease);
+    opacity: 0; visibility: hidden;
+    transition: opacity .6s var(--sm-ease), visibility .6s;
 }
-.sm-step.on { opacity: 1; }
+.sm-step.on { position: relative; opacity: 1; visibility: visible; }
+
+/* Text stagger khi active */
+.sm-step.on > * {
+    animation: smStepTextIn .6s var(--sm-ease) both;
+}
+.sm-step.on > *:nth-child(2) { animation-delay: .08s; }
+.sm-step.on > *:nth-child(3) { animation-delay: .16s; }
+.sm-step.on > *:nth-child(4) { animation-delay: .24s; }
+@keyframes smStepTextIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
 .sm-step-num {
     font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 800;
     letter-spacing: .14em; color: var(--sm-blue); margin-bottom: 12px;
 }
 .sm-step h3 { font-size: clamp(24px, 3vw, 40px); line-height: 1.1; margin: 0 0 14px; }
 .sm-step p { font-size: 16px; line-height: 1.7; color: var(--sm-gray); margin: 0 0 20px; max-width: 46ch; }
+
+/* Dots điều hướng */
+.sm-showcase-dots {
+    display: flex; gap: 10px; margin-top: 32px;
+}
+.sm-showcase-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(0,0,0,.2); border: none; padding: 0; cursor: pointer;
+    transition: all .4s var(--sm-ease);
+}
+.sm-showcase-dot.active {
+    width: 10px;
+    background: var(--sm-black);
+    transform: scale(1.2);
+}
+.sm-showcase-dot:hover { background: rgba(0,0,0,.45); }
+
+@media (max-width: 900px) {
+    .sm-showcase-grid { grid-template-columns: 1fr; }
+    .sm-showcase-visual { aspect-ratio: 1/1; max-width: 400px; margin: 0 auto; }
+    .sm-showcase-steps { min-height: 220px; text-align: center; }
+    .sm-step p { margin-left: auto; margin-right: auto; }
+    .sm-showcase-dots { justify-content: center; }
+}
 
 /* ============================================================
    5. SPEC CALLOUTS (số to + đường dẫn, kiểu 50MP)
@@ -315,9 +359,10 @@
    7. BRAND TICKER (cuộn ngang + kéo)
    ============================================================ */
 .sm-brands-rail {
-    display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory;
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 14px;
+    overflow-x: auto; scroll-snap-type: x proximity;
     padding: 8px 24px 22px; scrollbar-width: none;
-    max-width: 1440px; margin: 0 auto; cursor: grab;
+    max-width: 1440px; margin: 0 auto;
 }
 .sm-brands-rail::-webkit-scrollbar { display: none; }
 .sm-brands-rail.dragging { cursor: grabbing; scroll-snap-type: none; }
@@ -757,8 +802,8 @@
             <h2 class="sm-h2">Chuẩn khung hình.<br>Xem gì cũng đỉnh</h2>
         </div>
 
-        <div class="sm-wrap sm-wrap--narrow">
-            <div class="sm-showcase-grid">
+               <div class="sm-wrap sm-wrap--narrow">
+            <div class="sm-showcase-grid" id="smShowcaseSlider">
                 <div class="sm-showcase-visual" id="smShowcaseVisual">
                     @foreach($showcaseItems as $k => $sp)
                         @if($sp->first_image)
@@ -780,6 +825,15 @@
                         </div>
                     </div>
                     @endforeach
+
+                    {{-- Dots --}}
+                    @if($showcaseItems->count() > 1)
+                    <div class="sm-showcase-dots" id="smShowcaseDots">
+                        @foreach($showcaseItems as $k => $sp)
+                        <button class="sm-showcase-dot {{ $k === 0 ? 'active' : '' }}" data-slide="{{ $k }}" aria-label="Slide {{ $k + 1 }}"></button>
+                        @endforeach
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -1230,23 +1284,49 @@
     })();
 
     /* ----------------------------------------------------------
-       5. STICKY SHOWCASE — đổi ảnh theo bước đang đọc
+       5. SHOWCASE SLIDER — tự động chạy 1→2→3→1…
     ---------------------------------------------------------- */
-    (function showcase() {
-        const steps   = document.querySelectorAll('.sm-step');
-        const visuals = document.querySelectorAll('#smShowcaseVisual img');
-        if (!steps.length || !visuals.length) return;
+    (function showcaseSlider() {
+        const visual  = document.getElementById('smShowcaseVisual');
+        if (!visual) return;
+        const section = visual.closest('.sm-showcase');
+        const steps   = section.querySelectorAll('.sm-step');
+        const visuals = visual.querySelectorAll('img');
+        const dots    = section.querySelectorAll('.sm-showcase-dot');
+        if (steps.length <= 1) return;
 
-        const io = new IntersectionObserver((entries) => {
-            entries.forEach(e => {
-                if (!e.isIntersecting) return;
-                const i = e.target.dataset.step;
-                steps.forEach(s => s.classList.toggle('on', s === e.target));
-                visuals.forEach(v => v.classList.toggle('on', v.dataset.visual === i));
-            });
-        }, { threshold: 0.5, rootMargin: '-20% 0px -20% 0px' });
+        /* ⏱ CHỈNH THỜI GIAN Ở ĐÂY (mili-giây) — 5000 = 5 giây */
+        const INTERVAL = 3000;
 
-        steps.forEach(s => io.observe(s));
+        let index = 0, timer = null;
+
+        function go(i) {
+            index = (i + steps.length) % steps.length;
+            steps.forEach((s, k)   => s.classList.toggle('on', k === index));
+            visuals.forEach(v      => v.classList.toggle('on', v.dataset.visual == index));
+            dots.forEach((d, k)    => d.classList.toggle('active', k === index));
+        }
+
+        function next() { go(index + 1); }
+
+        function startAuto() {
+            clearInterval(timer);
+            timer = setInterval(next, INTERVAL);
+        }
+
+        function stopAuto() {
+            clearInterval(timer);
+        }
+
+        // Click dot để chuyển slide
+        dots.forEach((d, k) => d.addEventListener('click', () => { go(k); startAuto(); }));
+
+        // Hover tạm dừng, rời chuột chạy tiếp
+        section.addEventListener('mouseenter', stopAuto);
+        section.addEventListener('mouseleave', startAuto);
+
+        // Bắt đầu tự chạy
+        startAuto();
     })();
 
     /* ----------------------------------------------------------

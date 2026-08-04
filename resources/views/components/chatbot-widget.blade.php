@@ -96,14 +96,22 @@
 
 <style>
 /* ============================================================
-   ROOT & FLOATING TOGGLE BUTTON
+   ROOT & FLOATING TOGGLE BUTTON — đồng bộ design token với trang home
    ============================================================ */
 #ai-chatbot-root {
     position: fixed;
     bottom: 24px;
     right: 24px;
     z-index: 9999;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --ai-black: var(--sm-black, #000000);
+    --ai-ink: var(--sm-ink, #121212);
+    --ai-gray: var(--sm-gray, #545454);
+    --ai-line: var(--sm-line, #dcdcdc);
+    --ai-surface: var(--sm-surface, #f7f7f7);
+    --ai-blue: var(--sm-blue, #2189ff);
+    --ai-radius: var(--sm-radius, 24px);
+    --ai-ease: var(--sm-ease, cubic-bezier(.25,.46,.45,.94));
 }
 
 #ai-chat-toggle {
@@ -111,27 +119,27 @@
     height: 60px;
     border-radius: 50%;
     border: none;
-    background: linear-gradient(135deg, #0284c7, #0ea5e9);
+    background: var(--ai-black);
     color: #ffffff;
-    font-size: 24px;
+    font-size: 22px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 6px 24px rgba(14, 165, 233, 0.45);
-    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+    transition: transform .3s var(--ai-ease), box-shadow .3s var(--ai-ease);
     position: relative;
 }
 #ai-chat-toggle:hover {
     transform: translateY(-3px) scale(1.06);
-    box-shadow: 0 10px 30px rgba(14, 165, 233, 0.55);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.38);
 }
 
 #ai-chat-pulse {
     position: absolute;
     inset: -4px;
     border-radius: 50%;
-    border: 2px solid rgba(14, 165, 233, 0.45);
+    border: 2px solid rgba(33, 137, 255, 0.45);
     animation: chatPulse 2.4s ease-out infinite;
     pointer-events: none;
 }
@@ -153,13 +161,13 @@
     height: 560px;
     max-height: calc(100vh - 120px);
     background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.16), 0 2px 12px rgba(14, 165, 233, 0.1);
+    border-radius: var(--ai-radius);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18), 0 2px 12px rgba(0, 0, 0, 0.06);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     z-index: 9998;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--ai-line);
 }
 
 #ai-chat-window.ai-hidden {
@@ -167,19 +175,19 @@
 }
 
 #ai-chat-window.ai-entering {
-    animation: windowPop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation: windowPop 0.3s var(--ai-ease) forwards;
 }
 @keyframes windowPop {
-    from { transform: scale(0.9) translateY(16px); opacity: 0; }
+    from { transform: scale(0.94) translateY(16px); opacity: 0; }
     to   { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 /* ============================================================
-   HEADER BAR (DMX Blue Tone)
+   HEADER BAR (đen tuyệt đối, đồng bộ header/CTA của trang home)
    ============================================================ */
 #ai-chat-header {
-    background: #0284c7;
-    padding: 12px 16px;
+    background: var(--ai-black);
+    padding: 14px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -197,8 +205,8 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    border: 1.5px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.14);
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -207,15 +215,17 @@
 }
 
 .ai-hdr-title {
+    font-family: 'Manrope', 'Inter', sans-serif;
     font-size: 15px;
-    font-weight: 700;
+    font-weight: 800;
+    letter-spacing: -.01em;
     color: #ffffff;
     line-height: 1.2;
 }
 
 .ai-hdr-status {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.7);
     display: flex;
     align-items: center;
     gap: 5px;
@@ -223,10 +233,10 @@
 }
 
 .ai-status-dot {
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
-    background: #4ade80;
+    background: var(--ai-blue);
     display: inline-block;
 }
 
@@ -239,7 +249,7 @@
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.12);
     border: none;
     color: #ffffff;
     font-size: 14px;
@@ -247,10 +257,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.18s, transform 0.15s;
+    transition: background .2s var(--ai-ease), transform .2s var(--ai-ease);
 }
 .ai-hdr-actions button:hover {
-    background: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.24);
     transform: scale(1.05);
 }
 
@@ -274,7 +284,7 @@
     background: transparent;
 }
 #ai-chat-body::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: var(--ai-line);
     border-radius: 4px;
 }
 
@@ -289,46 +299,47 @@
 }
 
 .ai-welcome-avatar-ring {
-    width: 90px;
-    height: 90px;
+    width: 88px;
+    height: 88px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #0284c7, #0ea5e9);
+    background: var(--ai-black);
     padding: 3px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 14px;
-    box-shadow: 0 8px 24px rgba(14, 165, 233, 0.22);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
 }
 
 .ai-welcome-avatar-inner {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: #0284c7;
+    background: var(--ai-black);
     display: flex;
     align-items: center;
     justify-content: center;
     color: #ffffff;
-    font-size: 42px;
+    font-size: 40px;
     border: 2px solid #ffffff;
 }
 
 .ai-welcome-heading {
+    font-family: 'Manrope', 'Inter', sans-serif;
     font-size: 15.5px;
-    color: #1e293b;
+    color: var(--ai-ink);
     font-weight: 500;
     margin-bottom: 6px;
 }
 
 .ai-brand-accent {
-    color: #0284c7;
-    font-weight: 700;
+    color: var(--ai-blue);
+    font-weight: 800;
 }
 
 .ai-welcome-sub {
     font-size: 13.5px;
-    color: #334155;
+    color: var(--ai-gray);
     line-height: 1.5;
     max-width: 310px;
 }
@@ -337,7 +348,7 @@
 .ai-timestamp-divider {
     text-align: center;
     font-size: 12px;
-    color: #64748b;
+    color: var(--ai-gray);
     margin: 14px 0 10px;
     flex-shrink: 0;
 }
@@ -355,7 +366,7 @@
     display: flex;
     align-items: flex-start;
     gap: 8px;
-    animation: msgFadeIn 0.25s ease-out;
+    animation: msgFadeIn 0.3s var(--ai-ease);
 }
 @keyframes msgFadeIn {
     from { opacity: 0; transform: translateY(8px); }
@@ -370,7 +381,7 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: #0284c7;
+    background: var(--ai-black);
     color: #ffffff;
     display: flex;
     align-items: center;
@@ -391,13 +402,13 @@
 }
 
 .ai-msg-row.bot .ai-msg-bubble {
-    background: #f1f5f9;
-    color: #0f172a;
+    background: var(--ai-surface);
+    color: var(--ai-ink);
     border-top-left-radius: 4px;
 }
 
 .ai-msg-row.user .ai-msg-bubble {
-    background: #0284c7;
+    background: var(--ai-black);
     color: #ffffff;
     border-top-right-radius: 4px;
 }
@@ -416,25 +427,26 @@
     align-items: center;
     gap: 10px;
     background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
+    border: 1px solid var(--ai-line);
+    border-radius: 14px;
     padding: 8px 10px;
     text-decoration: none;
     color: inherit;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color .2s var(--ai-ease), box-shadow .2s var(--ai-ease), transform .2s var(--ai-ease);
 }
 .ai-product-item:hover {
-    border-color: #0284c7;
-    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.12);
+    border-color: var(--ai-black);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
 }
 
 .ai-product-item img {
     width: 48px;
     height: 48px;
     object-fit: contain;
-    border-radius: 6px;
-    background: #f8fafc;
-    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+    background: var(--ai-surface);
+    border: 1px solid var(--ai-line);
     flex-shrink: 0;
 }
 
@@ -446,7 +458,7 @@
 .ai-product-name {
     font-size: 13px;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--ai-ink);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -454,15 +466,25 @@
 }
 
 .ai-product-price {
+    font-family: 'Manrope', 'Inter', sans-serif;
     font-size: 13px;
-    font-weight: 700;
-    color: #dc2626;
+    font-weight: 800;
+    color: var(--ai-black);
     margin-top: 2px;
+}
+
+.ai-product-list-price {
+    font-family: 'Manrope', 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ai-muted, #9a9a9a);
+    text-decoration: line-through;
+    margin-left: 6px;
 }
 
 /* Typing Dots */
 .ai-typing-dots {
-    background: #f1f5f9;
+    background: var(--ai-surface);
     padding: 12px 16px;
     border-radius: 16px;
     border-top-left-radius: 4px;
@@ -473,14 +495,14 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #94a3b8;
+    background: var(--ai-gray);
     animation: typingBounce 1.2s infinite ease-in-out;
 }
 .ai-typing-dots span:nth-child(2) { animation-delay: 0.2s; }
 .ai-typing-dots span:nth-child(3) { animation-delay: 0.4s; }
 @keyframes typingBounce {
     0%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-6px); background: #0284c7; }
+    40% { transform: translateY(-6px); background: var(--ai-black); }
 }
 
 /* Quick Suggestion Chips (Smooth Scroll) */
@@ -503,21 +525,20 @@
     white-space: nowrap;
     padding: 7px 15px;
     border-radius: 20px;
-    background: #e0f2fe;
-    border: 1px solid #bae6fd;
-    color: #0284c7;
+    background: var(--ai-surface);
+    border: 1px solid var(--ai-line);
+    color: var(--ai-ink);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.18s, border-color 0.18s, transform 0.15s, box-shadow 0.18s;
-    box-shadow: 0 1px 3px rgba(2, 132, 199, 0.08);
+    transition: background .2s var(--ai-ease), border-color .2s var(--ai-ease), transform .2s var(--ai-ease), box-shadow .2s var(--ai-ease);
 }
 .ai-chip:hover {
-    background: #0284c7;
+    background: var(--ai-black);
     color: #ffffff;
-    border-color: #0284c7;
+    border-color: var(--ai-black);
     transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(2, 132, 199, 0.22);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
 }
 
 /* ============================================================
@@ -526,7 +547,7 @@
 #ai-chat-footer {
     background: #ffffff;
     padding: 12px 16px 14px;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--ai-line);
     flex-shrink: 0;
 }
 
@@ -534,31 +555,32 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    border: 1.5px solid #0284c7;
+    border: 1.5px solid var(--ai-black);
     border-radius: 26px;
     padding: 4px 6px 4px 14px;
     background: #ffffff;
-    transition: box-shadow 0.2s;
+    transition: box-shadow .2s var(--ai-ease);
 }
 #ai-chat-form:focus-within {
-    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    box-shadow: 0 0 0 3px rgba(33, 137, 255, 0.18);
+    border-color: var(--ai-blue);
 }
 
 #ai-mic-btn {
     border: none;
     background: none;
-    color: #64748b;
+    color: var(--ai-gray);
     font-size: 16px;
     cursor: pointer;
     padding: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.18s;
+    transition: color .2s var(--ai-ease);
     flex-shrink: 0;
 }
 #ai-mic-btn:hover {
-    color: #0284c7;
+    color: var(--ai-black);
 }
 
 #ai-chat-input {
@@ -566,7 +588,7 @@
     border: none;
     outline: none;
     font-size: 14px;
-    color: #0f172a;
+    color: var(--ai-ink);
     background: transparent;
     padding: 6px 0;
     min-width: 0;
@@ -580,7 +602,7 @@
     height: 36px;
     border-radius: 50%;
     border: none;
-    background: #0284c7;
+    background: var(--ai-black);
     color: #ffffff;
     font-size: 14px;
     cursor: pointer;
@@ -588,11 +610,11 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: background 0.18s, transform 0.15s;
+    transition: background .2s var(--ai-ease), transform .2s var(--ai-ease);
 }
 #ai-send-btn:hover {
-    background: #0369a1;
-    transform: scale(1.05);
+    background: var(--ai-blue);
+    transform: scale(1.06);
 }
 
 .ai-disclaimer {
@@ -716,9 +738,11 @@
             item.href = `/products/${p.slug}`;
             item.className = 'ai-product-item';
 
-            const price = p.discount_percent > 0
-                ? Math.round(p.price * (1 - p.discount_percent / 100))
-                : p.price;
+            // p.price là giá bán thật sự; p.list_price chỉ hiển thị gạch ngang khi đang
+            // giảm giá (p.is_on_sale). Khi sản phẩm có biến thể (p.has_price_range), hiển thị
+            // "Từ ..." theo p.min_price thay vì giá gốc, vì các phiên bản có thể rẻ/đắt hơn.
+            const displayPrice = p.has_price_range ? p.min_price : p.price;
+            const pricePrefix = p.has_price_range ? 'Từ ' : '';
 
             const thumb = p.thumbnail
                 ? '/storage/' + p.thumbnail.replace(/^\/?storage\//, '')
@@ -728,7 +752,8 @@
                 <img src="${thumb}" alt="${escapeHtml(p.name)}">
                 <div class="ai-product-info">
                     <span class="ai-product-name">${escapeHtml(p.name)}</span>
-                    <span class="ai-product-price">${price.toLocaleString('vi-VN')}đ</span>
+                    <span class="ai-product-price">${pricePrefix}${Math.round(displayPrice).toLocaleString('vi-VN')}đ</span>
+                    ${(!p.has_price_range && p.is_on_sale) ? `<span class="ai-product-list-price">${Math.round(p.list_price).toLocaleString('vi-VN')}đ</span>` : ''}
                 </div>
             `;
             container.appendChild(item);

@@ -17,7 +17,7 @@ class HomeController extends Controller
         $banners = Banner::active()->ordered()->get();
         $events  = Event::active()->ongoing()->ordered()->get();
 
-        $newProducts = Product::with(['brand'])
+        $newProducts = Product::with(['brand', 'category'])
             ->withCount('visibleReviews as reviews_count')
             ->active()
             ->latest()

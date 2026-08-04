@@ -3,675 +3,510 @@
 @php $showSearch = true; @endphp
 
 @push('styles')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   PAGE WRAPPER — sky gradient (khớp trang chủ)
+   SAMSUNG.COM DESIGN TOKENS
    ============================================================ */
-.products-page {
-    padding: 20px 0 60px;
-    position: relative;
-    min-height: 100vh;
+:root {
+    --sam-black:  #000;
+    --sam-white:  #fff;
+    --sam-gray:   #f7f7f7;   /* card / tile background */
+    --sam-gray-2: #eaeaea;   /* hover on gray */
+    --sam-line:   #ddd;      /* borders */
+    --sam-muted:  #666;      /* secondary text */
+    --sam-blue:   #2189ff;   /* links */
+    --sam-star:   #f5a623;
+    --sam-sale:   #d90000;
+    --sam-font:   'Inter', 'SamsungOne', arial, sans-serif;
+    --sam-head:   'Poppins', 'SamsungSharpSans', arial, sans-serif;
 }
 
+/* ============================================================
+   PAGE
+   ============================================================ */
 body {
-    background: linear-gradient(180deg,
-        #bae6fd 0%,
-        #e0f2fe 18%,
-        #f0f9ff 38%,
-        #e0f2fe 62%,
-        #bae6fd 100%) fixed;
-    background-attachment: fixed;
+    background: var(--sam-white);
+    color: var(--sam-black);
+    font-family: var(--sam-font);
+    -webkit-font-smoothing: antialiased;
 }
 
-/* Canvas clouds */
-#sky-canvas {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 0;
-    opacity: .45;
-}
-
-/* Floating bubbles */
-.bubble {
-    position: fixed;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,.8), rgba(186,230,253,.3));
-    border: 1px solid rgba(125,211,252,.4);
-    pointer-events: none;
-    z-index: 0;
-    animation: bubbleRise linear infinite;
-}
-
-@keyframes bubbleRise {
-    0%   { transform: translateY(0) scale(1);   opacity: .7; }
-    80%  { opacity: .4; }
-    100% { transform: translateY(-110vh) scale(1.1); opacity: 0; }
-}
-
-.products-page > * {
-    position: relative;
-    z-index: 1;
+.products-page {
+    padding: 0 0 80px;
+    max-width: 1440px;
+    margin: 0 auto;
 }
 
 /* ============================================================
    BREADCRUMB
    ============================================================ */
 .breadcrumb-wrap {
-    font-size: 13px;
-    color: #0369a1;
-    margin-bottom: 14px;
+    font-size: 12px;
+    color: var(--sam-muted);
+    padding: 20px 0 0;
     display: block;
 }
-
-.breadcrumb-wrap a {
-    color: #0c4a6e;
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.breadcrumb-wrap a:hover {
-    text-decoration: underline;
-}
+.breadcrumb-wrap a { color: var(--sam-muted); text-decoration: none; }
+.breadcrumb-wrap a:hover { color: var(--sam-black); text-decoration: underline; }
+.breadcrumb-wrap span { color: var(--sam-black); }
 
 /* ============================================================
-   PAGE HEADER
+   PAGE HEADLINE — Samsung Sharp Sans, 40px / 700
    ============================================================ */
-.page-header-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 6px;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.page-header-row h1 {
-    font-size: 24px;
-    font-weight: 800;
-    color: #0c4a6e;
-}
-
-.results-count {
-    font-size: 13.5px;
-    color: #0369a1;
-    margin-bottom: 20px;
-    opacity: .8;
-}
-
-/* ============================================================
-   LAYOUT
-   ============================================================ */
-.layout-row {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: 28px;
-    align-items: start;
-}
-
-@media (max-width: 860px) {
-    .layout-row { grid-template-columns: 1fr; }
-}
-
-/* ============================================================
-   SIDEBAR — glassmorphism
-   ============================================================ */
-.filter-sidebar {
-    background: rgba(255,255,255,.78);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-radius: 16px;
-    border: 1px solid rgba(186,230,253,.65);
-    box-shadow: 0 4px 24px rgba(14,165,233,.12);
-    padding: 18px;
-    position: sticky;
-    top: 90px;
-    transition: box-shadow .3s;
-}
-
-.filter-sidebar:hover {
-    box-shadow: 0 8px 32px rgba(14,165,233,.18);
-}
-
-.filter-sidebar-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-}
-
-.filter-sidebar-header h2 {
-    font-size: 13px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .6px;
-    color: #0c4a6e;
+.page-headline {
+    font-family: var(--sam-head);
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    line-height: 1.2;
+    color: var(--sam-black);
+    padding: 44px 0 22px;
     margin: 0;
 }
+@media (max-width: 640px) { .page-headline { font-size: 28px; padding: 28px 0 16px; } }
 
-.btn-clear-filter {
-    font-size: 12.5px;
-    color: #e53935;
-    font-weight: 700;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 6px;
-    border-radius: 6px;
-    transition: background .15s;
-}
-
-.btn-clear-filter:hover { background: #fdecea; }
-
-.filter-group { margin-bottom: 22px; }
-.filter-group:last-of-type { margin-bottom: 0; }
-
-.filter-group h3 {
-    font-size: 12px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .6px;
-    color: #0c4a6e;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(186,230,253,.7);
-}
-
-.filter-group ul { list-style: none; margin: 0; padding: 0; }
-.filter-group ul li { margin-bottom: 4px; }
-
-.filter-group ul li a {
-    font-size: 13.5px;
-    color: #0369a1;
-    display: block;
-    padding: 6px 8px;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: background .15s, color .15s, transform .15s;
-}
-
-.filter-group ul li a:hover {
-    background: rgba(186,230,253,.5);
-    color: #0c4a6e;
-    transform: translateX(3px);
-}
-
-.filter-group ul li a.active {
-    color: #0c4a6e;
-    font-weight: 700;
-    background: rgba(125,211,252,.3);
-    border-left: 3px solid #0ea5e9;
-    padding-left: 10px;
-}
-
-.price-check {
-    display: flex;
-    align-items: center;
+/* ============================================================
+   CATEGORY TILES (Samsung "Galaxy Tab / Watch / Buds" row)
+   ============================================================ */
+.cat-tiles {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
     gap: 8px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    padding: 4px 6px;
-    border-radius: 8px;
-    transition: background .15s;
+    margin-bottom: 40px;
+    overflow-x: auto;
+    scrollbar-width: none;
 }
+.cat-tiles::-webkit-scrollbar { display: none; }
 
-.price-check:hover { background: rgba(186,230,253,.35); }
-.price-check input { cursor: pointer; accent-color: #0ea5e9; width: 16px; height: 16px; }
-.price-check label { font-size: 13.5px; color: #0369a1; cursor: pointer; }
-.price-check .cnt { color: #7dd3fc; font-size: 12px; }
-
-.price-range { display: flex; align-items: center; gap: 6px; margin: 10px 0 0; }
-
-.price-range input {
-    flex: 1;
-    border: 1px solid rgba(125,211,252,.6);
-    border-radius: 8px;
-    padding: 7px 9px;
-    font-size: 12.5px;
-    outline: none;
-    min-width: 0;
-    background: rgba(255,255,255,.7);
-    color: #0c4a6e;
-    transition: border-color .2s, box-shadow .2s;
-}
-
-.price-range input:focus {
-    border-color: #0ea5e9;
-    box-shadow: 0 0 0 3px rgba(14,165,233,.15);
-}
-
-.price-range span { font-size: 12px; color: #0369a1; }
-
-.attr-check { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer; }
-.attr-check input { cursor: pointer; accent-color: #0ea5e9; width: 16px; height: 16px; }
-.attr-check label { font-size: 13.5px; color: #0369a1; cursor: pointer; }
-.attr-values-wrap { max-height: 180px; overflow-y: auto; padding-right: 4px; }
-
-.btn-filter {
-    width: 100%;
-    padding: 10px;
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    font-size: 13.5px;
+.cat-tile {
+    background: var(--sam-gray);
+    border: 1px solid transparent;
+    border-radius: 16px;
+    min-width: 168px;
+    min-height: 118px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--sam-black);
+    font-size: 16px;
     font-weight: 700;
-    cursor: pointer;
-    transition: opacity .2s, transform .15s, box-shadow .2s;
-    box-shadow: 0 4px 14px rgba(14,165,233,.35);
+    line-height: 1.35;
+    transition: background .2s, border-color .2s;
+}
+.cat-tile:hover { background: var(--sam-gray-2); }
+.cat-tile.active {
+    background: var(--sam-white);
+    border-color: var(--sam-black);
+}
+.cat-tile__img {
+    width: 52px;
+    height: 52px;
+    object-fit: cover;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+.cat-tile__icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #c9c9c9;
+    font-size: 18px;
+    flex-shrink: 0;
 }
 
-.btn-filter:hover {
-    opacity: .92;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(14,165,233,.45);
+/* ============================================================
+   TAB NAV (Tất cả / thương hiệu) — centered underline nav
+   ============================================================ */
+.brand-nav {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
 }
+.brand-nav a {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--sam-black);
+    text-decoration: none;
+    padding-bottom: 6px;
+    border-bottom: 2px solid transparent;
+    transition: border-color .2s;
+}
+.brand-nav a:hover { border-bottom-color: var(--sam-line); }
+.brand-nav a.active { font-weight: 700; border-bottom-color: var(--sam-black); }
 
-.btn-advanced-toggle {
-    width: 100%;
+/* ============================================================
+   FILTER BAR — "Bộ lọc | 52 Kết quả" ... "Sắp xếp"
+   ============================================================ */
+.filter-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-top: 1px solid var(--sam-line);
+    border-bottom: 1px solid var(--sam-line);
+    flex-wrap: wrap;
+}
+.filter-bar__left { display: flex; align-items: center; gap: 16px; }
+.filter-bar__title {
+    display: inline-flex;
+    align-items: center;
     gap: 8px;
-    padding: 10px 12px;
-    background: rgba(186,230,253,.4);
-    border: 1px dashed rgba(14,165,233,.6);
-    border-radius: 10px;
-    font-size: 13.5px;
+    font-size: 16px;
     font-weight: 700;
-    color: #0c4a6e;
+    color: var(--sam-black);
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
     cursor: pointer;
-    margin-bottom: 16px;
-    transition: background .15s, transform .15s;
 }
+.filter-bar__title i { font-size: 11px; transition: transform .2s; }
+.filter-bar__title.is-collapsed i { transform: rotate(-90deg); }
+.filter-bar__sep { width: 1px; height: 14px; background: var(--sam-line); }
+.filter-bar__count { font-size: 14px; color: var(--sam-black); }
+.filter-bar__count strong { font-weight: 700; }
 
-.btn-advanced-toggle:hover {
-    background: rgba(125,211,252,.45);
-    transform: translateY(-1px);
+.filter-bar__right { display: flex; align-items: center; gap: 8px; }
+.sort-label { font-size: 14px; font-weight: 700; }
+.sort-select {
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--sam-muted);
+    font-weight: 400;
+    padding: 4px 22px 4px 4px;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23000' stroke-width='1.4' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 2px center;
 }
+.sort-select:hover { color: var(--sam-black); }
 
-.btn-advanced-toggle .badge-count {
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
-    color: #fff;
+.btn-clear-filter {
+    font-size: 13px;
+    color: var(--sam-black);
+    text-decoration: underline;
+    font-weight: 400;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.btn-clear-filter:hover { color: var(--sam-muted); }
+
+/* ============================================================
+   FILTER CHIPS — white pill, 1px #ddd, radius 8px, 14px/700
+   ============================================================ */
+.chip-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 22px 0 0;
+}
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 15px;
+    background: var(--sam-white);
+    border: 1px solid var(--sam-line);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--sam-black);
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+}
+.chip:hover { border-color: #999; }
+.chip.open, .chip.has-value { border-color: var(--sam-black); }
+.chip__caret { transition: transform .2s; font-size: 10px; }
+.chip.open .chip__caret { transform: rotate(180deg); }
+.chip__badge {
+    background: var(--sam-black);
+    color: var(--sam-white);
     font-size: 11px;
     font-weight: 700;
     border-radius: 10px;
     padding: 1px 7px;
-    margin-left: auto;
+    line-height: 1.5;
 }
 
-/* ============================================================
-   MODAL LỌC NÂNG CAO
-   ============================================================ */
-.advanced-overlay {
+/* Panel that opens under the chip row */
+.chip-panel {
     display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(12,74,110,.45);
-    backdrop-filter: blur(4px);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+    border: 1px solid var(--sam-line);
+    border-radius: 12px;
+    background: var(--sam-white);
+    padding: 24px;
+    margin-top: 12px;
 }
-
-.advanced-overlay.open { display: flex; }
-
-.advanced-modal {
-    background: rgba(255,255,255,.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: 18px;
-    border: 1px solid rgba(186,230,253,.7);
-    width: 100%;
-    max-width: 520px;
-    max-height: 80vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 24px 60px rgba(12,74,110,.3);
-    animation: modalIn .25s cubic-bezier(.16,1,.3,1);
-}
-
-@keyframes modalIn {
-    from { opacity: 0; transform: scale(.94) translateY(12px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.advanced-modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 22px;
-    border-bottom: 1px solid rgba(186,230,253,.6);
-    flex-shrink: 0;
-    background: linear-gradient(135deg, #e0f2fe, #bae6fd);
-}
-
-.advanced-modal-header h3 {
-    font-size: 16px;
-    font-weight: 800;
-    margin: 0;
-    color: #0c4a6e;
-}
-
-.advanced-modal-close {
-    border: none;
-    background: rgba(255,255,255,.6);
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
+.chip-panel.open { display: block; }
+.chip-panel__title {
     font-size: 14px;
-    color: #0369a1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background .15s;
+    font-weight: 700;
+    margin: 0 0 16px;
 }
-
-.advanced-modal-close:hover { background: rgba(255,255,255,.9); color: #0c4a6e; }
-
-.advanced-modal-body {
-    padding: 18px 22px;
-    overflow-y: auto;
-    flex: 1;
+.chip-panel__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px 24px;
 }
-
-.advanced-modal-body .filter-group:last-child { margin-bottom: 0; }
-
-.advanced-modal-footer {
-    padding: 16px 22px;
-    border-top: 1px solid rgba(186,230,253,.6);
+.chip-panel__foot {
     display: flex;
+    justify-content: flex-end;
     gap: 10px;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--sam-line);
+}
+
+/* option link (danh mục / thương hiệu) */
+.opt-link {
+    font-size: 14px;
+    color: var(--sam-black);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+}
+.opt-link__img {
+    width: 22px;
+    height: 22px;
+    object-fit: cover;
+    border-radius: 5px;
     flex-shrink: 0;
 }
+.opt-link:hover { text-decoration: underline; }
+.opt-link.active { font-weight: 700; }
+.opt-link.active::before { content: '✓ '; }
 
-.advanced-modal-footer .btn-filter { margin: 0; }
-
-.btn-advanced-clear {
-    flex: 0 0 auto;
-    padding: 9px 18px;
-    background: rgba(255,255,255,.7);
-    color: #0369a1;
-    border: 1px solid rgba(125,211,252,.5);
-    border-radius: 8px;
-    font-size: 13.5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background .15s;
-}
-
-.btn-advanced-clear:hover { background: rgba(186,230,253,.5); }
-
-/* ============================================================
-   SORT BAR
-   ============================================================ */
-.sort-bar {
+/* checkbox rows — Samsung square checkbox */
+.check-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
+    gap: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 5px 0;
+}
+.check-row input[type="checkbox"] {
+    appearance: none;
+    width: 18px; height: 18px;
+    border: 1px solid #767676;
+    border-radius: 2px;
+    background: var(--sam-white);
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+}
+.check-row input[type="checkbox"]:checked {
+    background: var(--sam-black);
+    border-color: var(--sam-black);
+}
+.check-row input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px; top: 1px;
+    width: 5px; height: 10px;
+    border: solid var(--sam-white);
+    border-width: 0 1.6px 1.6px 0;
+    transform: rotate(45deg);
 }
 
-.sort-select {
-    border: 1px solid rgba(125,211,252,.6);
-    padding: 9px 14px;
-    border-radius: 10px;
-    font-size: 13.5px;
+.price-range { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+.price-range input {
+    width: 120px;
+    border: 1px solid var(--sam-line);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--sam-black);
     outline: none;
-    background: rgba(255,255,255,.75);
-    backdrop-filter: blur(8px);
-    color: #0c4a6e;
-    font-weight: 600;
-    transition: border-color .2s, box-shadow .2s;
-    cursor: pointer;
 }
+.price-range input:focus { border-color: var(--sam-black); }
+.price-range span { font-size: 14px; color: var(--sam-muted); }
 
-.sort-select:focus {
-    border-color: #0ea5e9;
-    box-shadow: 0 0 0 3px rgba(14,165,233,.15);
-}
-
-.view-toggle { display: flex; gap: 4px; }
-
-.view-btn {
-    width: 36px;
-    height: 36px;
-    border: 1px solid rgba(125,211,252,.5);
-    border-radius: 10px;
-    background: rgba(255,255,255,.7);
-    cursor: pointer;
-    display: flex;
+/* ============================================================
+   CTA — Samsung pill buttons (radius 20px, 14px/700)
+   ============================================================ */
+.cta {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #7dd3fc;
+    gap: 8px;
+    min-height: 40px;
+    padding: 9px 24px 10px;
+    border-radius: 20px;
+    font-family: inherit;
     font-size: 14px;
-    transition: .15s;
-    backdrop-filter: blur(6px);
+    font-weight: 700;
+    line-height: 1.4;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background .2s, color .2s, border-color .2s;
 }
-
-.view-btn.active {
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
-    color: #fff;
-    border-color: transparent;
-    box-shadow: 0 4px 10px rgba(14,165,233,.35);
-}
+.cta--black { background: var(--sam-black); color: var(--sam-white); }
+.cta--black:hover { background: #3d3d3d; color: var(--sam-white); }
+.cta--outline { background: transparent; color: var(--sam-black); border-color: var(--sam-black); }
+.cta--outline:hover { background: rgba(0,0,0,.05); }
+.cta--ghost { background: var(--sam-white); color: var(--sam-black); border-color: var(--sam-line); }
+.cta--block { width: 100%; }
 
 /* ============================================================
-   PRODUCT GRID
+   PRODUCT GRID — Samsung: 4 up, 24px gutter
    ============================================================ */
 .grid-4 {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
+    gap: 24px;
+    padding-top: 40px;
 }
-
-@media (max-width: 640px) {
-    .grid-4 { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-}
+@media (max-width: 1280px) { .grid-4 { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 900px)  { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px)  { .grid-4 { grid-template-columns: 1fr; gap: 16px; } }
 
 /* ============================================================
-   PRODUCT CARD — glassmorphism + animations
+   PRODUCT CARD — bg #f7f7f7, radius 20px, padding 24px, no shadow
    ============================================================ */
 .product-card {
-    display: block;
-    border-radius: 14px;
-    overflow: hidden;
-    text-decoration: none;
-    color: inherit;
-    transition: transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s, border-color .22s;
     position: relative;
-    background: rgba(255,255,255,.82);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(186,230,253,.6);
-    box-shadow: 0 2px 12px rgba(14,165,233,.08);
-    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    background: var(--sam-gray);
+    border-radius: 20px;
+    padding: 24px;
+    text-decoration: none;
+    color: var(--sam-black);
+    overflow: hidden;
+    transition: background .2s;
+}
+.product-card:hover { background: #f1f1f1; }
+
+.badge-tag {
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--sam-sale);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: block;
 }
 
-.product-card:hover {
-    transform: translateY(-5px) scale(1.01);
-    box-shadow: 0 12px 32px rgba(14,165,233,.2);
-    border-color: #7dd3fc;
-}
-
-/* Shine sweep on hover */
-.product-card::after {
-    content: '';
+.wish {
     position: absolute;
-    inset: 0;
-    background: linear-gradient(105deg,
-        transparent 40%,
-        rgba(255,255,255,.45) 50%,
-        transparent 60%);
-    transform: translateX(-120%);
-    transition: transform .55s ease;
-    pointer-events: none;
-    z-index: 3;
-}
-
-.product-card:hover::after {
-    transform: translateX(120%);
-}
-
-.product-card-img {
-    height: 170px;
-    background: linear-gradient(160deg, #f0f9ff 0%, #e0f2fe 100%);
+    top: 20px;
+    right: 20px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--sam-black);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0;
+    z-index: 3;
+    transition: background .2s, color .2s;
+}
+.wish:hover { background: rgba(0,0,0,.06); }
+.wish.active { color: var(--sam-sale); }
+
+.product-card-img {
+    height: 220px;
+    display: block;
+    margin: -24px -24px 24px;
     overflow: hidden;
 }
-
 .product-card-img img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    padding: 8px;
-    box-sizing: border-box;
-    transition: transform .35s cubic-bezier(.16,1,.3,1);
+    object-fit: cover;
+    display: block;
+    transition: transform .3s cubic-bezier(.33,0,.3,1);
+}
+.product-card:hover .product-card-img img { transform: scale(1.04); }
+.img-placeholder { color: #c9c9c9; }
+.product-card-img:has(.img-placeholder) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--sam-gray-2);
 }
 
-.product-card:hover .product-card-img img {
-    transform: scale(1.06);
-}
-
-.img-placeholder { color: #7dd3fc; }
-
-.product-card-body {
-    padding: 12px 14px 14px;
-    border-top: 1px solid rgba(186,230,253,.5);
-}
+.product-card-body { display: flex; flex-direction: column; gap: 10px; }
 
 .product-card-name {
-    font-size: 13.5px;
-    font-weight: 600;
-    margin-bottom: 6px;
-    line-height: 1.4;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.45;
+    letter-spacing: -.01em;
+    color: var(--sam-black);
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    min-height: 37px;
-    color: #0f4c75;
+    min-height: 52px;
 }
 
-.product-card-price {
-    font-size: 16px;
-    font-weight: 800;
-    color: #0369a1;
-}
+.product-card-price { font-size: 18px; font-weight: 700; color: var(--sam-black); }
+.price-strike { font-size: 14px; color: var(--sam-muted); text-decoration: line-through; margin-left: 8px; font-weight: 400; }
 
-.stars { font-size: 12px; color: #f59e0b; margin-top: 6px; }
-.review-count { color: #7dd3fc; }
+.stars { font-size: 13px; color: var(--sam-star); letter-spacing: 1px; }
+.review-count { color: var(--sam-blue); text-decoration: underline; margin-left: 4px; letter-spacing: 0; }
 
-.wish {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(255,255,255,.92);
-    backdrop-filter: blur(6px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #94a3b8;
-    font-size: 15px;
-    z-index: 3;
-    box-shadow: 0 1px 6px rgba(14,165,233,.18);
-    transition: color .2s, transform .2s, background .2s;
-    border: none;
-    cursor: pointer;
-    outline: none;
-    padding: 0;
-}
-.wish:hover { color: #ef4444; transform: scale(1.15); background: rgba(255,255,255,1); }
-.wish.active { color: #ef4444; }
-.wish.active i { font-weight: 900; }
-
-.badge-tag {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: linear-gradient(135deg, #ef4444, #e53935);
-    color: #fff;
-    font-size: 10.5px;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 6px;
-    z-index: 2;
-    box-shadow: 0 2px 6px rgba(229,57,53,.35);
-}
+.card-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
 
 /* ============================================================
-   RIPPLE
+   SCROLL REVEAL (subtle, Samsung-like fade up)
    ============================================================ */
-.ripple-wave {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(125,211,252,.3);
-    transform: scale(0);
-    animation: rippleOut .6s linear;
-    pointer-events: none;
-    z-index: 10;
-}
-
-@keyframes rippleOut {
-    to { transform: scale(4); opacity: 0; }
-}
-
-/* ============================================================
-   SCROLL REVEAL
-   ============================================================ */
-.reveal {
-    opacity: 0;
-    transform: translateY(28px);
-    transition: opacity .55s cubic-bezier(.16,1,.3,1), transform .55s cubic-bezier(.16,1,.3,1);
-}
-
-.reveal.revealed {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.stagger-children > * {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity .45s cubic-bezier(.16,1,.3,1), transform .45s cubic-bezier(.16,1,.3,1);
-}
-
-.stagger-children.revealed > *:nth-child(1)  { opacity:1; transform:translateY(0); transition-delay:.04s; }
-.stagger-children.revealed > *:nth-child(2)  { opacity:1; transform:translateY(0); transition-delay:.09s; }
-.stagger-children.revealed > *:nth-child(3)  { opacity:1; transform:translateY(0); transition-delay:.14s; }
-.stagger-children.revealed > *:nth-child(4)  { opacity:1; transform:translateY(0); transition-delay:.19s; }
-.stagger-children.revealed > *:nth-child(5)  { opacity:1; transform:translateY(0); transition-delay:.24s; }
-.stagger-children.revealed > *:nth-child(6)  { opacity:1; transform:translateY(0); transition-delay:.29s; }
-.stagger-children.revealed > *:nth-child(7)  { opacity:1; transform:translateY(0); transition-delay:.34s; }
-.stagger-children.revealed > *:nth-child(8)  { opacity:1; transform:translateY(0); transition-delay:.39s; }
-.stagger-children.revealed > *:nth-child(n+9){ opacity:1; transform:translateY(0); transition-delay:.43s; }
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity .6s cubic-bezier(.33,0,.3,1), transform .6s cubic-bezier(.33,0,.3,1); }
+.reveal.revealed { opacity: 1; transform: none; }
+.stagger-children > * { opacity: 0; transform: translateY(20px); transition: opacity .5s cubic-bezier(.33,0,.3,1), transform .5s cubic-bezier(.33,0,.3,1); }
+.stagger-children.revealed > * { opacity: 1; transform: none; }
+.stagger-children.revealed > *:nth-child(1) { transition-delay: .05s; }
+.stagger-children.revealed > *:nth-child(2) { transition-delay: .1s; }
+.stagger-children.revealed > *:nth-child(3) { transition-delay: .15s; }
+.stagger-children.revealed > *:nth-child(4) { transition-delay: .2s; }
+.stagger-children.revealed > *:nth-child(5) { transition-delay: .25s; }
+.stagger-children.revealed > *:nth-child(6) { transition-delay: .3s; }
+.stagger-children.revealed > *:nth-child(n+7) { transition-delay: .35s; }
 
 /* ============================================================
    EMPTY STATE
    ============================================================ */
 .empty-state {
     text-align: center;
-    padding: 60px 0;
-    color: #0369a1;
-    background: rgba(255,255,255,.7);
-    backdrop-filter: blur(12px);
-    border-radius: 16px;
-    border: 1px solid rgba(186,230,253,.5);
+    padding: 96px 24px;
+    background: var(--sam-gray);
+    border-radius: 20px;
+    margin-top: 40px;
 }
-
-.empty-state i { opacity: .35; color: #7dd3fc; margin-bottom: 16px; display: block; }
-.empty-state a { color: #0369a1; font-weight: 600; }
+.empty-state i { color: #c9c9c9; margin-bottom: 20px; display: block; }
+.empty-state p { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
 
 /* ============================================================
    PAGINATION
@@ -680,373 +515,353 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    margin-top: 36px;
+    gap: 16px;
+    margin-top: 56px;
 }
-
-.pagination-wrap nav {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-}
-
-.pagination-wrap .pagination {
-    display: flex;
-    gap: 6px;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
+.pagination-wrap nav { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.pagination-wrap .pagination { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; }
 .pagination-wrap .page-item .page-link {
-    min-width: 38px;
-    height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(125,211,252,.5);
-    border-radius: 10px;
-    background: rgba(255,255,255,.7);
-    backdrop-filter: blur(6px);
-    color: #0369a1;
-    font-size: 14px;
-    font-weight: 600;
+    min-width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    border: none; background: transparent;
+    border-radius: 50%;
+    color: var(--sam-black);
+    font-size: 14px; font-weight: 400;
     text-decoration: none;
-    transition: all .15s;
+    transition: background .2s;
 }
-
-.pagination-wrap .page-item .page-link:hover {
-    border-color: #0ea5e9;
-    background: rgba(186,230,253,.5);
-    color: #0c4a6e;
-    transform: translateY(-1px);
-}
-
+.pagination-wrap .page-item .page-link:hover { background: var(--sam-gray); }
 .pagination-wrap .page-item.active .page-link {
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
-    color: #fff;
-    border-color: transparent;
-    box-shadow: 0 4px 12px rgba(14,165,233,.4);
+    background: var(--sam-black); color: var(--sam-white); font-weight: 700;
 }
-
-.pagination-wrap .page-item.disabled .page-link {
-    color: #bae6fd;
-    pointer-events: none;
-    opacity: .6;
-}
-
-.pagination-wrap .pagination-info {
-    margin: 0;
-    font-size: 13px;
-    color: #0369a1;
-    text-align: center;
-    opacity: .8;
-}
-
-.pagination-wrap .pagination-info strong {
-    color: #0c4a6e;
-    font-weight: 700;
-}
+.pagination-wrap .page-item.disabled .page-link { color: #c9c9c9; pointer-events: none; }
+.pagination-wrap .pagination-info { margin: 0; font-size: 13px; color: var(--sam-muted); text-align: center; }
+.pagination-wrap .pagination-info strong { color: var(--sam-black); font-weight: 700; }
 </style>
 @endpush
 
 @section('content')
-{{-- Sky Canvas --}}
-<canvas id="sky-canvas" aria-hidden="true"></canvas>
-
 <div class="products-page container">
 
     {{-- Breadcrumb --}}
     <div class="breadcrumb-wrap reveal">
         <a href="{{ route('home') }}">Trang chủ</a>
-        <span> › </span>
+        <span> / </span>
         <span>Sản phẩm</span>
         @if(request('q'))
-            <span> › </span>
+            <span> / </span>
             <span>Tìm: "{{ request('q') }}"</span>
         @endif
     </div>
 
-    <div class="page-header-row reveal">
-        <h1>
-            @if(request('q'))
-                Kết quả tìm kiếm: "{{ request('q') }}"
+    <h1 class="page-headline reveal">
+        @if(request('q'))
+            Kết quả tìm kiếm: "{{ request('q') }}"
+        @else
+            Khám phá tất cả sản phẩm
+        @endif
+    </h1>
+
+    {{-- ===== CATEGORY TILES ===== --}}
+    @if($categories->isNotEmpty())
+    <div class="cat-tiles stagger-children">
+        <a href="{{ request()->fullUrlWithQuery(['category' => null, 'page' => null]) }}"
+           class="cat-tile {{ !request('category') ? 'active' : '' }}">
+            <span class="cat-tile__icon" aria-hidden="true"><i class="fas fa-th-large"></i></span>
+            <span>Tất cả sản phẩm</span>
+        </a>
+        @foreach($categories as $cat)
+        <a href="{{ request()->fullUrlWithQuery(['category' => $cat->id, 'page' => null]) }}"
+           class="cat-tile {{ request('category') == $cat->id ? 'active' : '' }}">
+            @if($cat->logo)
+                <img src="{{ $cat->logo_url }}" alt="" class="cat-tile__img" loading="lazy">
             @else
-                Tất cả sản phẩm
+                <span class="cat-tile__icon" aria-hidden="true"><i class="fas fa-image"></i></span>
             @endif
-        </h1>
-        <div class="sort-bar" style="margin-bottom:0">
-            <form id="sortForm" method="GET" action="{{ route('products.index') }}" style="display:flex;align-items:center;gap:8px">
+            <span>{{ $cat->name }}</span>
+        </a>
+        @endforeach
+    </div>
+    @endif
+
+    {{-- ===== BRAND NAV ===== --}}
+    @if($brands->isNotEmpty())
+    <nav class="brand-nav reveal" aria-label="Thương hiệu">
+        <a href="{{ request()->fullUrlWithQuery(['brand' => null, 'page' => null]) }}"
+           class="{{ !request('brand') ? 'active' : '' }}">Tất cả</a>
+        @foreach($brands as $brand)
+        <a href="{{ request()->fullUrlWithQuery(['brand' => $brand->id, 'page' => null]) }}"
+           class="{{ request('brand') == $brand->id ? 'active' : '' }}">{{ $brand->name }}</a>
+        @endforeach
+    </nav>
+    @endif
+
+    @php
+        $hasActiveFilters = request('category')
+            || request('brand')
+            || collect(request('price', []))->filter()->isNotEmpty()
+            || request('price_from')
+            || request('price_to')
+            || collect(request('attr', []))->flatten()->filter(fn ($v) => $v !== null && $v !== '')->isNotEmpty();
+
+        $priceCount = collect(request('price', []))->filter()->count()
+            + (request('price_from') ? 1 : 0)
+            + (request('price_to') ? 1 : 0);
+    @endphp
+
+    {{-- ===== FILTER BAR ===== --}}
+    <div class="filter-bar reveal">
+        <div class="filter-bar__left">
+            <button type="button" class="filter-bar__title is-collapsed" id="filterToggle"
+                    aria-expanded="false" aria-controls="filterChipsWrap">
+                Bộ lọc <i class="fas fa-chevron-down" aria-hidden="true"></i>
+            </button>
+            <span class="filter-bar__sep"></span>
+            <span class="filter-bar__count"><strong>{{ number_format($totalProducts) }}</strong> Kết quả</span>
+            @if($hasActiveFilters)
+                <a href="{{ route('products.index', request('q') ? ['q' => request('q')] : []) }}" class="btn-clear-filter">Xóa tất cả</a>
+            @endif
+        </div>
+        <div class="filter-bar__right">
+            <span class="sort-label">Sắp xếp</span>
+            <form id="sortForm" method="GET" action="{{ route('products.index') }}">
                 @if(request('q'))<input type="hidden" name="q" value="{{ request('q') }}">@endif
                 @if(request('category'))<input type="hidden" name="category" value="{{ request('category') }}">@endif
                 @if(request('brand'))<input type="hidden" name="brand" value="{{ request('brand') }}">@endif
-
                 <select class="sort-select" name="sort" onchange="document.getElementById('sortForm').submit()">
-                    <option value="">Sắp xếp: Mặc định</option>
+                    <option value="">Theo Khuyến Nghị</option>
                     <option value="price_asc"  {{ request('sort')=='price_asc'  ? 'selected' : '' }}>Giá: Thấp đến cao</option>
                     <option value="price_desc" {{ request('sort')=='price_desc' ? 'selected' : '' }}>Giá: Cao đến thấp</option>
                     <option value="newest"     {{ request('sort')=='newest'     ? 'selected' : '' }}>Mới nhất</option>
                     <option value="rating"     {{ request('sort')=='rating'     ? 'selected' : '' }}>Đánh giá cao</option>
                 </select>
             </form>
-            <div class="view-toggle" style="margin-left:10px">
-                <button class="view-btn active" id="gridView" title="Lưới"><i class="fas fa-th"></i></button>
-                <button class="view-btn" id="listView" title="Danh sách"><i class="fas fa-list"></i></button>
-            </div>
         </div>
     </div>
 
-    <div class="results-count reveal">
-        Hiển thị {{ $products->firstItem() }}–{{ $products->lastItem() }} trong {{ number_format($totalProducts) }} sản phẩm
-    </div>
+    {{-- ===== FILTER CHIPS + PANELS ===== --}}
+    <form action="{{ route('products.index') }}" method="GET" id="filterForm">
+        @if(request('q'))<input type="hidden" name="q" value="{{ request('q') }}">@endif
+        @if(request('sort'))<input type="hidden" name="sort" value="{{ request('sort') }}">@endif
 
-    <div class="layout-row">
+        <div id="filterChipsWrap" style="display:none">
+        <div class="chip-row">
+            <button type="button" class="chip {{ request('category') ? 'has-value' : '' }}" data-panel="panel-category">
+                Phạm vi sản phẩm <span class="chip__caret">▾</span>
+            </button>
+            <button type="button" class="chip {{ request('brand') ? 'has-value' : '' }}" data-panel="panel-brand">
+                Thương hiệu <span class="chip__caret">▾</span>
+            </button>
+            <button type="button" class="chip {{ $priceCount ? 'has-value' : '' }}" data-panel="panel-price">
+                Khoảng Giá
+                @if($priceCount)<span class="chip__badge">{{ $priceCount }}</span>@endif
+                <span class="chip__caret">▾</span>
+            </button>
+            @foreach($attributesFilter as $attr)
+                @php $attrCount = collect(request('attr.'.$attr['id'], []))->filter()->count(); @endphp
+                <button type="button" class="chip {{ $attrCount ? 'has-value' : '' }}" data-panel="panel-attr-{{ $attr['id'] }}">
+                    {{ $attr['name'] }}
+                    @if($attrCount)<span class="chip__badge">{{ $attrCount }}</span>@endif
+                    <span class="chip__caret">▾</span>
+                </button>
+            @endforeach
+        </div>
 
-        {{-- ===== SIDEBAR FILTER ===== --}}
-        <aside class="filter-sidebar reveal">
-            <form action="{{ route('products.index') }}" method="GET" id="filterForm">
-                @if(request('q'))<input type="hidden" name="q" value="{{ request('q') }}">@endif
-                @if(request('sort'))<input type="hidden" name="sort" value="{{ request('sort') }}">@endif
-                @if(request('category'))<input type="hidden" name="category" value="{{ request('category') }}">@endif
-                @if(request('brand'))<input type="hidden" name="brand" value="{{ request('brand') }}">@endif
+        {{-- Panel: Danh mục --}}
+        <div class="chip-panel" id="panel-category">
+            <h3 class="chip-panel__title">Danh mục</h3>
+            <div class="chip-panel__grid">
+                <label class="check-row">
+                    <input type="radio" name="category" value="" {{ !request('category') ? 'checked' : '' }}>
+                    <span>Tất cả</span>
+                </label>
+                @foreach($categories as $cat)
+                <label class="check-row">
+                    <input type="radio" name="category" value="{{ $cat->id }}" {{ request('category') == $cat->id ? 'checked' : '' }}>
+                    @if($cat->logo)<img src="{{ $cat->logo_url }}" alt="" class="opt-link__img" loading="lazy">@endif
+                    <span>{{ $cat->name }}</span>
+                </label>
+                @endforeach
+            </div>
+            <div class="chip-panel__foot">
+                <button type="button" class="cta cta--ghost js-panel-clear">Bỏ chọn</button>
+                <button type="submit" class="cta cta--black">Lọc</button>
+            </div>
+        </div>
 
-                @php
-                    $hasActiveFilters = request('category')
-                        || request('brand')
-                        || collect(request('price', []))->filter()->isNotEmpty()
-                        || request('price_from')
-                        || request('price_to')
-                        || collect(request('attr', []))->flatten()->filter(fn ($v) => $v !== null && $v !== '')->isNotEmpty();
-                @endphp
+        {{-- Panel: Thương hiệu --}}
+        <div class="chip-panel" id="panel-brand">
+            <h3 class="chip-panel__title">Thương hiệu</h3>
+            <div class="chip-panel__grid">
+                <label class="check-row">
+                    <input type="radio" name="brand" value="" {{ !request('brand') ? 'checked' : '' }}>
+                    <span>Tất cả</span>
+                </label>
+                @foreach($brands as $brand)
+                <label class="check-row">
+                    <input type="radio" name="brand" value="{{ $brand->id }}" {{ request('brand') == $brand->id ? 'checked' : '' }}>
+                    @if($brand->logo)<img src="{{ $brand->logo_url }}" alt="" class="opt-link__img" loading="lazy">@endif
+                    <span>{{ $brand->name }}</span>
+                </label>
+                @endforeach
+            </div>
+            <div class="chip-panel__foot">
+                <button type="button" class="cta cta--ghost js-panel-clear">Bỏ chọn</button>
+                <button type="submit" class="cta cta--black">Lọc</button>
+            </div>
+        </div>
 
-                <div class="filter-sidebar-header">
-                    <h2><i class="fas fa-filter" style="margin-right:6px;opacity:.7"></i>Bộ lọc</h2>
-                    @if($hasActiveFilters)
-                        <a href="{{ route('products.index', request('q') ? ['q' => request('q')] : []) }}" class="btn-clear-filter">
-                            <i class="fas fa-times-circle"></i> Xóa bộ lọc
-                        </a>
+        {{-- Panel: Khoảng giá --}}
+        <div class="chip-panel" id="panel-price">
+            <h3 class="chip-panel__title">Khoảng Giá</h3>
+            <div class="chip-panel__grid">
+                @foreach([
+                    ['Dưới 5 triệu',    '0',        '5000000'],
+                    ['5 – 10 triệu',    '5000000',  '10000000'],
+                    ['10 – 20 triệu',   '10000000', '20000000'],
+                    ['20 – 30 triệu',   '20000000', '30000000'],
+                    ['Trên 30 triệu',   '30000000', ''],
+                ] as $range)
+                <label class="check-row">
+                    <input type="checkbox" name="price[]"
+                           value="{{ $range[1] }}_{{ $range[2] }}"
+                           {{ in_array($range[1].'_'.$range[2], request('price', [])) ? 'checked' : '' }}>
+                    <span>{{ $range[0] }}</span>
+                </label>
+                @endforeach
+            </div>
+            <div class="price-range">
+                <input type="number" name="price_from" placeholder="Từ" value="{{ request('price_from') }}">
+                <span>–</span>
+                <input type="number" name="price_to" placeholder="Đến" value="{{ request('price_to') }}">
+            </div>
+            <div class="chip-panel__foot">
+                <button type="button" class="cta cta--ghost js-panel-clear">Bỏ chọn</button>
+                <button type="submit" class="cta cta--black">Áp dụng</button>
+            </div>
+        </div>
+
+        {{-- Panels: Thuộc tính (lọc nâng cao) --}}
+        @foreach($attributesFilter as $attr)
+        <div class="chip-panel" id="panel-attr-{{ $attr['id'] }}">
+            <h3 class="chip-panel__title">{{ $attr['name'] }}</h3>
+            <div class="chip-panel__grid">
+                @foreach($attr['values'] as $value)
+                <label class="check-row">
+                    <input type="checkbox" name="attr[{{ $attr['id'] }}][]" value="{{ $value }}"
+                        {{ in_array($value, request('attr.'.$attr['id'], [])) ? 'checked' : '' }}>
+                    <span>{{ $value }}</span>
+                </label>
+                @endforeach
+            </div>
+            <div class="chip-panel__foot">
+                <button type="button" class="cta cta--ghost js-panel-clear">Bỏ chọn</button>
+                <button type="submit" class="cta cta--black">Áp dụng</button>
+            </div>
+        </div>
+        @endforeach
+        </div>
+    </form>
+
+    {{-- ===== PRODUCT GRID ===== --}}
+    @if($products->isEmpty())
+        <div class="empty-state reveal">
+            <i class="fas fa-search fa-3x"></i>
+            <p>Không tìm thấy sản phẩm phù hợp.</p>
+            <a href="{{ route('products.index') }}" class="cta cta--black">Xem tất cả sản phẩm</a>
+        </div>
+    @else
+    <div class="grid-4 stagger-children" id="productsGrid">
+        @foreach($products as $product)
+        <div class="product-card">
+            @if($product->discount_percent > 0)
+                <span class="badge-tag">Giảm {{ $product->discount_percent }}%</span>
+            @endif
+            @auth
+            <button type="button"
+                class="wish wish-btn {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'active' : '' }}"
+                data-product-id="{{ $product->id }}"
+                data-url="{{ route('wishlist.toggle', $product->id) }}"
+                title="Yêu thích"
+                onclick="toggleWishlist(this)">
+                <i class="{{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'fas' : 'far' }} fa-heart"></i>
+            </button>
+            @else
+            <a href="{{ route('login') }}" class="wish" title="Đăng nhập để yêu thích">
+                <i class="far fa-heart"></i>
+            </a>
+            @endauth
+
+            <a href="{{ route('products.show', $product->slug) }}" class="product-card-img" tabindex="-1" aria-hidden="true">
+                @if($product->first_image)
+                    <img src="{{ $product->first_image }}" alt="{{ $product->name }}" loading="lazy">
+                @else
+                    <i class="fas fa-image fa-2x img-placeholder"></i>
+                @endif
+            </a>
+
+            <div class="product-card-body">
+                <a href="{{ route('products.show', $product->slug) }}" class="product-card-name" style="text-decoration:none;color:inherit">{{ $product->name }}</a>
+
+                <div class="stars">
+                    @for($i=1;$i<=5;$i++){{ $i <= round($product->avg_rating) ? '★' : '☆' }}@endfor
+                    <span class="review-count">({{ $product->reviews_count }})</span>
+                </div>
+
+                <div>
+                    @if($product->has_price_range)
+                        <span class="product-card-price">Từ {{ number_format($product->min_price) }}đ</span>
+                    @else
+                        <span class="product-card-price">{{ number_format($product->sale_price) }}đ</span>
+                        @if($product->discount_percent > 0)
+                            <span class="price-strike">{{ number_format($product->price) }}đ</span>
+                        @endif
                     @endif
                 </div>
 
-                {{-- Lọc nâng cao --}}
-                @if(count($attributesFilter))
-                    @php
-                        $selectedAttrCount = collect(request('attr', []))
-                            ->flatten()
-                            ->filter(fn ($v) => $v !== null && $v !== '')
-                            ->count();
-                    @endphp
-                    <button type="button" id="advancedToggle" class="btn-advanced-toggle">
-                        <span><i class="fas fa-sliders-h"></i> Lọc nâng cao</span>
-                        @if($selectedAttrCount)
-                            <span class="badge-count">{{ $selectedAttrCount }}</span>
-                        @endif
-                    </button>
+                <div class="card-actions">
+                    <a href="{{ route('products.show', $product->slug) }}" class="cta cta--black cta--block">Mua ngay</a>
+                    <a href="{{ route('products.show', $product->slug) }}" class="cta cta--outline cta--block">Tìm hiểu thêm</a>
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+
+    {{-- PAGINATION --}}
+    @php $paginator = $products->appends(request()->query()); @endphp
+    @if ($paginator->hasPages())
+    <div class="pagination-wrap reveal">
+        <nav aria-label="Phân trang">
+            <ul class="pagination">
+                @if ($paginator->onFirstPage())
+                    <li class="page-item disabled"><span class="page-link">&lsaquo;</span></li>
+                @else
+                    <li class="page-item"><a class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev">&lsaquo;</a></li>
                 @endif
 
-                {{-- Danh mục --}}
-                <div class="filter-group">
-                    <h3>Danh mục</h3>
-                    <ul>
-                        <li>
-                            <a href="{{ request()->fullUrlWithQuery(['category' => null]) }}"
-                               class="{{ !request('category') ? 'active' : '' }}">
-                                Tất cả
-                            </a>
-                        </li>
-                        @foreach($categories as $cat)
-                        <li>
-                            <a href="{{ request()->fullUrlWithQuery(['category' => $cat->id]) }}"
-                               class="{{ request('category') == $cat->id ? 'active' : '' }}">
-                                {{ $cat->name }}
-                            </a>
-                        </li>
-                        @endforeach
-                    </ul>
-                </div>
-
-                {{-- Thương hiệu --}}
-                <div class="filter-group">
-                    <h3>Thương hiệu</h3>
-                    <ul>
-                        @foreach($brands as $brand)
-                        <li>
-                            <a href="{{ request()->fullUrlWithQuery(['brand' => $brand->id]) }}"
-                               class="{{ request('brand') == $brand->id ? 'active' : '' }}">
-                                {{ $brand->name }}
-                            </a>
-                        </li>
-                        @endforeach
-                    </ul>
-                </div>
-
-                {{-- Khoảng giá --}}
-                <div class="filter-group">
-                    <h3>Khoảng giá</h3>
-                    @foreach([
-                        ['Dưới 5 triệu',    '0',        '5000000'],
-                        ['5 – 10 triệu',    '5000000',  '10000000'],
-                        ['10 – 20 triệu',   '10000000', '20000000'],
-                        ['20 – 30 triệu',   '20000000', '30000000'],
-                        ['Trên 30 triệu',   '30000000', ''],
-                    ] as $range)
-                    <label class="price-check">
-                        <input type="checkbox" name="price[]"
-                               value="{{ $range[1] }}_{{ $range[2] }}"
-                               {{ in_array($range[1].'_'.$range[2], request('price', [])) ? 'checked' : '' }}>
-                        <span>{{ $range[0] }}</span>
-                    </label>
-                    @endforeach
-
-                    <div class="price-range">
-                        <input type="number" name="price_from" placeholder="Từ" value="{{ request('price_from') }}">
-                        <span>–</span>
-                        <input type="number" name="price_to" placeholder="Đến" value="{{ request('price_to') }}">
-                    </div>
-                </div>
-
-                <div class="filter-group">
-                    <button type="submit" class="btn-filter">
-                        <i class="fas fa-search" style="margin-right:6px"></i>Lọc ngay
-                    </button>
-                </div>
-            </form>
-        </aside>
-
-        {{-- ===== PRODUCT GRID ===== --}}
-        <div>
-            @if($products->isEmpty())
-                <div class="empty-state reveal">
-                    <i class="fas fa-search fa-3x"></i>
-                    <p>Không tìm thấy sản phẩm phù hợp.</p>
-                    <a href="{{ route('products.index') }}">Xem tất cả sản phẩm</a>
-                </div>
-            @else
-            <div class="grid-4 stagger-children" id="productsGrid">
-                @foreach($products as $product)
-                <a href="{{ route('products.show', $product->slug) }}" class="product-card">
-                    @if($product->discount_percent > 0)
-                        <span class="badge-tag">-{{ $product->discount_percent }}%</span>
-                    @endif
-                    @auth
-                    <button class="wish wish-btn {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'active' : '' }}"
-                        data-product-id="{{ $product->id }}"
-                        data-url="{{ route('wishlist.toggle', $product->id) }}"
-                        title="Yêu thích"
-                        onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist(this)">
-                        <i class="{{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'fas' : 'far' }} fa-heart"></i>
-                    </button>
+                @foreach ($paginator->getUrlRange(1, $paginator->lastPage()) as $page => $url)
+                    @if ($page == $paginator->currentPage())
+                        <li class="page-item active"><span class="page-link">{{ $page }}</span></li>
                     @else
-                    <a href="{{ route('login') }}" class="wish" title="Đăng nhập để yêu thích"
-                       onclick="event.stopPropagation()">
-                        <i class="far fa-heart"></i>
-                    </a>
-                    @endauth
-                    <div class="product-card-img">
-                        @if($product->first_image)
-                            <img src="{{ $product->first_image }}" alt="{{ $product->name }}" loading="lazy">
-                        @else
-                            <i class="fas fa-image fa-2x img-placeholder"></i>
-                        @endif
-                    </div>
-                    <div class="product-card-body">
-                        <div class="product-card-name">{{ $product->name }}</div>
-                        <div>
-                            @if($product->has_price_range)
-                                <span class="product-card-price">Từ {{ number_format($product->min_price) }}đ</span>
-                            @else
-                                <span class="product-card-price">{{ number_format($product->sale_price) }}đ</span>
-                                @if($product->discount_percent > 0)
-                                    <span style="font-size:12px;color:#7dd3fc;text-decoration:line-through;margin-left:4px">
-                                        {{ number_format($product->price) }}đ
-                                    </span>
-                                @endif
-                            @endif
-                        </div>
-                        <div class="stars">
-                            @for($i=1;$i<=5;$i++)
-                                {{ $i <= round($product->avg_rating) ? '★' : '☆' }}
-                            @endfor
-                            <span class="review-count">({{ $product->reviews_count }})</span>
-                        </div>
-                    </div>
-                </a>
+                        <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
+                    @endif
                 @endforeach
-            </div>
 
-            {{-- PAGINATION --}}
-            @php $paginator = $products->appends(request()->query()); @endphp
-            @if ($paginator->hasPages())
-            <div class="pagination-wrap reveal">
-                <nav aria-label="Phân trang">
-                    <ul class="pagination">
-                        @if ($paginator->onFirstPage())
-                            <li class="page-item disabled"><span class="page-link">&lsaquo;</span></li>
-                        @else
-                            <li class="page-item"><a class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev">&lsaquo;</a></li>
-                        @endif
+                @if ($paginator->hasMorePages())
+                    <li class="page-item"><a class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next">&rsaquo;</a></li>
+                @else
+                    <li class="page-item disabled"><span class="page-link">&rsaquo;</span></li>
+                @endif
+            </ul>
 
-                        @foreach ($paginator->getUrlRange(1, $paginator->lastPage()) as $page => $url)
-                            @if ($page == $paginator->currentPage())
-                                <li class="page-item active"><span class="page-link">{{ $page }}</span></li>
-                            @else
-                                <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
-                            @endif
-                        @endforeach
-
-                        @if ($paginator->hasMorePages())
-                            <li class="page-item"><a class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next">&rsaquo;</a></li>
-                        @else
-                            <li class="page-item disabled"><span class="page-link">&rsaquo;</span></li>
-                        @endif
-                    </ul>
-
-                    <p class="pagination-info">
-                        Hiển thị <strong>{{ $paginator->firstItem() }}</strong>–<strong>{{ $paginator->lastItem() }}</strong>
-                        trong tổng <strong>{{ number_format($paginator->total()) }}</strong> kết quả
-                    </p>
-                </nav>
-            </div>
-            @endif
-            @endif
-        </div>
+            <p class="pagination-info">
+                Hiển thị <strong>{{ $paginator->firstItem() }}</strong>–<strong>{{ $paginator->lastItem() }}</strong>
+                trong tổng <strong>{{ number_format($paginator->total()) }}</strong> kết quả
+            </p>
+        </nav>
     </div>
-
-    {{-- Modal lọc nâng cao --}}
-    @if(count($attributesFilter))
-    <div id="advancedOverlay" class="advanced-overlay">
-        <div class="advanced-modal">
-            <div class="advanced-modal-header">
-                <h3><i class="fas fa-sliders-h" style="margin-right:8px"></i>Lọc nâng cao</h3>
-                <button type="button" class="advanced-modal-close" id="advancedClose">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="advanced-modal-body">
-                @foreach($attributesFilter as $attr)
-                <div class="filter-group">
-                    <h3>{{ $attr['name'] }}</h3>
-                    <div class="attr-values-wrap">
-                        @foreach($attr['values'] as $value)
-                        <label class="attr-check">
-                            <input type="checkbox" form="filterForm" name="attr[{{ $attr['id'] }}][]" value="{{ $value }}"
-                                {{ in_array($value, request('attr.'.$attr['id'], [])) ? 'checked' : '' }}>
-                            <span>{{ $value }}</span>
-                        </label>
-                        @endforeach
-                    </div>
-                </div>
-                @endforeach
-            </div>
-            <div class="advanced-modal-footer">
-                <button type="button" class="btn-advanced-clear" id="advancedClear">Bỏ chọn</button>
-                <button type="submit" form="filterForm" class="btn-filter">
-                    <i class="fas fa-check" style="margin-right:6px"></i>Áp dụng
-                </button>
-            </div>
-        </div>
-    </div>
+    @endif
     @endif
 
 </div><!-- /.products-page -->
@@ -1055,119 +870,67 @@ body {
 @push('scripts')
 <script>
 /* ============================================================
-   GRID / LIST VIEW TOGGLE
-   ============================================================ */
-document.getElementById('gridView').addEventListener('click', function () {
-    this.classList.add('active');
-    document.getElementById('listView').classList.remove('active');
-    document.getElementById('productsGrid').style.gridTemplateColumns = 'repeat(4, 1fr)';
-});
-document.getElementById('listView').addEventListener('click', function () {
-    this.classList.add('active');
-    document.getElementById('gridView').classList.remove('active');
-    document.getElementById('productsGrid').style.gridTemplateColumns = '1fr';
-});
-
-/* ============================================================
-   ADVANCED FILTER MODAL
-   ============================================================ */
-const advancedToggle  = document.getElementById('advancedToggle');
-const advancedOverlay = document.getElementById('advancedOverlay');
-const advancedClose   = document.getElementById('advancedClose');
-const advancedClear   = document.getElementById('advancedClear');
-
-if (advancedToggle && advancedOverlay) {
-    advancedToggle.addEventListener('click', () => advancedOverlay.classList.add('open'));
-    advancedClose.addEventListener('click', () => advancedOverlay.classList.remove('open'));
-    advancedOverlay.addEventListener('click', e => {
-        if (e.target === advancedOverlay) advancedOverlay.classList.remove('open');
-    });
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') advancedOverlay.classList.remove('open');
-    });
-    advancedClear.addEventListener('click', () => {
-        advancedOverlay.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-    });
-}
-
-/* ============================================================
-   ANIMATIONS
+   FILTER CHIP PANELS
    ============================================================ */
 (function () {
+    const chips  = document.querySelectorAll('.chip[data-panel]');
+    const panels = document.querySelectorAll('.chip-panel');
 
-    /* ---- 1. Canvas clouds ---- */
-    const canvas = document.getElementById('sky-canvas');
-    if (canvas) {
-        const ctx = canvas.getContext('2d');
-        let W, H, clouds = [];
-
-        function resize() {
-            W = canvas.width  = window.innerWidth;
-            H = canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        function makeCloud() {
-            return {
-                x:     Math.random() * W * 1.2,
-                y:     Math.random() * H * .6,
-                r:     50 + Math.random() * 110,
-                dx:    .15 + Math.random() * .25,
-                alpha: .06 + Math.random() * .11,
-            };
-        }
-
-        for (let i = 0; i < 8; i++) clouds.push(makeCloud());
-
-        function drawCloud(c) {
-            const g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r);
-            g.addColorStop(0,  `rgba(255,255,255,${c.alpha})`);
-            g.addColorStop(.6, `rgba(186,230,253,${c.alpha * .6})`);
-            g.addColorStop(1,  'rgba(186,230,253,0)');
-            ctx.beginPath();
-            ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
-            ctx.fillStyle = g;
-            ctx.fill();
-            [-.5, .5].forEach(o => {
-                ctx.beginPath();
-                ctx.arc(c.x + c.r * .55 * o, c.y - c.r * .18, c.r * .72, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255,255,255,${c.alpha * .7})`;
-                ctx.fill();
-            });
-        }
-
-        (function animateClouds() {
-            ctx.clearRect(0, 0, W, H);
-            clouds.forEach(c => {
-                drawCloud(c);
-                c.x += c.dx;
-                if (c.x - c.r > W * 1.2) { c.x = -c.r * 2; c.y = Math.random() * H * .6; }
-            });
-            requestAnimationFrame(animateClouds);
-        })();
+    function closeAll() {
+        chips.forEach(c => c.classList.remove('open'));
+        panels.forEach(p => p.classList.remove('open'));
     }
 
-    /* ---- 2. Bubbles ---- */
-    function spawnBubble() {
-        const el   = document.createElement('div');
-        el.className = 'bubble';
-        const size = 5 + Math.random() * 16;
-        const dur  = 8 + Math.random() * 12;
-        el.style.cssText = [
-            `width:${size}px`, `height:${size}px`,
-            `left:${Math.random() * 100}vw`,
-            `bottom:-${size}px`,
-            `animation-duration:${dur}s`,
-            `animation-delay:${Math.random() * 5}s`,
-        ].join(';');
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), (dur + 5) * 1000);
-    }
-    for (let i = 0; i < 10; i++) spawnBubble();
-    setInterval(spawnBubble, 3500);
+    chips.forEach(chip => {
+        chip.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const panel  = document.getElementById(this.dataset.panel);
+            const isOpen = this.classList.contains('open');
+            closeAll();
+            if (!isOpen && panel) {
+                this.classList.add('open');
+                panel.classList.add('open');
+            }
+        });
+    });
 
-    /* ---- 3. Scroll Reveal ---- */
+    document.querySelectorAll('.js-panel-clear').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const panel = this.closest('.chip-panel');
+            panel.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            panel.querySelectorAll('input[type="number"]').forEach(i => i.value = '');
+            const allRadio = panel.querySelector('input[type="radio"][value=""]');
+            if (allRadio) allRadio.checked = true;
+        });
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.chip-panel') && !e.target.closest('.chip')) closeAll();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
+
+    /* ---- Ẩn/hiện toàn bộ khối bộ lọc ---- */
+    const filterToggle = document.getElementById('filterToggle');
+    const filterWrap    = document.getElementById('filterChipsWrap');
+    if (filterToggle && filterWrap) {
+        filterToggle.addEventListener('click', function () {
+            const isOpen = filterWrap.style.display !== 'none';
+            if (isOpen) {
+                closeAll();
+                filterWrap.style.display = 'none';
+            } else {
+                filterWrap.style.display = '';
+            }
+            filterToggle.classList.toggle('is-collapsed', isOpen);
+            filterToggle.setAttribute('aria-expanded', String(!isOpen));
+        });
+    }
+})();
+
+/* ============================================================
+   SCROLL REVEAL
+   ============================================================ */
+(function () {
     const io = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -1175,75 +938,45 @@ if (advancedToggle && advancedOverlay) {
                 io.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.07, rootMargin: '0px 0px -30px 0px' });
+    }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
 
     document.querySelectorAll('.reveal, .stagger-children').forEach(el => io.observe(el));
+})();
 
-    /* ---- 4. Ripple on cards ---- */
-    document.querySelectorAll('.product-card').forEach(card => {
-        card.addEventListener('click', function (e) {
-            const rect   = card.getBoundingClientRect();
-            const size   = Math.max(rect.width, rect.height) * 1.6;
-            const ripple = document.createElement('span');
-            ripple.className = 'ripple-wave';
-            ripple.style.cssText = [
-                `width:${size}px`, `height:${size}px`,
-                `left:${e.clientX - rect.left - size / 2}px`,
-                `top:${e.clientY - rect.top  - size / 2}px`,
-            ].join(';');
-            card.appendChild(ripple);
-            ripple.addEventListener('animationend', () => ripple.remove());
-        });
-    });
-
-    /* ---- 5. 3D Tilt ---- */
-    document.querySelectorAll('.product-card').forEach(card => {
-        card.addEventListener('mousemove', function (e) {
-            const rect = card.getBoundingClientRect();
-            const dx   = (e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2);
-            const dy   = (e.clientY - rect.top  - rect.height / 2) / (rect.height / 2);
-            card.style.transform = `perspective(600px) rotateX(${-dy * 5}deg) rotateY(${dx * 5}deg) translateY(-5px) scale(1.02)`;
-        });
-        card.addEventListener('mouseleave', function () {
-            card.style.transform = '';
-            card.style.transition = 'transform .4s cubic-bezier(.16,1,.3,1), box-shadow .22s, border-color .22s';
-            setTimeout(() => card.style.transition = '', 420);
-        });
-    });
-
-    /* ---- 6. Wishlist toggle ---- */
-    @auth
-    const userWishlists = @json(auth()->user()->wishlists->pluck('product_id'));
-    @endauth
-
-    // Toast
+/* ============================================================
+   WISHLIST
+   ============================================================ */
+(function () {
     let _toastTimer;
     function showWishToast(msg, isErr = false) {
         let t = document.getElementById('wishToast');
         if (!t) {
             t = document.createElement('div');
             t.id = 'wishToast';
-            t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:rgba(15,23,42,.92);color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;z-index:9999;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;pointer-events:none;';
-            t.innerHTML = '<i class="fas fa-check-circle" style="color:#34d399;font-size:16px"></i><span></span>';
+            t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:#000;color:#fff;padding:12px 24px;border-radius:20px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:10px;z-index:9999;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;';
+            t.innerHTML = '<i class="fas fa-check-circle" style="font-size:15px"></i><span></span>';
             document.body.appendChild(t);
         }
         const icon = t.querySelector('i');
-        icon.style.color = isErr ? '#f87171' : '#34d399';
         icon.className = isErr ? 'fas fa-times-circle' : 'fas fa-check-circle';
         t.querySelector('span').textContent = msg;
-        t.style.opacity = '1'; t.style.transform = 'translateY(0)';
+        t.style.opacity = '1';
+        t.style.transform = 'translateX(-50%) translateY(0)';
         clearTimeout(_toastTimer);
-        _toastTimer = setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(10px)'; }, 2800);
+        _toastTimer = setTimeout(() => {
+            t.style.opacity = '0';
+            t.style.transform = 'translateX(-50%) translateY(10px)';
+        }, 2800);
     }
 
-    window.toggleWishlist = function(btn) {
+    window.toggleWishlist = function (btn) {
         @guest
         window.location.href = '{{ route("login") }}';
         return;
         @endguest
 
-        const url = btn.dataset.url;
-        const icon = btn.querySelector('i');
+        const url      = btn.dataset.url;
+        const icon     = btn.querySelector('i');
         const isActive = btn.classList.contains('active');
 
         // Optimistic UI
@@ -1261,16 +994,14 @@ if (advancedToggle && advancedOverlay) {
         .then(data => {
             btn.classList.toggle('active', data.wishlisted);
             icon.className = data.wishlisted ? 'fas fa-heart' : 'far fa-heart';
-            showWishToast(data.wishlisted ? '♥ Đã thêm vào yêu thích' : 'Nhấp khỏi danh sách yêu thích');
+            showWishToast(data.wishlisted ? 'Đã thêm vào yêu thích' : 'Đã xóa khỏi yêu thích');
         })
         .catch(() => {
-            // Revert on error
             btn.classList.toggle('active', isActive);
             icon.className = isActive ? 'fas fa-heart' : 'far fa-heart';
             showWishToast('Có lỗi xảy ra, vui lòng thử lại', true);
         });
     };
-
 })();
 </script>
 @endpush

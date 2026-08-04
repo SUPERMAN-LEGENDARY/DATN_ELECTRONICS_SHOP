@@ -2,588 +2,539 @@
 @section('title', $product->name . ' - ElectronicShop')
 
 @push('styles')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   PAGE BACKGROUND — sky gradient (khớp trang chủ)
+   SAMSUNG.COM DESIGN TOKENS
    ============================================================ */
+:root {
+    --sam-black:  #000;
+    --sam-white:  #fff;
+    --sam-gray:   #f7f7f7;
+    --sam-gray-2: #eaeaea;
+    --sam-line:   #ddd;
+    --sam-muted:  #666;
+    --sam-blue:   #2189ff;
+    --sam-navy:   #1428a0;
+    --sam-star:   #f5a623;
+    --sam-sale:   #d90000;
+    --sam-ok:     #007a3d;
+    --sam-font:   'Inter', 'SamsungOne', arial, sans-serif;
+    --sam-head:   'Poppins', 'SamsungSharpSans', arial, sans-serif;
+}
+
 body {
-    background: linear-gradient(180deg,
-        #bae6fd 0%,
-        #e0f2fe 18%,
-        #f0f9ff 38%,
-        #e0f2fe 62%,
-        #bae6fd 100%) fixed;
-    background-attachment: fixed;
-}
-
-#sky-canvas {
-    position: fixed; inset: 0;
-    width: 100%; height: 100%;
-    pointer-events: none; z-index: 0; opacity: .42;
-}
-
-.bubble {
-    position: fixed; border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,.8), rgba(186,230,253,.3));
-    border: 1px solid rgba(125,211,252,.4);
-    pointer-events: none; z-index: 0;
-    animation: bubbleRise linear infinite;
-}
-@keyframes bubbleRise {
-    0%   { transform: translateY(0) scale(1);    opacity: .7; }
-    80%  { opacity: .4; }
-    100% { transform: translateY(-110vh) scale(1.1); opacity: 0; }
+    background: var(--sam-white);
+    color: var(--sam-black);
+    font-family: var(--sam-font);
+    -webkit-font-smoothing: antialiased;
 }
 
 .product-detail-wrap {
-    max-width: 1200px; margin: 0 auto; padding: 16px;
-    position: relative; z-index: 1;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
 }
 
 /* ============================================================
    SCROLL REVEAL
    ============================================================ */
-.reveal {
-    opacity: 0; transform: translateY(28px);
-    transition: opacity .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1);
-}
-.reveal.revealed { opacity: 1; transform: translateY(0); }
+.reveal, .reveal-left { opacity: 0; transform: translateY(20px); transition: opacity .6s cubic-bezier(.33,0,.3,1), transform .6s cubic-bezier(.33,0,.3,1); }
+.reveal-left { transform: translateX(-20px); }
+.reveal.revealed, .reveal-left.revealed { opacity: 1; transform: none; }
 
-.reveal-left {
-    opacity: 0; transform: translateX(-28px);
-    transition: opacity .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1);
-}
-.reveal-left.revealed { opacity: 1; transform: translateX(0); }
-
-/* stagger children */
-.stagger-children > * {
-    opacity: 0; transform: translateY(18px);
-    transition: opacity .45s cubic-bezier(.16,1,.3,1), transform .45s cubic-bezier(.16,1,.3,1);
-}
-.stagger-children.revealed > *:nth-child(1)  { opacity:1; transform:translateY(0); transition-delay:.04s; }
-.stagger-children.revealed > *:nth-child(2)  { opacity:1; transform:translateY(0); transition-delay:.09s; }
-.stagger-children.revealed > *:nth-child(3)  { opacity:1; transform:translateY(0); transition-delay:.14s; }
-.stagger-children.revealed > *:nth-child(4)  { opacity:1; transform:translateY(0); transition-delay:.19s; }
-.stagger-children.revealed > *:nth-child(5)  { opacity:1; transform:translateY(0); transition-delay:.24s; }
-.stagger-children.revealed > *:nth-child(n+6){ opacity:1; transform:translateY(0); transition-delay:.29s; }
-
-/* ripple */
-.ripple-wave {
-    position: absolute; border-radius: 50%;
-    background: rgba(125,211,252,.3);
-    transform: scale(0);
-    animation: rippleOut .6s linear;
-    pointer-events: none; z-index: 10;
-}
-@keyframes rippleOut { to { transform: scale(4); opacity: 0; } }
+.stagger-children > * { opacity: 0; transform: translateY(14px); transition: opacity .45s cubic-bezier(.33,0,.3,1), transform .45s cubic-bezier(.33,0,.3,1); }
+.stagger-children.revealed > * { opacity: 1; transform: none; }
+.stagger-children.revealed > *:nth-child(1) { transition-delay: .05s; }
+.stagger-children.revealed > *:nth-child(2) { transition-delay: .1s; }
+.stagger-children.revealed > *:nth-child(3) { transition-delay: .15s; }
+.stagger-children.revealed > *:nth-child(4) { transition-delay: .2s; }
+.stagger-children.revealed > *:nth-child(n+5) { transition-delay: .25s; }
 
 /* ============================================================
-   BREADCRUMB
+   CTA — Samsung pill buttons
+   ============================================================ */
+.cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 9px 24px 10px;
+    border-radius: 20px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.4;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background .2s, color .2s, border-color .2s, opacity .2s;
+}
+.cta--black { background: var(--sam-black); color: var(--sam-white); }
+.cta--black:hover { background: #3d3d3d; color: var(--sam-white); }
+.cta--blue { background: var(--sam-blue); color: var(--sam-white); }
+.cta--blue:hover { background: #0d6fd8; color: var(--sam-white); }
+.cta--outline { background: transparent; color: var(--sam-black); border-color: var(--sam-black); }
+.cta--outline:hover { background: rgba(0,0,0,.05); }
+.cta--ghost { background: var(--sam-white); color: var(--sam-black); border-color: var(--sam-line); }
+.cta--ghost:hover { background: var(--sam-gray); }
+.cta--lg { min-height: 48px; font-size: 15px; padding: 12px 28px; border-radius: 24px; }
+
+/* ============================================================
+   BREADCRUMB / TOP BAR
    ============================================================ */
 .breadcrumb-row {
-    font-size: 13px; color: #0369a1;
-    margin-bottom: 16px;
-    display: flex; align-items: center;
+    font-size: 12px;
+    color: var(--sam-muted);
+    padding: 20px 0 0;
+    display: flex;
+    align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap; gap: 10px;
+    flex-wrap: wrap;
+    gap: 12px;
 }
-.breadcrumb-row a { color: #0c4a6e; font-weight: 600; text-decoration: none; }
-.breadcrumb-row a:hover { text-decoration: underline; }
+.breadcrumb-row a { color: var(--sam-muted); text-decoration: none; }
+.breadcrumb-row a:hover { color: var(--sam-black); text-decoration: underline; }
+.breadcrumb-row .crumb-current { color: var(--sam-black); font-weight: 500; }
+.breadcrumb-actions { display: flex; align-items: center; gap: 8px; }
+
+.btn-icon-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    background: var(--sam-white);
+    border: 1px solid var(--sam-line);
+    border-radius: 20px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--sam-black);
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color .2s, background .2s;
+}
+.btn-icon-text:hover { border-color: var(--sam-black); background: var(--sam-gray); }
+
+.btn-wishlist-detail {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--sam-white);
+    border: 1px solid var(--sam-line);
+    color: var(--sam-black);
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color .2s, color .2s, background .2s;
+}
+.btn-wishlist-detail:hover { border-color: var(--sam-black); background: var(--sam-gray); }
+.btn-wishlist-detail.active { color: var(--sam-sale); border-color: var(--sam-sale); }
 
 /* ============================================================
    FLASH MESSAGES
    ============================================================ */
-.flash-success {
-    background: rgba(232,245,233,.9); color: #2e7d32;
-    border: 1px solid rgba(76,175,80,.25);
-    padding: 10px 14px; border-radius: 10px;
-    margin-bottom: 16px; font-size: 14px;
-    backdrop-filter: blur(6px);
+.flash-success, .flash-error {
+    padding: 12px 18px;
+    border-radius: 8px;
+    margin: 16px 0 0;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
-.flash-error {
-    background: rgba(255,235,238,.9); color: #c62828;
-    border: 1px solid rgba(229,57,53,.25);
-    padding: 10px 14px; border-radius: 10px;
-    margin-bottom: 16px; font-size: 14px;
-    backdrop-filter: blur(6px);
-}
+.flash-success { background: #eef7f1; color: var(--sam-ok); border: 1px solid #cfe7d8; }
+.flash-error   { background: #fdeeee; color: var(--sam-sale); border: 1px solid #f5cccc; }
 
 /* ============================================================
-   PRODUCT MAIN GRID
+   PRODUCT MAIN GRID — gallery | info | sidebar
    ============================================================ */
 .product-main {
     display: grid;
-    grid-template-columns: 340px 1fr 260px;
-    gap: 24px; margin-bottom: 32px;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) 280px;
+    gap: 40px;
+    padding: 32px 0 64px;
+    align-items: start;
 }
-@media (max-width: 1024px) { .product-main { grid-template-columns: 320px 1fr; } .product-sidebar { display: none; } }
-@media (max-width: 700px)  { .product-main { grid-template-columns: 1fr; } }
+@media (max-width: 1200px) { .product-main { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .product-sidebar { display: none; } }
+@media (max-width: 820px)  { .product-main { grid-template-columns: 1fr; gap: 32px; } }
 
 /* ============================================================
-   GALLERY — glassmorphism card
+   GALLERY — flat #f7f7f7 panel, radius 20px
    ============================================================ */
-.gallery {}
-
 .gallery-main {
-    border: 1px solid rgba(186,230,253,.7);
-    border-radius: 16px;
-    height: 300px;
-    display: flex; align-items: center; justify-content: center;
+    background: var(--sam-gray);
+    border-radius: 20px;
+    height: 480px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: relative;
-    background: rgba(255,255,255,.82);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    margin-bottom: 12px; overflow: hidden;
-    box-shadow: 0 4px 24px rgba(14,165,233,.12);
-    transition: box-shadow .3s;
+    overflow: hidden;
+    margin-bottom: 16px;
 }
-.gallery-main:hover {
-    box-shadow: 0 8px 32px rgba(14,165,233,.2);
-}
+@media (max-width: 820px) { .gallery-main { height: 340px; } }
 .gallery-main img {
-    max-width: 100%; max-height: 100%;
+    max-width: 84%;
+    max-height: 84%;
     object-fit: contain;
-    transition: transform .4s cubic-bezier(.16,1,.3,1);
+    transition: transform .4s cubic-bezier(.33,0,.3,1), opacity .3s;
 }
-.gallery-main:hover img { transform: scale(1.05); }
+.gallery-main:hover img { transform: scale(1.03); }
 
 .discount-tag {
-    position: absolute; top: 10px; left: 10px;
-    background: linear-gradient(135deg, #ef4444, #e53935);
-    color: #fff; font-size: 12px; font-weight: 700;
-    padding: 3px 10px; border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(229,57,53,.35);
-    animation: badgePop .4s cubic-bezier(.34,1.56,.64,1);
+    position: absolute;
+    top: 24px; left: 24px;
+    background: transparent;
+    color: var(--sam-sale);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
 }
-@keyframes badgePop { from { transform: scale(0); } to { transform: scale(1); } }
 
-.gallery-thumbs { display: flex; gap: 10px; flex-wrap: wrap; }
-
+.gallery-thumbs { display: flex; gap: 8px; flex-wrap: wrap; }
 .thumb {
-    width: 58px; height: 58px;
-    border: 2px solid rgba(186,230,253,.6);
-    border-radius: 10px; overflow: hidden; cursor: pointer;
-    background: rgba(255,255,255,.8);
-    backdrop-filter: blur(6px);
+    width: 64px; height: 64px;
+    background: var(--sam-gray);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    transition: border-color .2s, transform .2s, box-shadow .2s;
+    transition: border-color .2s, background .2s;
 }
-.thumb:hover {
-    border-color: #7dd3fc;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(14,165,233,.18);
-}
-.thumb.active {
-    border-color: #0ea5e9;
-    box-shadow: 0 0 0 3px rgba(14,165,233,.2);
-}
-.thumb img { width: 100%; height: 100%; object-fit: contain; padding: 4px; box-sizing: border-box; }
-
-/* ============================================================
-   PRODUCT DESCRIPTION (nội dung CKEditor)
-   ============================================================ */
-.product-description-content :where(h1,h2,h3,h4) { color: #0c4a6e; margin: 18px 0 10px; }
-.product-description-content p { margin: 0 0 12px; }
-.product-description-content ul, .product-description-content ol { margin: 0 0 12px 22px; }
-.product-description-content img { max-width: 100%; border-radius: 10px; margin: 10px 0; }
-.product-description-content table { border-collapse: collapse; margin: 12px 0; }
-.product-description-content table td, .product-description-content table th {
-    border: 1px solid rgba(186,230,253,.8); padding: 6px 10px;
-}
-.product-description-content a { color: #0ea5e9; }
+.thumb:hover { background: var(--sam-gray-2); }
+.thumb.active { border-color: var(--sam-black); background: var(--sam-white); }
+.thumb img { width: 100%; height: 100%; object-fit: contain; padding: 6px; box-sizing: border-box; }
 
 /* ============================================================
    PRODUCT INFO
    ============================================================ */
-.product-info {
-    background: rgba(255,255,255,.78);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-radius: 16px;
-    border: 1px solid rgba(186,230,253,.6);
-    box-shadow: 0 4px 24px rgba(14,165,233,.1);
-    padding: 24px;
-}
+.product-info { background: transparent; padding: 0; }
 
 .product-brand {
-    font-size: 12px; font-weight: 700;
-    color: #0369a1; letter-spacing: 1px;
-    text-transform: uppercase; margin-bottom: 6px;
-    display: inline-flex; align-items: center; gap: 6px;
-}
-.product-brand::before {
-    content: '';
-    display: inline-block;
-    width: 20px; height: 2px;
-    background: linear-gradient(90deg, #0ea5e9, #38bdf8);
-    border-radius: 2px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--sam-blue);
+    margin-bottom: 8px;
+    display: block;
 }
 
 .product-name {
-    font-size: 22px; font-weight: 800;
-    line-height: 1.3; margin-bottom: 10px;
-    color: #0c4a6e;
+    font-family: var(--sam-head);
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    line-height: 1.2;
+    margin: 0 0 14px;
+    color: var(--sam-black);
 }
+@media (max-width: 640px) { .product-name { font-size: 24px; } }
 
 .product-rating {
-    display: flex; align-items: center;
-    gap: 10px; font-size: 13px; margin-bottom: 14px;
-    color: #0369a1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--sam-muted);
+    margin-bottom: 24px;
+    flex-wrap: wrap;
 }
-.product-rating .stars { color: #f59e0b; }
+.product-rating .stars { color: var(--sam-star); letter-spacing: 1px; font-size: 14px; }
+.product-rating .rating-num { color: var(--sam-black); font-weight: 700; }
+.product-rating .divider { color: var(--sam-line); }
 
-.price-current { font-size: 28px; font-weight: 800; color: #0369a1; }
-.price-old     { font-size: 14px; color: #7dd3fc; text-decoration: line-through; margin-left: 10px; }
-.price-pct     { font-size: 12px; color: #e53935; font-weight: 600; margin-left: 6px; }
+.price-block { padding: 20px 0 0; border-top: 1px solid var(--sam-line); }
+.price-current { font-size: 32px; font-weight: 700; letter-spacing: -.02em; color: var(--sam-black); }
+.price-old     { font-size: 15px; color: var(--sam-muted); text-decoration: line-through; margin-left: 12px; }
+.price-pct     { font-size: 15px; color: var(--sam-sale); font-weight: 700; margin-left: 8px; }
 
-.in-stock      { color: #16a34a; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 4px; margin: 8px 0 16px; }
-.out-of-stock  { color: #e53935; font-size: 13px; font-weight: 500; margin: 8px 0 16px; }
+.in-stock     { color: var(--sam-ok);   font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.out-of-stock { color: var(--sam-sale); font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
 
-#variantSelector { display: flex; flex-direction: column; gap: 14px; margin-bottom: 6px; }
+/* ============================================================
+   VARIANT OPTIONS — Samsung bordered selector cards
+   ============================================================ */
+#variantSelector { display: flex; flex-direction: column; gap: 24px; margin-bottom: 8px; }
 
-.option-group { margin-bottom: 0; }
-.option-label { font-size: 13px; color: #0369a1; margin-bottom: 8px; font-weight: 600; }
-.option-label strong { color: #0c4a6e; font-weight: 700; }
-.option-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.option-group { margin: 0; }
+.option-label { font-size: 14px; color: var(--sam-muted); margin-bottom: 10px; }
+.option-label strong { color: var(--sam-black); font-weight: 700; }
+.option-btns { display: flex; gap: 8px; flex-wrap: wrap; }
 
 .opt-btn {
-    padding: 8px 18px; min-width: 56px;
-    border: 1.5px solid rgba(125,211,252,.5);
-    border-radius: 10px; font-size: 13.5px; font-weight: 600;
+    padding: 11px 20px;
+    min-width: 64px;
+    background: var(--sam-white);
+    border: 1px solid var(--sam-line);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--sam-black);
     cursor: pointer;
-    background: rgba(255,255,255,.7);
-    backdrop-filter: blur(4px);
-    color: #0369a1;
-    transition: all .2s;
+    transition: border-color .2s, box-shadow .2s, background .2s;
 }
-.opt-btn:hover:not(.opt-btn-disabled) {
-    border-color: #0ea5e9;
-    background: rgba(186,230,253,.4);
-    transform: translateY(-1px);
-}
+.opt-btn:hover:not(.opt-btn-disabled) { border-color: #999; }
 .opt-btn.active {
-    border-color: #0ea5e9;
-    color: #0c4a6e; font-weight: 700;
-    background: rgba(186,230,253,.55);
-    box-shadow: 0 0 0 2px rgba(14,165,233,.25) inset;
-}
-.opt-btn-disabled { opacity: .4; text-decoration: line-through; cursor: not-allowed; pointer-events: none; }
-
-.action-btns { display: flex; gap: 12px; margin-top: 20px; }
-
-.btn-add-cart {
-    flex: 1; padding: 13px;
-    border: 2px solid #0ea5e9; border-radius: 10px;
-    background: rgba(255,255,255,.7); backdrop-filter: blur(6px);
-    color: #0369a1; font-size: 15px; font-weight: 700;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    transition: all .2s;
-}
-.btn-add-cart:hover {
-    background: rgba(186,230,253,.55);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(14,165,233,.2);
-}
-
-.btn-buy-now {
-    flex: 1; padding: 13px; border: none;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
-    color: #fff; font-size: 15px; font-weight: 700;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    transition: all .2s;
-    box-shadow: 0 4px 16px rgba(14,165,233,.35);
-}
-.btn-buy-now:hover {
-    opacity: .92;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 22px rgba(14,165,233,.45);
-}
-
-/* ============================================================
-   SIDEBAR BENEFITS
-   ============================================================ */
-.product-sidebar { display: flex; flex-direction: column; gap: 14px; }
-
-.benefit-box, .commit-box {
-    background: rgba(255,255,255,.78);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(186,230,253,.6);
-    border-radius: 16px; padding: 18px;
-    box-shadow: 0 4px 18px rgba(14,165,233,.1);
-}
-
-.benefit-item { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 14px; }
-.benefit-item:last-child { margin-bottom: 0; }
-.benefit-item .bi-icon {
-    width: 34px; height: 34px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #bae6fd, #7dd3fc);
-    color: #0369a1; font-size: 15px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; margin-top: 1px;
-    box-shadow: 0 2px 8px rgba(14,165,233,.18);
-}
-.benefit-item .bi-title { font-size: 13px; font-weight: 700; color: #0c4a6e; }
-.benefit-item .bi-desc  { font-size: 12px; color: #0369a1; opacity: .75; }
-
-.commit-box h4 {
-    font-size: 12px; font-weight: 800;
-    text-transform: uppercase; letter-spacing: .5px;
-    color: #0c4a6e; margin-bottom: 14px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(186,230,253,.6);
-}
-.commit-item {
-    display: flex; align-items: center; gap: 8px;
-    margin-bottom: 10px; font-size: 13px; color: #0369a1;
-}
-.commit-item:last-child { margin-bottom: 0; }
-.commit-item i { color: #0ea5e9; }
-
-/* ============================================================
-   TABS
-   ============================================================ */
-.product-tabs {
-    border-bottom: 2px solid rgba(186,230,253,.6);
-    margin-bottom: 24px;
-    display: flex; gap: 0;
-    overflow-x: auto;
-    background: rgba(255,255,255,.6);
-    backdrop-filter: blur(10px);
-    border-radius: 12px 12px 0 0;
-    padding: 0 4px;
-}
-.tab-btn {
-    padding: 13px 24px;
-    background: none; border: none;
-    border-bottom: 3px solid transparent;
-    font-size: 13px; font-weight: 600;
-    cursor: pointer;
-    text-transform: uppercase; letter-spacing: .5px;
-    color: #0369a1; white-space: nowrap;
-    transition: all .2s; border-radius: 8px 8px 0 0;
-    margin-bottom: -2px;
-}
-.tab-btn:hover { background: rgba(186,230,253,.35); color: #0c4a6e; }
-.tab-btn.active {
-    color: #0c4a6e;
-    border-bottom-color: #0ea5e9;
-    background: rgba(186,230,253,.25);
+    border-color: var(--sam-navy);
+    box-shadow: inset 0 0 0 1px var(--sam-navy);
     font-weight: 700;
 }
+.opt-btn-disabled {
+    color: #bbb;
+    background: var(--sam-gray);
+    border-color: #ececec;
+    text-decoration: line-through;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+#variantAlert { font-size: 13px; color: var(--sam-sale); font-weight: 500; }
+
+.action-btns { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
+.action-btns form { flex: 1 1 180px; }
+.btn-add-cart { width: 100%; }
+.btn-buy-now  { width: 100%; }
+
+/* ============================================================
+   SIDEBAR — benefits / commitments
+   ============================================================ */
+.product-sidebar { display: flex; flex-direction: column; gap: 12px; }
+
+.benefit-box, .commit-box {
+    background: var(--sam-gray);
+    border-radius: 16px;
+    padding: 22px;
+}
+
+.benefit-item { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 18px; }
+.benefit-item:last-child { margin-bottom: 0; }
+.benefit-item .bi-icon {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--sam-white);
+    color: var(--sam-black);
+    font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.benefit-item .bi-title { font-size: 13px; font-weight: 700; color: var(--sam-black); margin-bottom: 2px; }
+.benefit-item .bi-desc  { font-size: 12px; color: var(--sam-muted); line-height: 1.5; }
+
+.commit-box h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--sam-black);
+    margin: 0 0 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--sam-line);
+}
+.commit-item { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 13px; color: var(--sam-muted); }
+.commit-item:last-child { margin-bottom: 0; }
+.commit-item i { color: var(--sam-black); font-size: 12px; }
+
+/* ============================================================
+   TABS — Samsung underline nav
+   ============================================================ */
+.product-tabs {
+    display: flex;
+    gap: 32px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--sam-line);
+    margin-bottom: 40px;
+    scrollbar-width: none;
+}
+.product-tabs::-webkit-scrollbar { display: none; }
+
+.tab-btn {
+    padding: 14px 0 12px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--sam-black);
+    white-space: nowrap;
+    cursor: pointer;
+    margin-bottom: -1px;
+    transition: border-color .2s, font-weight .2s;
+}
+.tab-btn:hover { border-bottom-color: var(--sam-line); }
+.tab-btn.active { font-weight: 700; border-bottom-color: var(--sam-black); }
 
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
+.tab-panel-inner { padding: 0; }
 
 /* ============================================================
-   TAB PANELS — glassmorphism wrappers
+   DESCRIPTION (CKEditor content)
    ============================================================ */
-.tab-panel-inner {
-    background: rgba(255,255,255,.78);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-radius: 0 0 16px 16px;
-    border: 1px solid rgba(186,230,253,.55);
-    border-top: none;
-    padding: 24px;
-    box-shadow: 0 4px 20px rgba(14,165,233,.08);
-}
+.product-description-content :where(h1,h2,h3,h4) { font-family: var(--sam-head); color: var(--sam-black); margin: 24px 0 12px; font-weight: 700; }
+.product-description-content p { margin: 0 0 14px; }
+.product-description-content ul, .product-description-content ol { margin: 0 0 14px 22px; }
+.product-description-content img { max-width: 100%; border-radius: 12px; margin: 14px 0; }
+.product-description-content table { border-collapse: collapse; margin: 14px 0; }
+.product-description-content table td, .product-description-content table th { border: 1px solid var(--sam-line); padding: 8px 12px; }
+.product-description-content a { color: var(--sam-blue); }
+
+.empty-note { color: var(--sam-muted); font-size: 14px; padding: 32px 0; }
 
 /* ============================================================
    SPECS TABLE
    ============================================================ */
-.specs-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.specs-table tr:nth-child(even) { background: rgba(186,230,253,.2); }
-.specs-table tr:hover { background: rgba(186,230,253,.35); }
-.specs-table td { padding: 10px 16px; border: 1px solid rgba(186,230,253,.4); }
-.specs-table td:first-child { color: #0369a1; width: 200px; font-weight: 600; }
-.specs-table td:last-child { color: #0c4a6e; }
+.specs-table { width: 100%; border-collapse: collapse; font-size: 14px; max-width: 900px; }
+.specs-table td { padding: 14px 16px; border-bottom: 1px solid var(--sam-line); vertical-align: top; }
+.specs-table tr:first-child td { border-top: 1px solid var(--sam-line); }
+.specs-table td:first-child { color: var(--sam-muted); width: 240px; font-weight: 400; }
+.specs-table td:last-child { color: var(--sam-black); font-weight: 500; }
 
 /* ============================================================
    RATING SUMMARY
    ============================================================ */
 .rating-summary {
-    display: flex; align-items: center; gap: 32px;
-    padding: 26px;
-    background: linear-gradient(135deg, #e0f2fe, #bae6fd);
-    border-radius: 14px; margin-bottom: 26px;
-    border: 1px solid rgba(125,211,252,.4);
-    box-shadow: 0 4px 16px rgba(14,165,233,.12);
+    display: flex;
+    align-items: center;
+    gap: 48px;
+    padding: 32px;
+    background: var(--sam-gray);
+    border-radius: 20px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
 }
 .rating-avg { text-align: center; }
-.rating-avg .big { font-size: 56px; font-weight: 800; color: #0369a1; line-height: 1; }
-.rating-avg .stars-lg { font-size: 20px; color: #f59e0b; margin: 4px 0; }
-.rating-avg small { color: #0369a1; font-size: 13px; opacity: .75; }
+.rating-avg .big { font-family: var(--sam-head); font-size: 56px; font-weight: 700; color: var(--sam-black); line-height: 1; letter-spacing: -.03em; }
+.rating-avg .stars-lg { font-size: 18px; color: var(--sam-star); margin: 8px 0 4px; letter-spacing: 2px; }
+.rating-avg small { color: var(--sam-muted); font-size: 13px; }
 
-.rating-bars { flex: 1; }
-.rating-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 13px; color: #0369a1; }
-.rating-bar-row .bar { flex: 1; height: 7px; background: rgba(255,255,255,.6); border-radius: 4px; overflow: hidden; }
-.rating-bar-row .bar-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 4px; transition: width .8s cubic-bezier(.16,1,.3,1); }
-.rating-bar-row .cnt { width: 30px; text-align: right; color: #0369a1; opacity: .7; }
+.rating-bars { flex: 1; min-width: 240px; }
+.rating-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; color: var(--sam-muted); }
+.rating-bar-row .bar { flex: 1; height: 6px; background: var(--sam-white); border-radius: 3px; overflow: hidden; }
+.rating-bar-row .bar-fill { height: 100%; background: var(--sam-star); border-radius: 3px; transition: width .8s cubic-bezier(.33,0,.3,1); }
+.rating-bar-row .cnt { width: 32px; text-align: right; }
 
 /* ============================================================
    REVIEWS
    ============================================================ */
-.review-item {
-    border-bottom: 1px solid rgba(186,230,253,.5);
-    padding: 16px 0;
-    transition: background .2s;
-}
-.review-item:last-child { border-bottom: none; }
-.review-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-.review-user { font-weight: 700; font-size: 14px; color: #0c4a6e; }
-.review-date { font-size: 12px; color: #7dd3fc; }
-.review-stars { color: #f59e0b; font-size: 14px; margin-bottom: 6px; }
-.review-content { font-size: 14px; color: #0369a1; line-height: 1.6; }
+.review-item { border-bottom: 1px solid var(--sam-line); padding: 22px 0; }
+.review-item:first-of-type { border-top: 1px solid var(--sam-line); }
+.review-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.review-user { font-weight: 700; font-size: 14px; color: var(--sam-black); }
+.review-date { font-size: 12px; color: var(--sam-muted); }
+.review-stars { color: var(--sam-star); font-size: 14px; letter-spacing: 1px; margin-bottom: 8px; }
+.review-content { font-size: 14px; color: #333; line-height: 1.7; }
 
-.review-form {
-    background: linear-gradient(135deg, #e0f2fe, #bae6fd);
-    border-radius: 14px; padding: 22px; margin-top: 26px;
-    border: 1px solid rgba(125,211,252,.4);
-}
-.review-form h4 { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: #0c4a6e; }
+.review-form { background: var(--sam-gray); border-radius: 20px; padding: 32px; margin-top: 32px; }
+.review-form h4 { font-family: var(--sam-head); font-size: 18px; font-weight: 700; margin: 0 0 20px; color: var(--sam-black); }
+.form-label { font-size: 13px; font-weight: 700; display: block; margin-bottom: 8px; color: var(--sam-black); }
 
-.star-rating { display: flex; gap: 6px; margin-bottom: 12px; flex-direction: row-reverse; justify-content: flex-end; }
+.star-rating { display: flex; gap: 6px; margin-bottom: 4px; flex-direction: row-reverse; justify-content: flex-end; }
 .star-rating input { display: none; }
-.star-rating label { font-size: 28px; color: rgba(125,211,252,.5); cursor: pointer; transition: color .12s, transform .12s; }
-.star-rating label:hover { transform: scale(1.15); }
+.star-rating label { font-size: 30px; color: #d4d4d4; cursor: pointer; transition: color .15s, transform .15s; line-height: 1; }
+.star-rating label:hover { transform: scale(1.1); }
 .star-rating input:checked ~ label,
 .star-rating label:hover,
-.star-rating label:hover ~ label { color: #f59e0b; }
+.star-rating label:hover ~ label { color: var(--sam-star); }
 
 .form-textarea {
     width: 100%;
-    border: 1px solid rgba(125,211,252,.5);
-    border-radius: 10px; padding: 10px;
-    font-size: 14px; outline: none; resize: vertical;
+    border: 1px solid var(--sam-line);
+    border-radius: 8px;
+    padding: 12px 14px;
     font-family: inherit;
-    background: rgba(255,255,255,.75);
-    backdrop-filter: blur(6px);
-    color: #0c4a6e;
-    transition: border-color .2s, box-shadow .2s;
+    font-size: 14px;
+    color: var(--sam-black);
+    background: var(--sam-white);
+    outline: none;
+    resize: vertical;
+    transition: border-color .2s;
 }
-.form-textarea:focus {
-    border-color: #0ea5e9;
-    box-shadow: 0 0 0 3px rgba(14,165,233,.15);
-}
+.form-textarea:focus { border-color: var(--sam-black); }
+.field-error { color: var(--sam-sale); font-size: 12px; }
 
-.btn-submit-review {
-    margin-top: 10px; padding: 10px 24px;
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
-    color: #fff; border: none; border-radius: 8px;
-    font-size: 14px; font-weight: 700; cursor: pointer;
-    transition: opacity .2s, transform .15s, box-shadow .2s;
-    box-shadow: 0 4px 14px rgba(14,165,233,.3);
+.notice-box {
+    background: var(--sam-gray);
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 32px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--sam-muted);
 }
-.btn-submit-review:hover {
-    opacity: .9; transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(14,165,233,.4);
-}
+.notice-box a { color: var(--sam-blue); font-weight: 700; }
 
 /* ============================================================
    RELATED PRODUCTS
    ============================================================ */
-.related-section {
-    margin-top: 48px;
-    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 35%, #7dd3fc 65%, #38bdf8 100%);
-    border-radius: 16px; padding: 24px 24px 28px;
-    position: relative; overflow: hidden;
-    box-shadow: 0 4px 20px rgba(14,165,233,.18);
-}
-.related-section::before {
-    content: ''; position: absolute; top: -60px; right: -60px;
-    width: 200px; height: 200px; border-radius: 50%;
-    background: rgba(255,255,255,.18); pointer-events: none;
-}
-.related-section::after {
-    content: ''; position: absolute; bottom: -40px; left: -40px;
-    width: 140px; height: 140px; border-radius: 50%;
-    background: rgba(255,255,255,.14); pointer-events: none;
-}
-
+.related-section { margin-top: 80px; }
 .related-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 18px; position: relative; z-index: 1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
 }
-.related-header h2 { font-size: 16px; font-weight: 800; color: #0c4a6e; text-transform: uppercase; letter-spacing: .3px; margin: 0; padding-left: 10px; border-left: 3px solid #0ea5e9; }
-.related-header a {
-    font-size: 12.5px; color: #0c4a6e; font-weight: 700;
-    text-decoration: none;
-    background: rgba(255,255,255,.55); padding: 5px 12px;
-    border-radius: 20px; border: 1px solid rgba(255,255,255,.8);
-    transition: background .2s;
+.related-header h2 {
+    font-family: var(--sam-head);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--sam-black);
+    margin: 0;
 }
-.related-header a:hover { background: rgba(255,255,255,.8); }
+.related-header a { font-size: 14px; font-weight: 700; color: var(--sam-black); text-decoration: underline; }
 
-.related-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 14px;
-    position: relative; z-index: 1;
-}
-@media (max-width: 960px) { .related-grid { grid-template-columns: repeat(4, 1fr); } }
-@media (max-width: 640px) { .related-grid { grid-template-columns: repeat(2, 1fr); } }
+.related-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+@media (max-width: 1100px) { .related-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 640px)  { .related-grid { grid-template-columns: repeat(2, 1fr); } }
 
 .product-card {
-    display: flex; flex-direction: column; height: 100%;
-    border-radius: 12px; overflow: hidden;
-    text-decoration: none; color: inherit;
-    transition: transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s, border-color .22s;
-    position: relative;
-    background: rgba(255,255,255,.85);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,255,255,.7);
-    box-shadow: 0 2px 10px rgba(14,165,233,.08);
-    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--sam-gray);
+    border-radius: 16px;
+    padding: 20px;
+    text-decoration: none;
+    color: var(--sam-black);
+    transition: background .2s;
 }
-.product-card:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 14px 32px rgba(14,165,233,.22);
-    border-color: rgba(255,255,255,.95);
-}
-/* shine sweep */
-.product-card::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.4) 50%, transparent 60%);
-    transform: translateX(-120%); transition: transform .5s ease;
-    pointer-events: none; z-index: 3;
-}
-.product-card:hover::after { transform: translateX(120%); }
+.product-card:hover { background: #f1f1f1; }
 
 .product-card-img {
-    height: 140px;
-    background: linear-gradient(160deg, #f0f9ff, #e0f2fe);
+    height: 150px;
     display: flex; align-items: center; justify-content: center;
-    overflow: hidden; flex-shrink: 0;
+    margin-bottom: 16px;
+    flex-shrink: 0;
 }
 .product-card-img img {
-    width: 100%; height: 100%; object-fit: contain;
-    padding: 8px; box-sizing: border-box;
-    transition: transform .35s cubic-bezier(.16,1,.3,1);
+    max-width: 100%; max-height: 100%;
+    object-fit: contain;
+    transition: transform .3s cubic-bezier(.33,0,.3,1);
 }
-.product-card:hover .product-card-img img { transform: scale(1.07); }
+.product-card:hover .product-card-img img { transform: scale(1.05); }
 
-.product-card-body { padding: 12px; display: flex; flex-direction: column; flex: 1; }
+.product-card-body { display: flex; flex-direction: column; gap: 8px; flex: 1; }
 .product-card-name {
-    font-size: 12.5px; font-weight: 600; margin-bottom: 6px;
-    line-height: 1.4; min-height: 35px;
+    font-size: 15px; font-weight: 700; line-height: 1.45;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-    color: #0f4c75;
+    min-height: 44px; color: var(--sam-black);
 }
-.product-card-price { font-size: 14.5px; font-weight: 800; color: #0369a1; margin-top: auto; }
-.stars { font-size: 11px; color: #f59e0b; }
+.product-card-price { font-size: 16px; font-weight: 700; color: var(--sam-black); margin-top: auto; }
+.stars { font-size: 12px; color: var(--sam-star); letter-spacing: 1px; }
+.stars .muted { color: var(--sam-muted); letter-spacing: 0; }
 </style>
 @endpush
 
 @section('content')
-{{-- Sky Canvas --}}
-<canvas id="sky-canvas" aria-hidden="true"></canvas>
-
 <div class="product-detail-wrap">
 
     {{-- Breadcrumb --}}
@@ -596,44 +547,30 @@ body {
                     {{ $product->category->name }}
                 </a> /
             @endif
-            <span style="color:#0c4a6e;font-weight:600">{{ $product->name }}</span>
+            <span class="crumb-current">{{ $product->name }}</span>
         </div>
-        <form action="{{ route('compare.add', $product) }}" method="POST" style="margin:0">
-            @csrf
-            <button type="submit" style="
-                padding: 6px 14px;
-                background: rgba(255,255,255,.7);
-                backdrop-filter: blur(6px);
-                border: 1px solid rgba(125,211,252,.5);
-                border-radius: 8px;
-                color: #0369a1; font-size: 13px; font-weight: 600;
-                cursor: pointer; transition: all .2s;
-            ">
-                <i class="fas fa-code-compare"></i> So sánh
+
+        <div class="breadcrumb-actions">
+            <form action="{{ route('compare.add', $product) }}" method="POST" style="margin:0">
+                @csrf
+                <button type="submit" class="btn-icon-text">
+                    <i class="fas fa-code-compare"></i> So sánh
+                </button>
+            </form>
+
+            @auth
+            <button id="btnWishlistDetail"
+                class="btn-wishlist-detail {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'active' : '' }}"
+                data-url="{{ route('wishlist.toggle', $product->id) }}"
+                title="Yêu thích">
+                <i class="{{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'fas' : 'far' }} fa-heart"></i>
             </button>
-        </form>
-        {{-- Nút yêu thích --}}
-        @auth
-        <button id="btnWishlistDetail"
-            class="btn-wishlist-detail {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'active' : '' }}"
-            data-url="{{ route('wishlist.toggle', $product->id) }}"
-            title="Yêu thích">
-            <i class="{{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'fas' : 'far' }} fa-heart"></i>
-        </button>
-        @else
-        <a href="{{ route('login') }}" style="
-            padding: 6px 14px;
-            background: rgba(255,255,255,.7);
-            backdrop-filter: blur(6px);
-            border: 1px solid rgba(239,68,68,.4);
-            border-radius: 8px;
-            color: #ef4444; font-size: 13px; font-weight: 600;
-            cursor: pointer; transition: all .2s; text-decoration:none;
-            display:inline-flex;align-items:center;gap:6px;
-        ">
-            <i class="far fa-heart"></i> Yêu thích
-        </a>
-        @endauth
+            @else
+            <a href="{{ route('login') }}" class="btn-icon-text">
+                <i class="far fa-heart"></i> Yêu thích
+            </a>
+            @endauth
+        </div>
     </div>
 
     {{-- Flash messages --}}
@@ -661,12 +598,12 @@ body {
         <div class="gallery reveal-left">
             <div class="gallery-main">
                 @if($product->discount_percent > 0)
-                    <span class="discount-tag">-{{ $product->discount_percent }}%</span>
+                    <span class="discount-tag">Giảm {{ $product->discount_percent }}%</span>
                 @endif
                 @if($galleryImages->isNotEmpty())
                     <img src="{{ $galleryImages->first() }}" alt="{{ $product->name }}" id="mainImg">
                 @else
-                    <i class="fas fa-image fa-3x" style="color:#7dd3fc"></i>
+                    <i class="fas fa-image fa-3x" style="color:#c9c9c9"></i>
                 @endif
             </div>
             <div class="gallery-thumbs stagger-children">
@@ -681,19 +618,21 @@ body {
 
         {{-- Product Info --}}
         <div class="product-info reveal">
-            <div class="product-brand">{{ $product->brand->name ?? '' }}</div>
+            @if($product->brand)
+                <span class="product-brand">{{ $product->brand->name }}</span>
+            @endif
             <h1 class="product-name">{{ $product->name }}</h1>
 
             <div class="product-rating">
                 <span class="stars">
                     @for($i=1;$i<=5;$i++){{ $i <= round($product->avg_rating) ? '★' : '☆' }}@endfor
                 </span>
-                <span>{{ $product->avg_rating }}/5</span>
-                <span style="color:#bae6fd">|</span>
+                <span class="rating-num">{{ $product->avg_rating }}</span>
+                <span class="divider">|</span>
                 <span>{{ $product->reviews_count }} đánh giá</span>
                 @if($product->variants->isEmpty())
-                <span style="color:#bae6fd">|</span>
-                <span style="opacity:.7">{{ number_format($product->stock) }} còn lại</span>
+                <span class="divider">|</span>
+                <span>{{ number_format($product->stock) }} còn lại</span>
                 @endif
             </div>
 
@@ -714,7 +653,7 @@ body {
                 @endif
             </div>
 
-            <div id="stockDisplay" style="margin:8px 0 16px">
+            <div id="stockDisplay" style="margin:12px 0 28px">
                 @if($product->stock > 0)
                     <div class="in-stock"><i class="fas fa-check-circle"></i> Còn hàng ({{ $product->stock }})</div>
                 @else
@@ -724,28 +663,28 @@ body {
 
             @if($product->variants->isNotEmpty())
             <div id="variantSelector"></div>
-            <div id="variantAlert" style="display:none;color:#e53935;font-size:13px;margin-bottom:10px">
+            <div id="variantAlert" style="display:none;margin-top:14px">
                 <i class="fas fa-exclamation-triangle"></i> <span id="variantAlertText">Phiên bản này hiện không có sẵn.</span>
             </div>
             @endif
 
             {{-- Nút biến thể --}}
             <div class="action-btns" id="actionBtns" style="display:none">
-                <form action="{{ route('cart.add') }}" method="POST" style="flex:1" id="formAddCart">
+                <form action="{{ route('cart.add') }}" method="POST" id="formAddCart">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
                     <input type="hidden" name="variant_id" id="inputVariantId" value="">
                     <input type="hidden" name="quantity" value="1">
-                    <button type="submit" class="btn-add-cart" style="width:100%" id="btnAddCart">
+                    <button type="submit" class="cta cta--outline cta--lg btn-add-cart" id="btnAddCart">
                         <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
                     </button>
                 </form>
-                <form action="{{ route('cart.buy-now') }}" method="POST" style="flex:1" id="formBuyNow">
+                <form action="{{ route('cart.buy-now') }}" method="POST" id="formBuyNow">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
                     <input type="hidden" name="variant_id" id="inputVariantIdBuy" value="">
-                    <button type="submit" class="btn-buy-now" style="width:100%" id="btnBuyNow">
-                        <i class="fas fa-bolt"></i> Mua ngay
+                    <button type="submit" class="cta cta--black cta--lg btn-buy-now" id="btnBuyNow">
+                        Mua ngay
                     </button>
                 </form>
             </div>
@@ -754,23 +693,23 @@ body {
             @if($product->variants->isEmpty())
             <div class="action-btns">
                 @if($product->stock > 0)
-                <form action="{{ route('cart.add') }}" method="POST" style="flex:1">
+                <form action="{{ route('cart.add') }}" method="POST">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
                     <input type="hidden" name="quantity" value="1">
-                    <button type="submit" class="btn-add-cart" style="width:100%">
+                    <button type="submit" class="cta cta--outline cta--lg btn-add-cart">
                         <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
                     </button>
                 </form>
-                <form action="{{ route('cart.buy-now') }}" method="POST" style="flex:1">
+                <form action="{{ route('cart.buy-now') }}" method="POST">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
-                    <button type="submit" class="btn-buy-now" style="width:100%">
-                        <i class="fas fa-bolt"></i> Mua ngay
+                    <button type="submit" class="cta cta--black cta--lg btn-buy-now">
+                        Mua ngay
                     </button>
                 </form>
                 @else
-                <button class="btn-add-cart" style="width:100%;opacity:.5;cursor:not-allowed" disabled>
+                <button class="cta cta--outline cta--lg btn-add-cart" style="opacity:.4;cursor:not-allowed" disabled>
                     <i class="fas fa-ban"></i> Hết hàng
                 </button>
                 @endif
@@ -812,7 +751,7 @@ body {
 
     {{-- ===== TABS ===== --}}
     <div class="product-tabs reveal">
-        <button class="tab-btn active" onclick="switchTab(this,'tab-desc')">Mô tả sản phẩm</button>
+        <button class="tab-btn active" onclick="switchTab(this,'tab-desc')">Tổng quan</button>
         <button class="tab-btn" onclick="switchTab(this,'tab-specs')">Thông số kỹ thuật</button>
         <button class="tab-btn" onclick="switchTab(this,'tab-reviews')">
             Đánh giá ({{ $product->reviews_count }})
@@ -827,11 +766,11 @@ body {
                      chứa sẵn thẻ HTML (đoạn văn, danh sách, in đậm...). Nội dung này đã
                      được làm sạch (purify) phía server khi lưu ở admin, nên hiển thị
                      trực tiếp ở đây mà không escape để giữ định dạng. --}}
-                <div class="product-description-content" style="font-size:14px;line-height:1.8;color:#0369a1;max-width:800px">
+                <div class="product-description-content" style="font-size:15px;line-height:1.75;color:#333;max-width:800px">
                     {!! $product->description !!}
                 </div>
             @else
-                <p style="color:#7dd3fc;padding:24px 0">Chưa có mô tả cho sản phẩm này.</p>
+                <p class="empty-note">Chưa có mô tả cho sản phẩm này.</p>
             @endif
         </div>
     </div>
@@ -849,7 +788,7 @@ body {
                     @endforeach
                 </tbody>
             </table>
-            <p id="specsEmptyMsg" style="color:#7dd3fc;padding:24px 0;{{ $product->attributes->isNotEmpty() ? 'display:none' : '' }}">
+            <p class="empty-note" id="specsEmptyMsg" style="{{ $product->attributes->isNotEmpty() ? 'display:none' : '' }}">
                 Chưa có thông số kỹ thuật.
             </p>
         </div>
@@ -872,7 +811,7 @@ body {
                     @php $cnt = $ratingDistribution[$star] ?? 0; $pct = $product->reviews_count ? ($cnt/$product->reviews_count*100) : 0; @endphp
                     <div class="rating-bar-row">
                         <span style="width:14px;text-align:right">{{ $star }}</span>
-                        <i class="fas fa-star" style="color:#f59e0b;font-size:11px"></i>
+                        <i class="fas fa-star" style="color:var(--sam-star);font-size:11px"></i>
                         <div class="bar"><div class="bar-fill" style="width:{{ $pct }}%" data-width="{{ $pct }}"></div></div>
                         <span class="cnt">{{ $cnt }}</span>
                     </div>
@@ -894,47 +833,45 @@ body {
                 @endif
             </div>
             @empty
-            <p style="color:#7dd3fc;padding:16px 0">Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá!</p>
+            <p class="empty-note">Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá!</p>
             @endforelse
 
             @if($reviews->hasPages())
-            <div style="margin-top:16px">{{ $reviews->links() }}</div>
+            <div style="margin-top:20px">{{ $reviews->links() }}</div>
             @endif
 
             @auth
                 @if($canReview)
                 <div class="review-form">
-                    <h4><i class="fas fa-pen" style="margin-right:8px"></i>Viết đánh giá của bạn</h4>
+                    <h4>Viết đánh giá của bạn</h4>
                     <form action="{{ route('products.review', $product->id) }}" method="POST">
                         @csrf
-                        <div style="margin-bottom:12px">
-                            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;color:#0c4a6e">Chọn sao:</label>
+                        <div style="margin-bottom:18px">
+                            <label class="form-label">Chọn sao</label>
                             <div class="star-rating" id="starRating">
                                 @for($i=5;$i>=1;$i--)
                                 <input type="radio" name="rating" id="star{{ $i }}" value="{{ $i }}" {{ old('rating')==$i ? 'checked' : '' }}>
                                 <label for="star{{ $i }}">★</label>
                                 @endfor
                             </div>
-                            @error('rating')<span style="color:#e53935;font-size:12px">{{ $message }}</span>@enderror
+                            @error('rating')<span class="field-error">{{ $message }}</span>@enderror
                         </div>
                         <div>
-                            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;color:#0c4a6e">Nội dung (tuỳ chọn):</label>
+                            <label class="form-label">Nội dung (tuỳ chọn)</label>
                             <textarea name="content" rows="4" class="form-textarea"
                                       placeholder="Chia sẻ trải nghiệm của bạn...">{{ old('content') }}</textarea>
                         </div>
-                        <button type="submit" class="btn-submit-review">
-                            <i class="fas fa-paper-plane"></i> Gửi đánh giá
-                        </button>
+                        <button type="submit" class="cta cta--black" style="margin-top:16px">Gửi đánh giá</button>
                     </form>
                 </div>
                 @else
-                <div style="background:rgba(186,230,253,.3);border-radius:10px;padding:20px;margin-top:24px;text-align:center;font-size:14px;color:#0369a1">
-                    <i class="fas fa-info-circle"></i> Bạn cần mua và nhận hàng thành công sản phẩm này trước khi đánh giá.
+                <div class="notice-box">
+                    Bạn cần mua và nhận hàng thành công sản phẩm này trước khi đánh giá.
                 </div>
                 @endif
             @else
-            <div style="background:rgba(186,230,253,.3);border-radius:10px;padding:20px;margin-top:24px;text-align:center;font-size:14px;color:#0369a1">
-                <a href="{{ route('login') }}" style="color:#0c4a6e;font-weight:700">Đăng nhập</a> để viết đánh giá.
+            <div class="notice-box">
+                <a href="{{ route('login') }}">Đăng nhập</a> để viết đánh giá.
             </div>
             @endauth
         </div>
@@ -945,7 +882,7 @@ body {
     <div class="related-section reveal">
         <div class="related-header">
             <h2>Sản phẩm liên quan</h2>
-            <a href="{{ route('products.index', ['category' => $product->category_id]) }}">Xem tất cả →</a>
+            <a href="{{ route('products.index', ['category' => $product->category_id]) }}">Xem tất cả</a>
         </div>
         <div class="related-grid stagger-children">
             @foreach($relatedProducts as $p)
@@ -954,17 +891,17 @@ body {
                     @if($p->first_image)
                         <img src="{{ $p->first_image }}" alt="{{ $p->name }}" loading="lazy">
                     @else
-                        <i class="fas fa-image fa-2x" style="color:#7dd3fc"></i>
+                        <i class="fas fa-image fa-2x" style="color:#c9c9c9"></i>
                     @endif
                 </div>
                 <div class="product-card-body">
                     <div class="product-card-name">{{ $p->name }}</div>
-                    <div class="product-card-price">
-                        {{ $p->has_price_range ? 'Từ ' : '' }}{{ number_format($p->min_price) }}đ
-                    </div>
                     <div class="stars">
                         @for($i=1;$i<=5;$i++){{ $i <= round($p->avg_rating) ? '★' : '☆' }}@endfor
-                        <span style="color:#7dd3fc">({{ $p->reviews_count }})</span>
+                        <span class="muted">({{ $p->reviews_count }})</span>
+                    </div>
+                    <div class="product-card-price">
+                        {{ $p->has_price_range ? 'Từ ' : '' }}{{ number_format($p->min_price) }}đ
                     </div>
                 </div>
             </a>
@@ -994,7 +931,7 @@ function switchImage(thumb, src) {
     const img = document.getElementById('mainImg');
     if (img) {
         img.style.opacity = '0';
-        img.style.transform = 'scale(.96)';
+        img.style.transform = 'scale(.97)';
         setTimeout(() => {
             img.src = src;
             img.style.transition = 'opacity .3s, transform .3s';
@@ -1005,7 +942,7 @@ function switchImage(thumb, src) {
 }
 
 /* ============================================================
-   VARIANT SELECTION (logic giữ nguyên, chỉ đổi màu sắc CSS)
+   VARIANT SELECTION (logic giữ nguyên, chỉ đổi giao diện)
    ============================================================ */
 @php
 $variantsForJs = $product->variants->map(function($v) {
@@ -1157,8 +1094,8 @@ $baseGalleryForJs = $galleryImages->values()->toArray();
         });
 
         const soldOut = option.stock <= 0 || option.is_active === false;
-        if (addBtn) { addBtn.disabled = soldOut; addBtn.style.opacity = soldOut ? '.5' : '1'; }
-        if (buyBtn) { buyBtn.disabled = soldOut; buyBtn.style.opacity = soldOut ? '.5' : '1'; }
+        if (addBtn) { addBtn.disabled = soldOut; addBtn.style.opacity = soldOut ? '.4' : '1'; }
+        if (buyBtn) { buyBtn.disabled = soldOut; buyBtn.style.opacity = soldOut ? '.4' : '1'; }
 
         renderPrice(option.price, option.discount_percent);
         renderStock(option.stock);
@@ -1282,59 +1219,14 @@ $baseGalleryForJs = $galleryImages->values()->toArray();
 @endif
 
 /* ============================================================
-   ANIMATIONS
+   SCROLL REVEAL + WISHLIST
    ============================================================ */
 (function () {
-
-    /* ---- Canvas clouds ---- */
-    const canvas = document.getElementById('sky-canvas');
-    if (canvas) {
-        const ctx = canvas.getContext('2d');
-        let W, H, clouds = [];
-        function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize); resize();
-        function makeCloud() {
-            return { x: Math.random() * W * 1.2, y: Math.random() * H * .6,
-                     r: 50 + Math.random() * 110, dx: .12 + Math.random() * .2,
-                     alpha: .05 + Math.random() * .1 };
-        }
-        for (let i = 0; i < 8; i++) clouds.push(makeCloud());
-        function drawCloud(c) {
-            const g = ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,c.r);
-            g.addColorStop(0, `rgba(255,255,255,${c.alpha})`);
-            g.addColorStop(.6, `rgba(186,230,253,${c.alpha*.6})`);
-            g.addColorStop(1, 'rgba(186,230,253,0)');
-            ctx.beginPath(); ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
-            ctx.fillStyle = g; ctx.fill();
-            [-.5,.5].forEach(o => {
-                ctx.beginPath(); ctx.arc(c.x+c.r*.55*o, c.y-c.r*.18, c.r*.72, 0, Math.PI*2);
-                ctx.fillStyle = `rgba(255,255,255,${c.alpha*.7})`; ctx.fill();
-            });
-        }
-        (function anim() {
-            ctx.clearRect(0,0,W,H);
-            clouds.forEach(c => { drawCloud(c); c.x += c.dx; if (c.x-c.r > W*1.2) { c.x=-c.r*2; c.y=Math.random()*H*.6; } });
-            requestAnimationFrame(anim);
-        })();
-    }
-
-    /* ---- Bubbles ---- */
-    function spawnBubble() {
-        const el = document.createElement('div');
-        el.className = 'bubble';
-        const size = 4 + Math.random() * 14, dur = 8 + Math.random() * 12;
-        el.style.cssText = [`width:${size}px`,`height:${size}px`,`left:${Math.random()*100}vw`,
-            `bottom:-${size}px`,`animation-duration:${dur}s`,`animation-delay:${Math.random()*5}s`].join(';');
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), (dur+5)*1000);
-    }
-    for (let i = 0; i < 8; i++) spawnBubble();
-    setInterval(spawnBubble, 3500);
 
     /* ---- Scroll Reveal ---- */
     const io = new IntersectionObserver(entries => {
         entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); io.unobserve(e.target); } });
-    }, { threshold: 0.07, rootMargin: '0px 0px -30px 0px' });
+    }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
     document.querySelectorAll('.reveal, .reveal-left, .stagger-children').forEach(el => io.observe(el));
 
     /* ---- Rating bar animate on reveal ---- */
@@ -1352,50 +1244,6 @@ $baseGalleryForJs = $galleryImages->values()->toArray();
     }, { threshold: 0.3 });
     document.querySelectorAll('.rating-summary').forEach(el => barObserver.observe(el));
 
-    /* ---- Ripple on related product cards ---- */
-    document.querySelectorAll('.product-card').forEach(card => {
-        card.addEventListener('click', function (e) {
-            const rect = card.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height) * 1.6;
-            const ripple = document.createElement('span');
-            ripple.className = 'ripple-wave';
-            ripple.style.cssText = [`width:${size}px`,`height:${size}px`,
-                `left:${e.clientX-rect.left-size/2}px`,`top:${e.clientY-rect.top-size/2}px`].join(';');
-            card.appendChild(ripple);
-            ripple.addEventListener('animationend', () => ripple.remove());
-        });
-    });
-
-    /* ---- 3D Tilt on related product cards ---- */
-    document.querySelectorAll('.product-card').forEach(card => {
-        card.addEventListener('mousemove', function (e) {
-            const r = card.getBoundingClientRect();
-            const dx = (e.clientX-r.left-r.width/2)/(r.width/2);
-            const dy = (e.clientY-r.top-r.height/2)/(r.height/2);
-            card.style.transform = `perspective(600px) rotateX(${-dy*5}deg) rotateY(${dx*5}deg) translateY(-5px) scale(1.02)`;
-        });
-        card.addEventListener('mouseleave', function () {
-            card.style.transform = '';
-            card.style.transition = 'transform .4s cubic-bezier(.16,1,.3,1), box-shadow .22s, border-color .22s';
-            setTimeout(() => card.style.transition = '', 420);
-        });
-    });
-
-    /* ---- Thumb hover pulse ---- */
-    document.querySelectorAll('.thumb').forEach(t => {
-        t.addEventListener('mouseenter', () => t.style.transform = 'translateY(-3px) scale(1.06)');
-        t.addEventListener('mouseleave', () => t.style.transform = '');
-    });
-
-    /* ---- Benefit item stagger on load ---- */
-    const benefitItems = document.querySelectorAll('.benefit-item');
-    benefitItems.forEach((item, i) => {
-        item.style.opacity = '0';
-        item.style.transform = 'translateX(12px)';
-        item.style.transition = `opacity .5s ${i*.1}s, transform .5s ${i*.1}s`;
-        setTimeout(() => { item.style.opacity = '1'; item.style.transform = 'translateX(0)'; }, 400 + i*100);
-    });
-
     /* ---- Wishlist toggle (chi tiết sản phẩm) ---- */
     (function() {
         const btn = document.getElementById('btnWishlistDetail');
@@ -1406,17 +1254,17 @@ $baseGalleryForJs = $galleryImages->values()->toArray();
             if (!t) {
                 t = document.createElement('div');
                 t.id = '_wlToast';
-                t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:rgba(15,23,42,.92);color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;z-index:9999;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;pointer-events:none;';
-                t.innerHTML = '<i style="font-size:16px"></i><span></span>';
+                t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:#000;color:#fff;padding:12px 24px;border-radius:20px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:10px;z-index:9999;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;';
+                t.innerHTML = '<i style="font-size:15px"></i><span></span>';
                 document.body.appendChild(t);
             }
             const icon = t.querySelector('i');
-            icon.style.color = isErr ? '#f87171' : '#34d399';
             icon.className = isErr ? 'fas fa-times-circle' : 'fas fa-check-circle';
             t.querySelector('span').textContent = msg;
-            t.style.opacity = '1'; t.style.transform = 'translateY(0)';
+            t.style.opacity = '1';
+            t.style.transform = 'translateX(-50%) translateY(0)';
             clearTimeout(_t);
-            _t = setTimeout(() => { t.style.opacity='0'; t.style.transform='translateY(10px)'; }, 2800);
+            _t = setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(10px)'; }, 2800);
         }
 
         btn.addEventListener('click', function() {
@@ -1438,7 +1286,7 @@ $baseGalleryForJs = $galleryImages->values()->toArray();
             .then(data => {
                 this.classList.toggle('active', data.wishlisted);
                 icon.className = data.wishlisted ? 'fas fa-heart' : 'far fa-heart';
-                showToast(data.wishlisted ? '♥ Đã thêm vào yêu thích' : 'Nhấp khỏi yêu thích');
+                showToast(data.wishlisted ? 'Đã thêm vào yêu thích' : 'Đã xóa khỏi yêu thích');
             })
             .catch(() => {
                 this.classList.toggle('active', wasActive);

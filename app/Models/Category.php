@@ -16,6 +16,18 @@ class Category extends Model
 
     protected $casts = ['is_active' => 'boolean'];
 
+    /** URL đầy đủ của logo (tự nối storage nếu chỉ lưu path tương đối) */
+    public function getLogoUrlAttribute(): ?string
+    {
+        if (!$this->logo) {
+            return null;
+        }
+
+        return str_starts_with($this->logo, 'http://') || str_starts_with($this->logo, 'https://')
+            ? $this->logo
+            : asset('storage/' . $this->logo);
+    }
+
     // ─── Scopes ───────────────────────────────────────────────────
 
     public function scopeCategories($query)
