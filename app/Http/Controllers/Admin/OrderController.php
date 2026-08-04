@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Payment;
 use App\Models\Voucher;
 use App\Models\Product;
 use App\Models\Address;
@@ -15,6 +16,35 @@ use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
+    /**
+     * Ghi/cập nhật bản ghi thanh toán (bảng payments) tương ứng với
+     * payment_status hiện tại của đơn — gọi mỗi khi payment_status thay đổi
+     * từ phía quản trị (đổi trạng thái, huỷ đơn, chỉnh sửa đơn...).
+     */
+    private function syncPaymentRecord(Order $order, string $newPaymentStatus): void
+    {
+        $statusMap = [
+            'unpaid'   => 'pending',
+            'paid'     => 'success',
+            'refunded' => 'refunded',
+        ];
+
+        $payment = $order->payments()->latest('id')->first();
+
+        $data = [
+            'gateway' => $order->payment_method,
+            'amount'  => $order->total,
+            'status'  => $statusMap[$newPaymentStatus] ?? 'pending',
+            'paid_at' => $newPaymentStatus === 'paid' ? now() : ($payment->paid_at ?? null),
+        ];
+
+        if ($payment) {
+            $payment->update($data);
+        } else {
+            $order->payments()->create($data);
+        }
+    }
+
     // ─── Danh sách đơn hàng ──────────────────────────────────
     public function index(Request $request)
     {
@@ -108,7 +138,7 @@ class OrderController extends Controller
                 'ward'      => $request->address_ward,
                 'district'  => $request->address_district,
                 'province'  => $request->address_province,
-                'is_default'=> false,
+                'is_default' => false,
             ]);
             $addressId = $address->id;
         }
@@ -158,7 +188,7 @@ class OrderController extends Controller
                 'payment_method' => $request->payment_method,
                 'payment_status' => $request->payment_status,
                 'subtotal'       => $subtotal,
-                'discount_amount'=> $discount,
+                'discount_amount' => $discount,
                 'total'          => $total,
                 'note'           => $request->note,
             ]);
@@ -171,10 +201,12 @@ class OrderController extends Controller
                     $product->decrement('stock', $item['quantity']);
                 }
             }
+
+            $this->syncPaymentRecord($order, $order->payment_status);
         });
 
         return redirect()->route('admin.orders.show', $order)
-                         ->with('success', 'Đã tạo đơn hàng mới (đã giao).');
+            ->with('success', 'Đã tạo đơn hàng mới (đã giao).');
     }
 
     // ─── Chi tiết đơn hàng ────────────────────────────────────
@@ -212,6 +244,8 @@ class OrderController extends Controller
             'voucher_id'     => $request->voucher_id,
             'note'           => $request->note,
         ]);
+
+        $this->syncPaymentRecord($order, $request->payment_status);
 
         return redirect()->route('admin.orders.show', $order)
             ->with('success', 'Đã cập nhật đơn hàng.');
@@ -265,6 +299,11 @@ class OrderController extends Controller
         }
 
         $order->save();
+
+        if ($order->wasChanged('payment_status')) {
+            $this->syncPaymentRecord($order, $order->payment_status);
+        }
+
         return back()->with('success', 'Cập nhật trạng thái thành công.');
     }
 
@@ -282,6 +321,8 @@ class OrderController extends Controller
             $order->status = 'cancelled';
             $order->payment_status = 'refunded';
             $order->save();
+
+            $this->syncPaymentRecord($order, 'refunded');
         });
 
         return redirect()->route('admin.orders.show', $order)

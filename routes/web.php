@@ -22,6 +22,8 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 // ─── TRANG CHỦ ────────────────────────────────────────────────────
@@ -77,6 +79,17 @@ Route::post('/profile/order/{order}/review', [ReviewController::class, 'store'])
 
     // ── Đánh giá của tôi ──
     Route::get('/profile/review', [ReviewController::class, 'index'])->name('profile.review');
+
+    // ── Yêu thích ──
+    Route::get('/profile/yeu-thich', [WishlistController::class, 'index'])->name('profile.wishlist');
+    Route::post('/yeu-thich/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+
+    // ── Thông báo ──
+    Route::prefix('thong-bao')->name('notifications.')->group(function () {
+        Route::get('/',           [NotificationController::class, 'list'])->name('list');
+        Route::post('/{id}/doc', [NotificationController::class, 'markRead'])->name('mark-read');
+        Route::post('/doc-het',  [NotificationController::class, 'markAllRead'])->name('mark-all-read');
+    });
 });
 
 // ─── ĐƠN HÀNG (ngoài trang tài khoản) ──────────────────────────────

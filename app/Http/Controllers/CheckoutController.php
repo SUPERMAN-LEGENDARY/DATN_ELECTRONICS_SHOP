@@ -204,12 +204,12 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Tạo đơn hàng + chi tiết đơn hàng + trừ tồn kho (transaction).
+     * Tạo đơn hàng + chi tiết đơn hàng + bản ghi thanh toán + trừ tồn kho (transaction).
      */
-    private function createOrder(array $orderPayload, array $items, string $paymentStatus): ?Order
+    private function createOrder(array $orderPayload, array $items, string $paymentStatus, array $paymentInfo = []): ?Order
     {
         try {
-            return DB::transaction(function () use ($orderPayload, $items, $paymentStatus) {
+            return DB::transaction(function () use ($orderPayload, $items, $paymentStatus, $paymentInfo) {
                 $order = Order::create([
                     'user_id'         => $orderPayload['user_id'],
                     'address_id'      => $orderPayload['address_id'],
@@ -243,6 +243,16 @@ class CheckoutController extends Controller
                 if ($orderPayload['voucher_id']) {
                     Voucher::where('id', $orderPayload['voucher_id'])->increment('used_count');
                 }
+
+                // Ghi lại giao dịch thanh toán (COD: chờ thu tiền khi giao;
+                // MoMo: đã thanh toán thành công ngay tại thời điểm tạo đơn)
+                $order->payments()->create([
+                    'gateway'        => $orderPayload['payment_method'],
+                    'transaction_id' => $paymentInfo['transaction_id'] ?? null,
+                    'amount'         => $orderPayload['total'],
+                    'status'         => $paymentInfo['status'] ?? ($paymentStatus === 'paid' ? 'success' : 'pending'),
+                    'paid_at'        => $paymentInfo['paid_at'] ?? ($paymentStatus === 'paid' ? now() : null),
+                ]);
 
                 return $order;
             });
@@ -346,7 +356,11 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'Thanh toán thành công nhưng giỏ hàng đã thay đổi, vui lòng liên hệ hỗ trợ.');
         }
 
-        $order = $this->createOrder($orderPayload, $items, 'paid');
+        $order = $this->createOrder($orderPayload, $items, 'paid', [
+            'status'         => 'success',
+            'transaction_id' => $request->input('transId'),
+            'paid_at'        => now(),
+        ]);
 
         session()->forget(['pending_order', 'momo_order_id']);
 

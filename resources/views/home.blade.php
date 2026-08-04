@@ -384,7 +384,7 @@
     transition: all .25s var(--sm-ease);
 }
 .sm-wish:hover { background: var(--sm-black); color: #fff; }
-.sm-wish.on { background: #d0021b; color: #fff; border-color: #d0021b; }
+.sm-wish.on, .sm-wish.active { background: #d0021b; color: #fff; border-color: #d0021b; }
 .sm-product-brand { font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #8c8c8c; min-height: 15px; }
 .sm-product-name {
     font-size: 15px; font-weight: 700; line-height: 1.35; color: var(--sm-black);
@@ -864,7 +864,18 @@
                 @foreach($suggestedProducts as $product)
                 <a href="{{ route('products.show', ['slug' => $product->slug, 'from' => 'suggestion', 'via' => 'homepage']) }}" class="sm-product">
                     <div class="sm-product-media">
-                        <button type="button" class="sm-wish" aria-label="Yêu thích"><i class="bi bi-heart"></i></button>
+                        @auth
+                        <button type="button" class="sm-wish sm-wish-ajax {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'active' : '' }}"
+                            data-product-id="{{ $product->id }}"
+                            data-url="{{ route('wishlist.toggle', $product->id) }}"
+                            aria-label="Yêu thích">
+                            <i class="bi {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'bi-heart-fill' : 'bi-heart' }}"></i>
+                        </button>
+                        @else
+                        <a href="{{ route('login') }}" class="sm-wish" aria-label="Yêu thích" onclick="event.stopPropagation()">
+                            <i class="bi bi-heart"></i>
+                        </a>
+                        @endauth
                         @if($product->first_image)
                         <img src="{{ $product->first_image }}" alt="{{ $product->name }}" loading="lazy">
                         @else
@@ -902,7 +913,18 @@
                 @forelse($newProducts as $product)
                 <a href="{{ route('products.show', $product->slug) }}" class="sm-product">
                     <div class="sm-product-media">
-                        <button type="button" class="sm-wish" aria-label="Yêu thích"><i class="bi bi-heart"></i></button>
+                        @auth
+                        <button type="button" class="sm-wish sm-wish-ajax {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'active' : '' }}"
+                            data-product-id="{{ $product->id }}"
+                            data-url="{{ route('wishlist.toggle', $product->id) }}"
+                            aria-label="Yêu thích">
+                            <i class="bi {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'bi-heart-fill' : 'bi-heart' }}"></i>
+                        </button>
+                        @else
+                        <a href="{{ route('login') }}" class="sm-wish" aria-label="Yêu thích" onclick="event.stopPropagation()">
+                            <i class="bi bi-heart"></i>
+                        </a>
+                        @endauth
                         @if($product->first_image)
                         <img src="{{ $product->first_image }}" alt="{{ $product->name }}" loading="lazy">
                         @else
@@ -1302,12 +1324,62 @@
     })();
 
     /* ----------------------------------------------------------
-       9. WISHLIST (toggle nhanh, không rời trang)
+       9. WISHLIST (toggle AJAX)
     ---------------------------------------------------------- */
-    document.querySelectorAll('.sm-wish').forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
+    let _hmToastTimer;
+    function showHomeWishToast(msg, isErr) {
+        let t = document.getElementById('_homeWlToast');
+        if (!t) {
+            t = document.createElement('div');
+            t.id = '_homeWlToast';
+            t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:rgba(15,23,42,.92);color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;z-index:9999;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;pointer-events:none;';
+            t.innerHTML = '<i style="font-size:16px"></i><span></span>';
+            document.body.appendChild(t);
+        }
+        const icon = t.querySelector('i');
+        icon.style.color = isErr ? '#f87171' : '#34d399';
+        icon.className = isErr ? 'fas fa-times-circle' : 'fas fa-check-circle';
+        t.querySelector('span').textContent = msg;
+        t.style.opacity = '1'; t.style.transform = 'translateY(0)';
+        clearTimeout(_hmToastTimer);
+        _hmToastTimer = setTimeout(() => { t.style.opacity='0'; t.style.transform='translateY(10px)'; }, 2800);
+    }
+
+    // AJAX-enabled buttons
+    document.querySelectorAll('.sm-wish-ajax').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault(); e.stopPropagation();
+            const icon = this.querySelector('i');
+            const wasActive = this.classList.contains('active');
+
+            this.classList.toggle('active', !wasActive);
+            icon.className = wasActive ? 'bi bi-heart' : 'bi bi-heart-fill';
+
+            fetch(this.dataset.url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+            })
+            .then(r => r.json())
+            .then(data => {
+                this.classList.toggle('active', data.wishlisted);
+                icon.className = data.wishlisted ? 'bi bi-heart-fill' : 'bi bi-heart';
+                showHomeWishToast(data.wishlisted ? '♥ Đã thêm vào yêu thích' : 'Nhấp khỏi yêu thích');
+            })
+            .catch(() => {
+                this.classList.toggle('active', wasActive);
+                icon.className = wasActive ? 'bi bi-heart-fill' : 'bi bi-heart';
+                showHomeWishToast('Có lỗi, vui lòng thử lại', true);
+            });
+        });
+    });
+
+    // Legacy static buttons (fallback, gữ lại cho tương thích)
+    document.querySelectorAll('.sm-wish:not(.sm-wish-ajax)').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault(); e.stopPropagation();
             const on = btn.classList.toggle('on');
             btn.innerHTML = on ? '<i class="bi bi-heart-fill"></i>' : '<i class="bi bi-heart"></i>';
         });

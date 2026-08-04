@@ -39,9 +39,15 @@
         </a>
 
         <a href="{{ route('profile.review') }}"
-            class="list-group-item list-group-item-action">
+            class="list-group-item list-group-item-action {{ request()->routeIs('profile.review') ? 'active' : '' }}">
             <i class="far fa-star"></i>
             <span>Đánh giá của tôi</span>
+        </a>
+
+        <a href="{{ route('profile.wishlist') }}"
+            class="list-group-item list-group-item-action {{ request()->routeIs('profile.wishlist') ? 'active' : '' }}">
+            <i class="fas fa-heart"></i>
+            <span>Sản phẩm yêu thích</span>
         </a>
 
         <form action="{{ route('logout') }}" method="POST">

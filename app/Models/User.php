@@ -69,4 +69,24 @@ class User extends Authenticatable
     {
         return $this->hasMany(Address::class);
     }
+
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function wishlistProducts()
+    {
+        return $this->belongsToMany(Product::class, 'wishlists')->withPivot('created_at');
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class)->latest('created_at');
+    }
+
+    public function unreadNotificationsCount(): int
+    {
+        return $this->notifications()->where('is_read', false)->count();
+    }
 }

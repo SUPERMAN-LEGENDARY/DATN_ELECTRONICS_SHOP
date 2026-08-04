@@ -48,4 +48,17 @@ class Order extends Model
     {
         return $this->belongsTo(Address::class);
     }
+
+    // Toàn bộ lịch sử giao dịch thanh toán của đơn hàng (có thể có nhiều lần thử,
+    // ví dụ MoMo thất bại rồi khách thử lại)
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    // Giao dịch thanh toán mới nhất — dùng khi chỉ cần biết trạng thái hiện tại
+    public function payment()
+    {
+        return $this->hasOne(Payment::class)->latestOfMany();
+    }
 }

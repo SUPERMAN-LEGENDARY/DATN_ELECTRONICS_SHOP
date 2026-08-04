@@ -612,6 +612,28 @@ body {
                 <i class="fas fa-code-compare"></i> So sánh
             </button>
         </form>
+        {{-- Nút yêu thích --}}
+        @auth
+        <button id="btnWishlistDetail"
+            class="btn-wishlist-detail {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'active' : '' }}"
+            data-url="{{ route('wishlist.toggle', $product->id) }}"
+            title="Yêu thích">
+            <i class="{{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'fas' : 'far' }} fa-heart"></i>
+        </button>
+        @else
+        <a href="{{ route('login') }}" style="
+            padding: 6px 14px;
+            background: rgba(255,255,255,.7);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(239,68,68,.4);
+            border-radius: 8px;
+            color: #ef4444; font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: all .2s; text-decoration:none;
+            display:inline-flex;align-items:center;gap:6px;
+        ">
+            <i class="far fa-heart"></i> Yêu thích
+        </a>
+        @endauth
     </div>
 
     {{-- Flash messages --}}
@@ -1373,6 +1395,58 @@ $baseGalleryForJs = $galleryImages->values()->toArray();
         item.style.transition = `opacity .5s ${i*.1}s, transform .5s ${i*.1}s`;
         setTimeout(() => { item.style.opacity = '1'; item.style.transform = 'translateX(0)'; }, 400 + i*100);
     });
+
+    /* ---- Wishlist toggle (chi tiết sản phẩm) ---- */
+    (function() {
+        const btn = document.getElementById('btnWishlistDetail');
+        if (!btn) return;
+        let _t;
+        function showToast(msg, isErr) {
+            let t = document.getElementById('_wlToast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = '_wlToast';
+                t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:rgba(15,23,42,.92);color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;z-index:9999;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;pointer-events:none;';
+                t.innerHTML = '<i style="font-size:16px"></i><span></span>';
+                document.body.appendChild(t);
+            }
+            const icon = t.querySelector('i');
+            icon.style.color = isErr ? '#f87171' : '#34d399';
+            icon.className = isErr ? 'fas fa-times-circle' : 'fas fa-check-circle';
+            t.querySelector('span').textContent = msg;
+            t.style.opacity = '1'; t.style.transform = 'translateY(0)';
+            clearTimeout(_t);
+            _t = setTimeout(() => { t.style.opacity='0'; t.style.transform='translateY(10px)'; }, 2800);
+        }
+
+        btn.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            const wasActive = this.classList.contains('active');
+
+            // Optimistic UI
+            this.classList.toggle('active', !wasActive);
+            icon.className = wasActive ? 'far fa-heart' : 'fas fa-heart';
+
+            fetch(this.dataset.url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+            })
+            .then(r => r.json())
+            .then(data => {
+                this.classList.toggle('active', data.wishlisted);
+                icon.className = data.wishlisted ? 'fas fa-heart' : 'far fa-heart';
+                showToast(data.wishlisted ? '♥ Đã thêm vào yêu thích' : 'Nhấp khỏi yêu thích');
+            })
+            .catch(() => {
+                this.classList.toggle('active', wasActive);
+                icon.className = wasActive ? 'fas fa-heart' : 'far fa-heart';
+                showToast('Có lỗi, vui lòng thử lại', true);
+            });
+        });
+    })();
 
 })();
 </script>

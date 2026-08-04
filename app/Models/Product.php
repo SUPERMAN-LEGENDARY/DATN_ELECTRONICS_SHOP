@@ -113,6 +113,11 @@ use HasFactory, SoftDeletes;
         return $this->hasMany(Review::class)->where('is_visible', true);
     }
 
+    public function wishlistUsers()
+    {
+        return $this->belongsToMany(User::class, 'wishlists')->withPivot('created_at');
+    }
+
     // ─── Accessors ────────────────────────────────────────────────
 
     /** Giá niêm yết (dùng để hiển thị giá gạch ngang) */

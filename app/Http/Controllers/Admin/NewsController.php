@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\News;
 use App\Models\NewsCategory;
+use App\Models\Notification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -64,7 +65,12 @@ class NewsController extends Controller
             $data['thumbnail'] = $request->file('thumbnail')->store('news', 'public');
         }
 
-        News::create($data);
+        $news = News::create($data);
+
+        // → Gửi thông báo nếu tin được đăng luôn (is_active = true)
+        if ($news->is_active) {
+            Notification::dispatchNewsNotification($news);
+        }
 
         return redirect()->route('admin.news.index')->with('success', 'Đã thêm bài viết thành công.');
     }
@@ -100,7 +106,13 @@ class NewsController extends Controller
             $data['thumbnail'] = $request->file('thumbnail')->store('news', 'public');
         }
 
+        $wasActive = $news->is_active;   // trạng thái trước khi update
         $news->update($data);
+
+        // → Gửi thông báo khi bài vừa được bật active lần đầu
+        if (!$wasActive && $news->is_active) {
+            Notification::dispatchNewsNotification($news);
+        }
 
         return redirect()->route('admin.news.index')->with('success', 'Đã cập nhật bài viết.');
     }
@@ -177,6 +189,12 @@ class NewsController extends Controller
     public function toggleActive(News $news): RedirectResponse
     {
         $news->update(['is_active' => ! $news->is_active]);
+
+        // → Gửi thông báo khi vừa bật hiển thị
+        if ($news->is_active) {
+            Notification::dispatchNewsNotification($news);
+        }
+
         return back()->with('success', $news->is_active ? 'Đã hiển thị bài viết.' : 'Đã ẩn bài viết.');
     }
 
