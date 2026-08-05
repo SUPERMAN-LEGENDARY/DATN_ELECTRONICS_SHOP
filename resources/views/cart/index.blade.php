@@ -7,8 +7,8 @@
    DESIGN TOKENS
    ============================================================ */
 .cart-page {
-    --samsung-gray-dark:  #e5e5e5;
-    --samsung-gray-dark-hover:  #e5e5e5;
+    --samsung-gray-dark:  #000000;   /* trước: #e5e5e5 → đổi thành đen */
+    --samsung-gray-dark-hover:  #333333;   /* trước: #e5e5e5 → đổi thành xám đậm để có hiệu ứng hover */
     --black:              #000000;
     --gray-100:           #F4F4F4;
     --gray-200:           #E5E5E5;

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ContactRequest;
 use App\Mail\ContactMail;
+use App\Models\Category;
 use App\Models\Contact;
 use Illuminate\Support\Facades\Mail;
 
@@ -14,7 +15,15 @@ class ContactController extends Controller
      */
     public function index()
     {
-        return view('contact.index');
+    // Lấy thương hiệu để hiển thị ở khu vực icon
+    // "Chúng tôi có thể giúp gì cho bạn?"
+    $brands = Category::brands()
+        ->active()
+        ->orderBy('id')
+        ->take(6)
+        ->get();
+
+        return view('contact.index', compact('brands'));
     }
 
     /**

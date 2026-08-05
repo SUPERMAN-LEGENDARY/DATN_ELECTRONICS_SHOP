@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Đăng nhập – ElectronicShop</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@800&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -13,9 +15,15 @@
             padding: 0
         }
 
+        :root {
+            --sm-black: #000000;
+            --sm-white: #ffffff;
+            --sm-ease: cubic-bezier(.4, 0, .2, 1);
+        }
+
         body {
             font-family: 'Segoe UI', sans-serif;
-            background: #f0f4f8;
+            background: #f4f4f4;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -31,34 +39,34 @@
         .auth-card {
             background: #fff;
             border-radius: 12px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, .10);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, .08);
             overflow: hidden
         }
 
         .auth-header {
-            background: #0D1B2A;
+            background: #000000;
             padding: 28px 32px 24px;
             text-align: center
         }
 
-        .auth-header a {
-            color: #fff;
+        /* Logo trong khung viền – y hệt logo SAMSUNG (nền đen: viền/chữ trắng) */
+        .sm-logo {
+            display: inline-flex; align-items: center; justify-content: center;
+            border: 1.5px solid var(--sm-white);
+            padding: 5px 12px;
+            font-family: 'Manrope', sans-serif;
+            font-weight: 800; font-size: 14px; letter-spacing: .14em;
+            color: var(--sm-white); text-transform: uppercase;
+            white-space: nowrap; flex-shrink: 0;
             text-decoration: none;
-            font-size: 22px;
-            font-weight: 800;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px
+            transition: background .25s var(--sm-ease), color .25s var(--sm-ease);
         }
-
-        .auth-header a span {
-            color: #1E88E5
-        }
+        .sm-logo:hover { background: var(--sm-white); color: var(--sm-black); }
 
         .auth-header p {
             color: rgba(255, 255, 255, .6);
             font-size: 13px;
-            margin-top: 6px
+            margin-top: 12px
         }
 
         .auth-body {
@@ -102,8 +110,8 @@
         }
 
         .input-icon input:focus {
-            border-color: #1E88E5;
-            box-shadow: 0 0 0 3px rgba(30, 136, 229, .12)
+            border-color: #000000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, .1)
         }
 
         .error-msg {
@@ -121,7 +129,7 @@
         }
 
         .form-check input {
-            accent-color: #1E88E5;
+            accent-color: #000000;
             width: 15px;
             height: 15px
         }
@@ -129,7 +137,7 @@
         .btn-main {
             width: 100%;
             padding: 12px;
-            background: #1565C0;
+            background: #000000;
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -141,7 +149,7 @@
         }
 
         .btn-main:hover {
-            background: #0D47A1
+            background: #333333
         }
 
         .auth-footer {
@@ -152,7 +160,7 @@
         }
 
         .auth-footer a {
-            color: #1565C0;
+            color: #000000;
             font-weight: 600;
             text-decoration: none
         }
@@ -168,18 +176,19 @@
 
         .forgot-link a {
             font-size: 12px;
-            color: #1565C0;
+            color: #555555;
             text-decoration: none
         }
 
         .forgot-link a:hover {
-            text-decoration: underline
+            text-decoration: underline;
+            color: #000000
         }
 
         .alert-status {
-            background: #E3F2FD;
-            border: 1px solid #90CAF9;
-            color: #1565C0;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            color: #333333;
             padding: 10px 14px;
             border-radius: 8px;
             font-size: 13px;
@@ -198,9 +207,7 @@
     <div class="auth-wrap">
         <div class="auth-card">
             <div class="auth-header">
-                <a href="{{ route('home') }}">
-                    <i class="fas fa-bolt"></i>Electronic<span>Shop</span>
-                </a>
+                <a href="{{ route('home') }}" class="sm-logo">ElectronicShop</a>
                 <p>Đăng nhập vào tài khoản của bạn</p>
             </div>
             <div class="auth-body">

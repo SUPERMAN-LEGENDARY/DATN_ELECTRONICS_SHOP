@@ -329,21 +329,32 @@ body {
    ============================================================ */
 .pagination-wrap { margin-top: 24px; }
 .pagination-wrap .pagination .page-link {
-    border: 1px solid #ebebeb;
-    color: #333333;
-    background: #ffffff;
+    border: 1px solid #ebebeb !important;
+    color: #333333 !important;
+    background: #ffffff !important;
     border-radius: 10px !important;
     margin: 0 4px;
     font-weight: 600; font-size: 14px;
     transition: all .2s;
+    box-shadow: none !important;
 }
-.pagination-wrap .pagination .page-link:hover {
-    background: #f4f4f4; color: #000000; border-color: #cccccc;
+.pagination-wrap .pagination .page-link:hover,
+.pagination-wrap .pagination .page-link:focus {
+    background: #f4f4f4 !important;
+    color: #000000 !important;
+    border-color: #cccccc !important;
+    box-shadow: none !important;
 }
 .pagination-wrap .pagination .page-item.active .page-link {
-    background: #000000;
-    border-color: #000000; color: #ffffff;
-    box-shadow: 0 4px 10px rgba(0,0,0,.15);
+    background: #000000 !important;
+    border-color: #000000 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,.15) !important;
+}
+.pagination-wrap .pagination .page-item.disabled .page-link {
+    color: #bbbbbb !important;
+    background: #ffffff !important;
+    border-color: #ebebeb !important;
 }
 
 /* ============================================================
@@ -564,9 +575,9 @@ body {
         </div>{{-- /.stagger-orders --}}
 
         {{-- Pagination --}}
-        <div class="pagination-wrap reveal">
-            {{ $orders->links() }}
-        </div>
+            <div class="pagination-wrap reveal">
+                {{ $orders->links('pagination::bootstrap-5') }}
+            </div>
 
     </div>{{-- /.content --}}
 </div>{{-- /.orders-container --}}

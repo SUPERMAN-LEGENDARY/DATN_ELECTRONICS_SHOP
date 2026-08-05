@@ -5,35 +5,11 @@
 @push('styles')
 <style>
 /* ============================================================
-   PAGE BACKGROUND — sky gradient (khớp trang chủ)
+   PAGE BACKGROUND — Samsung Style (trắng / xám nhạt)
    ============================================================ */
 body {
-    background: linear-gradient(180deg,
-        #bae6fd 0%,
-        #e0f2fe 18%,
-        #f0f9ff 38%,
-        #e0f2fe 62%,
-        #bae6fd 100%) fixed;
-    background-attachment: fixed;
-}
-
-#sky-canvas {
-    position: fixed; inset: 0;
-    width: 100%; height: 100%;
-    pointer-events: none; z-index: 0; opacity: .42;
-}
-
-.bubble {
-    position: fixed; border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,.8), rgba(186,230,253,.3));
-    border: 1px solid rgba(125,211,252,.4);
-    pointer-events: none; z-index: 0;
-    animation: bubbleRise linear infinite;
-}
-@keyframes bubbleRise {
-    0%   { transform: translateY(0) scale(1);    opacity: .7; }
-    80%  { opacity: .4; }
-    100% { transform: translateY(-110vh) scale(1.1); opacity: 0; }
+    background: #f4f4f4;
+    color: #000000;
 }
 
 /* ============================================================
@@ -57,7 +33,7 @@ body {
 /* ripple */
 .ripple-wave {
     position: absolute; border-radius: 50%;
-    background: rgba(125,211,252,.25);
+    background: rgba(0,0,0,.12);
     transform: scale(0); animation: rippleOut .6s linear;
     pointer-events: none; z-index: 10;
 }
@@ -69,7 +45,6 @@ body {
 .compare-page {
     min-height: 100vh;
     padding: 36px 0 70px;
-    position: relative; z-index: 1;
 }
 
 /* ============================================================
@@ -78,24 +53,24 @@ body {
 .compare-title {
     text-align: center;
     font-size: 32px; font-weight: 800;
-    color: #0c4a6e; margin-bottom: 32px;
+    color: #000000; margin-bottom: 32px;
     display: flex; align-items: center; justify-content: center; gap: 12px;
 }
 .compare-title i {
     width: 52px; height: 52px; border-radius: 14px;
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
+    background: #000000;
     color: #fff; font-size: 22px;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 16px rgba(14,165,233,.35);
+    box-shadow: 0 4px 16px rgba(0,0,0,.15);
 }
 
 /* ============================================================
-   ALERT
+   ALERT (giữ màu xanh lá — mang ý nghĩa thành công)
    ============================================================ */
 .alert-success {
     display: flex; align-items: center; gap: 10px;
-    background: rgba(220,252,231,.9); backdrop-filter: blur(8px);
-    color: #166534; border: 1px solid rgba(187,247,208,.8);
+    background: #e6f4ea;
+    color: #137333; border: 1px solid #ceead6;
     padding: 14px 18px; border-radius: 12px;
     margin-bottom: 28px; font-weight: 600; font-size: 14px;
     animation: alertIn .4s cubic-bezier(.16,1,.3,1);
@@ -106,18 +81,15 @@ body {
    EMPTY STATE
    ============================================================ */
 .compare-empty {
-    background: rgba(255,255,255,.82);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(186,230,253,.6);
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
     border-radius: 20px; padding: 80px 30px;
     text-align: center;
-    box-shadow: 0 6px 28px rgba(14,165,233,.12);
+    box-shadow: 0 6px 24px rgba(0,0,0,.05);
 }
 .compare-empty-icon {
     font-size: 76px;
-    background: linear-gradient(135deg, #0369a1, #38bdf8);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    color: #000000;
     display: block; margin-bottom: 20px;
     animation: emptyFloat 3s ease-in-out infinite;
 }
@@ -125,23 +97,23 @@ body {
     0%,100% { transform: translateY(0);  }
     50%      { transform: translateY(-12px); }
 }
-.compare-empty h2 { font-size: 28px; font-weight: 800; color: #0c4a6e; margin-bottom: 12px; }
-.compare-empty p  { color: #0369a1; margin-bottom: 24px; opacity: .8; }
+.compare-empty h2 { font-size: 28px; font-weight: 800; color: #000; margin-bottom: 12px; }
+.compare-empty p  { color: #666; margin-bottom: 24px; }
 
 /* ============================================================
    PRIMARY BUTTON (shared)
    ============================================================ */
 .btn-primary {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
+    background: #000000;
     color: #fff; padding: 12px 28px; border-radius: 10px;
     text-decoration: none; font-weight: 700; font-size: 14px;
     transition: opacity .2s, transform .18s, box-shadow .2s;
-    box-shadow: 0 4px 16px rgba(14,165,233,.35);
+    box-shadow: 0 4px 16px rgba(0,0,0,.15);
 }
 .btn-primary:hover {
-    opacity: .9; transform: translateY(-2px); color: #fff;
-    box-shadow: 0 8px 22px rgba(14,165,233,.45);
+    opacity: .85; transform: translateY(-2px); color: #fff;
+    box-shadow: 0 8px 22px rgba(0,0,0,.2);
 }
 
 /* ============================================================
@@ -153,40 +125,39 @@ body {
 }
 
 /* ============================================================
-   COMPARE CARD — glassmorphism
+   COMPARE CARD
    ============================================================ */
 .compare-card {
     width: 300px;
-    background: rgba(255,255,255,.82);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(186,230,253,.65);
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
     border-radius: 18px; padding: 24px;
-    box-shadow: 0 6px 24px rgba(14,165,233,.1);
+    box-shadow: 0 4px 18px rgba(0,0,0,.05);
     transition: transform .28s cubic-bezier(.16,1,.3,1),
                 box-shadow .28s, border-color .25s;
     position: relative; overflow: hidden;
+    text-align: center;   /* ← thêm dòng này */
 }
 
-/* top gradient bar */
+/* top bar */
 .compare-card::before {
     content: '';
     position: absolute; top: 0; left: 0; right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #0369a1, #38bdf8);
+    background: #000000;
     border-radius: 18px 18px 0 0;
 }
 
 .compare-card:hover {
     transform: translateY(-10px) scale(1.01);
-    box-shadow: 0 16px 40px rgba(14,165,233,.22);
-    border-color: #7dd3fc;
+    box-shadow: 0 16px 36px rgba(0,0,0,.1);
+    border-color: #cccccc;
 }
 
 .compare-image {
     display: flex; justify-content: center; align-items: center;
     height: 200px;
-    background: linear-gradient(160deg, #f0f9ff, #e0f2fe);
+    background: #f4f4f4;
     border-radius: 12px; margin-bottom: 16px;
     overflow: hidden;
 }
@@ -195,11 +166,11 @@ body {
     transition: transform .35s cubic-bezier(.16,1,.3,1);
 }
 .compare-card:hover .compare-image img { transform: scale(1.08); }
-.compare-image i { color: #7dd3fc; }
+.compare-image i { color: #bbbbbb; }
 
 .compare-card h3 {
     font-size: 15px; font-weight: 700;
-    color: #0c4a6e; margin: 0 0 10px;
+    color: #000000; margin: 0 0 10px;
     min-height: 42px;
     display: -webkit-box; -webkit-line-clamp: 2;
     -webkit-box-orient: vertical; overflow: hidden;
@@ -208,11 +179,11 @@ body {
 
 .price {
     font-size: 24px; font-weight: 800;
-    color: #0369a1; margin-bottom: 4px;
+    color: #000000; margin-bottom: 4px;
 }
 
 .old-price {
-    font-size: 13px; color: #7dd3fc;
+    font-size: 13px; color: #999999;
     text-decoration: line-through; margin-bottom: 16px;
 }
 
@@ -220,21 +191,22 @@ body {
 
 .buy-btn {
     display: flex; justify-content: center; align-items: center; gap: 8px;
-    background: linear-gradient(135deg, #0369a1, #0ea5e9);
+    background: #000000;
     color: #fff; border-radius: 10px; padding: 11px;
     text-decoration: none; font-weight: 700; font-size: 14px;
     transition: opacity .2s, transform .15s, box-shadow .2s;
-    box-shadow: 0 4px 12px rgba(14,165,233,.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
     position: relative; overflow: hidden;
 }
 .buy-btn::after {
     content: ''; position: absolute; inset: 0;
-    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.3) 50%, transparent 60%);
+    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.25) 50%, transparent 60%);
     transform: translateX(-120%); transition: transform .5s ease; pointer-events: none;
 }
 .buy-btn:hover::after { transform: translateX(120%); }
-.buy-btn:hover { opacity:.9; transform: translateY(-1px); color:#fff; box-shadow: 0 6px 18px rgba(14,165,233,.4); }
+.buy-btn:hover { opacity:.85; transform: translateY(-1px); color:#fff; box-shadow: 0 6px 16px rgba(0,0,0,.2); }
 
+/* Nút xóa — giữ màu đỏ, mang ý nghĩa cảnh báo/hủy */
 .remove-btn {
     width: 100%; border: none;
     background: rgba(239,68,68,.1);
@@ -252,94 +224,91 @@ body {
 }
 
 /* ============================================================
-   ADD CARD — dashed glassmorphism
+   ADD CARD — dashed
    ============================================================ */
 .compare-add {
     display: flex; flex-direction: column;
     justify-content: center; align-items: center;
     gap: 8px;
-    background: rgba(255,255,255,.55);
-    backdrop-filter: blur(10px);
-    border: 2.5px dashed rgba(125,211,252,.6) !important;
-    color: #0369a1;
+    background: #fafafa;
+    border: 2.5px dashed #cccccc !important;
+    color: #000000;
     transition: background .2s, border-color .2s !important;
 }
 .compare-add::before { display: none; }
 .compare-add:hover {
-    background: rgba(255,255,255,.72) !important;
-    border-color: #0ea5e9 !important;
+    background: #f0f0f0 !important;
+    border-color: #999999 !important;
     transform: translateY(-6px) scale(1.01) !important;
 }
 .compare-add .add-icon {
     font-size: 52px;
-    background: linear-gradient(135deg, #0369a1, #38bdf8);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    color: #000000;
     margin-bottom: 10px;
     animation: addPulse 2.4s ease-in-out infinite;
 }
 @keyframes addPulse {
-    0%,100% { transform: scale(1);    opacity: .9; }
+    0%,100% { transform: scale(1);    opacity: .85; }
     50%      { transform: scale(1.1); opacity: 1;  }
 }
-.compare-add h3 { color: #0c4a6e; font-size: 16px; }
-.compare-add p  { color: #0369a1; opacity:.75; font-size: 13px; text-align: center; margin: 0; }
+.compare-add h3 { color: #000000; font-size: 16px; }
+.compare-add p  { color: #666666; font-size: 13px; text-align: center; margin: 0; }
 
 /* ============================================================
-   COMPARE TABLE — glassmorphism
+   COMPARE TABLE
    ============================================================ */
 .compare-table {
     overflow: auto;
     border-radius: 16px;
-    box-shadow: 0 6px 28px rgba(14,165,233,.1);
+    box-shadow: 0 6px 24px rgba(0,0,0,.06);
 }
 
 .compare-table table {
     width: 100%;
     border-collapse: separate; border-spacing: 0;
-    background: rgba(255,255,255,.85);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background: #ffffff;
     border-radius: 16px; overflow: hidden;
-    border: 1px solid rgba(186,230,253,.6);
+    border: 1px solid #e0e0e0;
     min-width: 600px;
 }
 
 .compare-table thead th {
-    background: linear-gradient(135deg, #0369a1 0%, #0ea5e9 100%);
+    background: #000000;
     color: #fff; padding: 16px 18px;
     font-size: 14.5px; font-weight: 700;
     white-space: nowrap; letter-spacing: .2px;
+    text-align: center !important;    /* ← thêm !important */
     position: sticky; top: 0; z-index: 10;
 }
 .compare-table thead th:first-child {
-    background: linear-gradient(135deg, #0c4a6e, #0369a1);
-    text-align: left;
+    background: #000000;
+    text-align: left !important;      /* ← thêm !important, cột "Thông số" vẫn canh trái */
 }
 
 .compare-table td {
     padding: 14px 16px;
-    border-bottom: 1px solid rgba(186,230,253,.4);
+    border-bottom: 1px solid #eeeeee;
     text-align: center;
-    font-size: 14px; color: #0c4a6e;
+    font-size: 14px; color: #333333;
     transition: background .15s;
 }
 
-.compare-table tbody tr:nth-child(even) td { background: rgba(224,242,254,.25); }
-.compare-table tbody tr:hover td { background: rgba(186,230,253,.3); }
+.compare-table tbody tr:nth-child(even) td { background: #fafafa; }
+.compare-table tbody tr:hover td { background: #f0f0f0; }
 .compare-table tbody tr:last-child td { border-bottom: none; }
 
 .attribute-name {
     text-align: left !important;
-    font-weight: 700; color: #0c4a6e;
-    background: rgba(186,230,253,.18) !important;
+    font-weight: 700; color: #000000;
+    background: #f4f4f4 !important;
     min-width: 200px; white-space: nowrap;
 }
-.compare-table tbody tr:hover .attribute-name { background: rgba(186,230,253,.3) !important; }
+.compare-table tbody tr:hover .attribute-name { background: #ececec !important; }
 
-.empty-cell { color: #bae6fd; }
+.empty-cell { color: #cccccc; }
 
 /* ============================================================
-   DIFF HIGHLIGHT
+   DIFF HIGHLIGHT (giữ màu xanh lá — mang ý nghĩa "khác biệt")
    ============================================================ */
 .diff {
     background: rgba(187,247,208,.55) !important;
@@ -376,11 +345,8 @@ body {
 @endpush
 
 @section('content')
-{{-- Sky Canvas --}}
-<canvas id="sky-canvas" aria-hidden="true"></canvas>
-
 <section class="compare-page">
-    <div class="container" style="position:relative;z-index:1">
+    <div class="container">
 
         <h1 class="compare-title reveal">
             <i class="fas fa-code-compare"></i>
@@ -520,9 +486,6 @@ body {
 
 @push('scripts')
 <script>
-/* ============================================================
-   TABLE LOGIC — highlight diff rows
-   ============================================================ */
 document.addEventListener('DOMContentLoaded', function () {
 
     /* Highlight các thông số khác nhau */
@@ -550,57 +513,7 @@ document.addEventListener('DOMContentLoaded', function () {
     cards.forEach(c => c.style.minHeight = maxH + 'px');
 });
 
-/* ============================================================
-   ANIMATIONS
-   ============================================================ */
 (function () {
-
-    /* ---- Canvas clouds ---- */
-    const canvas = document.getElementById('sky-canvas');
-    if (canvas) {
-        const ctx = canvas.getContext('2d');
-        let W, H, clouds = [];
-        function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize); resize();
-        function makeCloud() {
-            return { x: Math.random()*W*1.2, y: Math.random()*H*.6,
-                     r: 50+Math.random()*110, dx: .13+Math.random()*.22,
-                     alpha: .05+Math.random()*.1 };
-        }
-        for (let i = 0; i < 8; i++) clouds.push(makeCloud());
-        function drawCloud(c) {
-            const g = ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,c.r);
-            g.addColorStop(0, `rgba(255,255,255,${c.alpha})`);
-            g.addColorStop(.6, `rgba(186,230,253,${c.alpha*.6})`);
-            g.addColorStop(1, 'rgba(186,230,253,0)');
-            ctx.beginPath(); ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
-            ctx.fillStyle = g; ctx.fill();
-            [-.5,.5].forEach(o => {
-                ctx.beginPath();
-                ctx.arc(c.x+c.r*.55*o, c.y-c.r*.18, c.r*.72, 0, Math.PI*2);
-                ctx.fillStyle = `rgba(255,255,255,${c.alpha*.7})`; ctx.fill();
-            });
-        }
-        (function anim() {
-            ctx.clearRect(0,0,W,H);
-            clouds.forEach(c => { drawCloud(c); c.x += c.dx;
-                if (c.x-c.r > W*1.2) { c.x=-c.r*2; c.y=Math.random()*H*.6; } });
-            requestAnimationFrame(anim);
-        })();
-    }
-
-    /* ---- Bubbles ---- */
-    function spawnBubble() {
-        const el = document.createElement('div'); el.className = 'bubble';
-        const size = 4+Math.random()*14, dur = 8+Math.random()*12;
-        el.style.cssText = [`width:${size}px`,`height:${size}px`,
-            `left:${Math.random()*100}vw`,`bottom:-${size}px`,
-            `animation-duration:${dur}s`,`animation-delay:${Math.random()*5}s`].join(';');
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), (dur+5)*1000);
-    }
-    for (let i = 0; i < 8; i++) spawnBubble();
-    setInterval(spawnBubble, 3500);
 
     /* ---- Scroll Reveal ---- */
     const io = new IntersectionObserver(entries => {
@@ -640,13 +553,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    /* ---- Table row hover glow ---- */
-    document.querySelectorAll('.compare-table tbody tr').forEach(row => {
-        row.addEventListener('mouseenter', function () {
-            this.style.transition = 'background .15s';
-        });
-    });
-
     /* ---- Sticky thead on scroll ---- */
     const table = document.querySelector('.compare-table table');
     if (table) {
@@ -654,7 +560,7 @@ document.addEventListener('DOMContentLoaded', function () {
         window.addEventListener('scroll', () => {
             const r = table.getBoundingClientRect();
             if (r.top < 70 && r.bottom > 120) {
-                thead.style.boxShadow = '0 4px 20px rgba(14,165,233,.25)';
+                thead.style.boxShadow = '0 4px 20px rgba(0,0,0,.2)';
             } else {
                 thead.style.boxShadow = '';
             }
