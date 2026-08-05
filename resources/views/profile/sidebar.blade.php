@@ -46,7 +46,7 @@
 
         <a href="{{ route('profile.wishlist') }}"
             class="list-group-item list-group-item-action {{ request()->routeIs('profile.wishlist') ? 'active' : '' }}">
-            <i class="fas fa-heart me-2"></i>
+            <i class="fas fa-heart"></i>
             <span>Sản phẩm yêu thích</span>
         </a>
 

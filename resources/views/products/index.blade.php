@@ -415,25 +415,18 @@ body {
 }
 
 .wish {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: transparent;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--sam-black);
-    font-size: 16px;
-    cursor: pointer;
-    padding: 0;
-    z-index: 3;
-    transition: background .2s, color .2s;
+    position: absolute; top: 10px; right: 10px;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,.92); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    color: #94a3b8; font-size: 15px; z-index: 3;
+    box-shadow: 0 1px 6px rgba(14,165,233,.18);
+    transition: color .2s, transform .2s, background .2s;
+    border: none; cursor: pointer; outline: none; padding: 0;
 }
-.wish:hover { background: rgba(0,0,0,.06); }
-.wish.active { color: var(--sam-sale); }
+.wish:hover { color: #ef4444; transform: scale(1.15); background: rgba(255,255,255,1); }
+.wish.active { color: #ef4444; }
+.wish.active i { font-weight: 900; }
 
 .product-card-img {
     height: 220px;
@@ -778,16 +771,15 @@ body {
                 <span class="badge-tag">Giảm {{ $product->discount_percent }}%</span>
             @endif
             @auth
-            <button type="button"
-                class="wish wish-btn {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'active' : '' }}"
+            <button class="wish wish-btn {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'active' : '' }}"
                 data-product-id="{{ $product->id }}"
                 data-url="{{ route('wishlist.toggle', $product->id) }}"
                 title="Yêu thích"
-                onclick="toggleWishlist(this)">
+                onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist(this)">
                 <i class="{{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'fas' : 'far' }} fa-heart"></i>
             </button>
             @else
-            <a href="{{ route('login') }}" class="wish" title="Đăng nhập để yêu thích">
+            <a href="{{ route('login') }}" class="wish" title="Đăng nhập để yêu thích" onclick="event.stopPropagation()">
                 <i class="far fa-heart"></i>
             </a>
             @endauth
@@ -946,62 +938,46 @@ body {
 /* ============================================================
    WISHLIST
    ============================================================ */
-(function () {
-    let _toastTimer;
-    function showWishToast(msg, isErr = false) {
-        let t = document.getElementById('wishToast');
-        if (!t) {
-            t = document.createElement('div');
-            t.id = 'wishToast';
-            t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:#000;color:#fff;padding:12px 24px;border-radius:20px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:10px;z-index:9999;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;';
-            t.innerHTML = '<i class="fas fa-check-circle" style="font-size:15px"></i><span></span>';
-            document.body.appendChild(t);
-        }
-        const icon = t.querySelector('i');
-        icon.className = isErr ? 'fas fa-times-circle' : 'fas fa-check-circle';
-        t.querySelector('span').textContent = msg;
-        t.style.opacity = '1';
-        t.style.transform = 'translateX(-50%) translateY(0)';
-        clearTimeout(_toastTimer);
-        _toastTimer = setTimeout(() => {
-            t.style.opacity = '0';
-            t.style.transform = 'translateX(-50%) translateY(10px)';
-        }, 2800);
+/* Wishlist toggle */
+let _toastTimer;
+function showWishToast(msg, isErr = false) {
+    let t = document.getElementById('wishToast');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'wishToast';
+        t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:rgba(15,23,42,.92);color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;z-index:9999;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;pointer-events:none;';
+        t.innerHTML = '<i class="fas fa-check-circle" style="color:#34d399;font-size:16px"></i><span></span>';
+        document.body.appendChild(t);
     }
-
-    window.toggleWishlist = function (btn) {
-        @guest
-        window.location.href = '{{ route("login") }}';
-        return;
-        @endguest
-
-        const url      = btn.dataset.url;
-        const icon     = btn.querySelector('i');
-        const isActive = btn.classList.contains('active');
-
-        // Optimistic UI
-        btn.classList.toggle('active', !isActive);
-        icon.className = isActive ? 'far fa-heart' : 'fas fa-heart';
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json',
-            },
-        })
-        .then(r => r.json())
-        .then(data => {
-            btn.classList.toggle('active', data.wishlisted);
-            icon.className = data.wishlisted ? 'fas fa-heart' : 'far fa-heart';
-            showWishToast(data.wishlisted ? 'Đã thêm vào yêu thích' : 'Đã xóa khỏi yêu thích');
-        })
-        .catch(() => {
-            btn.classList.toggle('active', isActive);
-            icon.className = isActive ? 'fas fa-heart' : 'far fa-heart';
-            showWishToast('Có lỗi xảy ra, vui lòng thử lại', true);
-        });
-    };
-})();
+    const icon = t.querySelector('i');
+    icon.style.color = isErr ? '#f87171' : '#34d399';
+    icon.className = isErr ? 'fas fa-times-circle' : 'fas fa-check-circle';
+    t.querySelector('span').textContent = msg;
+    t.style.opacity = '1'; t.style.transform = 'translateY(0)';
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(10px)'; }, 2800);
+}
+window.toggleWishlist = function(btn) {
+    const url = btn.dataset.url;
+    const icon = btn.querySelector('i');
+    const isActive = btn.classList.contains('active');
+    btn.classList.toggle('active', !isActive);
+    icon.className = isActive ? 'far fa-heart' : 'fas fa-heart';
+    fetch(url, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' },
+    })
+    .then(r => r.json())
+    .then(data => {
+        btn.classList.toggle('active', data.wishlisted);
+        icon.className = data.wishlisted ? 'fas fa-heart' : 'far fa-heart';
+        showWishToast(data.wishlisted ? '♥ Đã thêm vào yêu thích' : 'Nhấp khỏi danh sách yêu thích');
+    })
+    .catch(() => {
+        btn.classList.toggle('active', isActive);
+        icon.className = isActive ? 'fas fa-heart' : 'far fa-heart';
+        showWishToast('Có lỗi xảy ra, vui lòng thử lại', true);
+    });
+};
 </script>
 @endpush

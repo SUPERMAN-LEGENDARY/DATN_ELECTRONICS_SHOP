@@ -159,153 +159,56 @@
             box-shadow: 0 0 0 2px #fff;
         }
 
-        /* ============================================================
-           NOTIFICATION BELL
-           ============================================================ */
-        .notif-wrap {
-            position: relative;
-        }
+        /* NOTIFICATION BELL */
+        .notif-wrap { position: relative; }
         .notif-badge {
             position: absolute; top: 4px; right: 3px;
             min-width: 17px; height: 17px; padding: 0 4px;
             background: #d0021b; color: #fff;
             font-size: 10px; font-weight: 800; line-height: 17px;
             border-radius: 999px; text-align: center;
-            box-shadow: 0 0 0 2px #fff;
-            display: none;
+            box-shadow: 0 0 0 2px #fff; display: none;
             animation: badgePop .35s cubic-bezier(.34,1.56,.64,1);
         }
-        @keyframes badgePop {
-            0%   { transform: scale(0); }
-            100% { transform: scale(1); }
-        }
-
-        /* Dropdown panel */
+        @keyframes badgePop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
         .notif-dropdown {
-            position: absolute; top: calc(100% + 14px); right: -10px;
-            width: 360px;
-            background: rgba(255,255,255,.97);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(0,0,0,.08);
-            border-radius: 18px;
-            box-shadow: 0 16px 48px rgba(0,0,0,.14);
-            z-index: 700;
-            overflow: hidden;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px) scale(.97);
-            transition: opacity .25s cubic-bezier(.16,1,.3,1),
-                        transform .25s cubic-bezier(.16,1,.3,1),
-                        visibility .25s;
+            position: absolute; top: calc(100% + 14px); right: -10px; width: 360px;
+            background: rgba(255,255,255,.97); backdrop-filter: blur(20px);
+            border: 1px solid rgba(0,0,0,.08); border-radius: 18px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.14); z-index: 700; overflow: hidden;
+            opacity: 0; visibility: hidden; transform: translateY(-10px) scale(.97);
+            transition: opacity .25s cubic-bezier(.16,1,.3,1), transform .25s cubic-bezier(.16,1,.3,1), visibility .25s;
         }
-        .notif-dropdown.open {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0) scale(1);
-        }
-        /* Pointer arrow */
+        .notif-dropdown.open { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
         .notif-dropdown::before {
-            content: '';
-            position: absolute; top: -7px; right: 18px;
-            width: 14px; height: 14px;
-            background: rgba(255,255,255,.97);
-            border: 1px solid rgba(0,0,0,.08);
-            transform: rotate(45deg);
+            content: ''; position: absolute; top: -7px; right: 18px;
+            width: 14px; height: 14px; background: rgba(255,255,255,.97);
+            border: 1px solid rgba(0,0,0,.08); transform: rotate(45deg);
             border-bottom: none; border-right: none;
         }
-
-        .notif-header {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 16px 18px 12px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .notif-header h4 {
-            font-size: 15px; font-weight: 800;
-            color: #0f172a; margin: 0;
-            display: flex; align-items: center; gap: 7px;
-        }
+        .notif-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px 12px; border-bottom: 1px solid #f0f0f0; }
+        .notif-header h4 { font-size: 15px; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 7px; }
         .notif-header h4 i { color: #3b82f6; }
-        .notif-mark-all {
-            font-size: 12px; font-weight: 600;
-            color: #3b82f6; border: none; background: none;
-            cursor: pointer; padding: 4px 8px;
-            border-radius: 6px;
-            transition: background .2s;
-        }
+        .notif-mark-all { font-size: 12px; font-weight: 600; color: #3b82f6; border: none; background: none; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background .2s; }
         .notif-mark-all:hover { background: #eff6ff; }
-
-        .notif-list {
-            max-height: 380px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #e2e8f0 transparent;
-        }
-        .notif-list::-webkit-scrollbar { width: 4px; }
-        .notif-list::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
-
-        .notif-item {
-            display: flex; gap: 12px; align-items: flex-start;
-            padding: 13px 18px;
-            cursor: pointer;
-            transition: background .18s;
-            border-bottom: 1px solid #f8fafc;
-            position: relative;
-        }
-        .notif-item:last-child { border-bottom: none; }
+        .notif-list { max-height: 380px; overflow-y: auto; scrollbar-width: thin; }
+        .notif-item { display: flex; gap: 12px; align-items: flex-start; padding: 13px 18px; cursor: pointer; transition: background .18s; border-bottom: 1px solid #f8fafc; position: relative; }
         .notif-item:hover { background: #f8fafc; }
         .notif-item.unread { background: #eff6ff; }
         .notif-item.unread:hover { background: #dbeafe; }
-
-        .notif-item-img {
-            width: 46px; height: 46px; border-radius: 10px;
-            background: #f1f5f9;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; overflow: hidden;
-        }
+        .notif-item-img { width: 46px; height: 46px; border-radius: 10px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
         .notif-item-img img { width: 100%; height: 100%; object-fit: cover; }
         .notif-item-img i { font-size: 20px; color: #94a3b8; }
-
         .notif-item-content { flex: 1; min-width: 0; }
-        .notif-item-title {
-            font-size: 13px; font-weight: 600; color: #1e293b;
-            line-height: 1.4;
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-            overflow: hidden; margin-bottom: 4px;
-        }
-        .notif-item-body {
-            font-size: 12px; color: #64748b; line-height: 1.4;
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .notif-item-time {
-            font-size: 11px; color: #94a3b8; margin-top: 5px;
-            display: flex; align-items: center; gap: 4px;
-        }
-        /* Dot chưa đọc */
-        .notif-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: #3b82f6;
-            flex-shrink: 0; margin-top: 6px;
-        }
-
-        .notif-empty {
-            padding: 40px 20px;
-            text-align: center;
-            color: #94a3b8;
-        }
+        .notif-item-title { font-size: 13px; font-weight: 600; color: #1e293b; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 4px; }
+        .notif-item-body { font-size: 12px; color: #64748b; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .notif-item-time { font-size: 11px; color: #94a3b8; margin-top: 5px; display: flex; align-items: center; gap: 4px; }
+        .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; flex-shrink: 0; margin-top: 6px; }
+        .notif-empty { padding: 40px 20px; text-align: center; color: #94a3b8; }
         .notif-empty i { font-size: 36px; margin-bottom: 10px; display: block; }
         .notif-empty p { font-size: 13px; margin: 0; }
-
-        .notif-footer {
-            padding: 10px 18px;
-            border-top: 1px solid #f0f0f0;
-            text-align: center;
-        }
-        .notif-footer a {
-            font-size: 13px; font-weight: 600;
-            color: #3b82f6;
-        }
+        .notif-footer { padding: 10px 18px; border-top: 1px solid #f0f0f0; text-align: center; }
+        .notif-footer a { font-size: 13px; font-weight: 600; color: #3b82f6; }
         .notif-footer a:hover { text-decoration: underline; }
 
         /* Menu hamburger (mobile) */
@@ -815,152 +718,42 @@
         })();
 
     @auth
-    /* ============================================================
-       NOTIFICATION SYSTEM
-       ============================================================ */
+    /* NOTIFICATION SYSTEM */
     (function () {
         const btn        = document.getElementById('notifBtn');
         const dropdown   = document.getElementById('notifDropdown');
         const list       = document.getElementById('notifList');
         const badge      = document.getElementById('notifBadge');
         const markAllBtn = document.getElementById('notifMarkAll');
-
-        const API_LIST     = '{{ route('notifications.list') }}';
-        const API_MARK_ALL = '{{ route('notifications.mark-all-read') }}';
+        if (!btn) return;
+        const API_LIST     = '{{ route("notifications.list") }}';
+        const API_MARK_ALL = '{{ route("notifications.mark-all-read") }}';
         const CSRF         = document.querySelector('meta[name="csrf-token"]').content;
-
-        let isOpen = false;
-        let cache  = [];
-
-        // ─ Helpers ────────────────────────────────────────────────
+        let isOpen = false, cache = [];
         function setBadge(count) {
-            if (count > 0) {
-                badge.textContent = count > 99 ? '99+' : count;
-                badge.style.display = 'block';
-            } else {
-                badge.style.display = 'none';
-            }
+            if (count > 0) { badge.textContent = count > 99 ? '99+' : count; badge.style.display = 'block'; }
+            else { badge.style.display = 'none'; }
         }
-
-        function timeAgo(str) {
-            return str || '';
-        }
-
         function renderList(notifications) {
-            if (!notifications.length) {
-                list.innerHTML = `
-                    <div class="notif-empty">
-                        <i class="bi bi-bell-slash"></i>
-                        <p>Chưa có thông báo nào</p>
-                    </div>`;
-                return;
-            }
-
-            list.innerHTML = notifications.map(n => `
-                <div class="notif-item ${n.is_read ? '' : 'unread'}"
-                     data-id="${n.id}" data-url="${n.url || '#'}">
-                    <div class="notif-item-img">
-                        ${ n.image
-                            ? `<img src="${n.image}" alt="">`
-                            : `<i class="bi bi-newspaper"></i>` }
-                    </div>
-                    <div class="notif-item-content">
-                        <div class="notif-item-title">${n.title}</div>
-                        ${ n.body ? `<div class="notif-item-body">${n.body}</div>` : '' }
-                        <div class="notif-item-time">
-                            <i class="bi bi-clock" style="font-size:10px"></i>
-                            ${n.created_at}
-                        </div>
-                    </div>
-                    ${ !n.is_read ? '<div class="notif-dot"></div>' : '' }
-                </div>
-            `).join('');
-
-            // Click item → mark read + redirect
+            if (!notifications.length) { list.innerHTML = '<div class="notif-empty"><i class="bi bi-bell-slash"></i><p>Chưa có thông báo nào</p></div>'; return; }
+            list.innerHTML = notifications.map(n => `<div class="notif-item ${n.is_read ? '' : 'unread'}" data-id="${n.id}" data-url="${n.url || '#'}"><div class="notif-item-img">${ n.image ? `<img src="${n.image}" alt="">` : `<i class="bi bi-newspaper"></i>` }</div><div class="notif-item-content"><div class="notif-item-title">${n.title}</div>${ n.body ? `<div class="notif-item-body">${n.body}</div>` : '' }<div class="notif-item-time"><i class="bi bi-clock" style="font-size:10px"></i>${n.created_at}</div></div>${ !n.is_read ? '<div class="notif-dot"></div>' : '' }</div>`).join('');
             list.querySelectorAll('.notif-item').forEach(item => {
                 item.addEventListener('click', function () {
-                    const id  = this.dataset.id;
-                    const url = this.dataset.url;
-
-                    fetch(`/thong-bao/${id}/doc`, {
-                        method: 'POST',
-                        headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        setBadge(data.unread_count);
-                        // Cập nhật class trong cache
-                        const cached = cache.find(n => n.id == id);
-                        if (cached) cached.is_read = true;
-                        this.classList.remove('unread');
-                        this.querySelector('.notif-dot')?.remove();
-                        if (url && url !== '#') window.location.href = url;
-                    })
-                    .catch(() => {
-                        if (url && url !== '#') window.location.href = url;
-                    });
+                    const id = this.dataset.id, url = this.dataset.url;
+                    fetch(`/thong-bao/${id}/doc`, { method: 'POST', headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' } })
+                    .then(r => r.json()).then(data => { setBadge(data.unread_count); const c = cache.find(n => n.id == id); if (c) c.is_read = true; this.classList.remove('unread'); this.querySelector('.notif-dot')?.remove(); if (url && url !== '#') window.location.href = url; }).catch(() => { if (url && url !== '#') window.location.href = url; });
                 });
             });
         }
-
-        // ─ Fetch từ server ────────────────────────────────────────
         function fetchNotifications(silent = false) {
-            if (!silent && list.querySelector('.notif-empty') && isOpen) {
-                list.innerHTML = '<div style="padding:30px;text-align:center"><i class="bi bi-arrow-repeat" style="font-size:24px;color:#94a3b8;animation:spin 1s linear infinite"></i></div>';
-            }
-            return fetch(API_LIST, {
-                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
-            })
-            .then(r => r.json())
-            .then(data => {
-                cache = data.notifications;
-                setBadge(data.unread_count);
-                if (isOpen) renderList(cache);
-            })
-            .catch(() => {});
+            return fetch(API_LIST, { headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF } })
+            .then(r => r.json()).then(data => { cache = data.notifications; setBadge(data.unread_count); if (isOpen) renderList(cache); }).catch(() => {});
         }
-
-        // ─ Toggle dropdown ────────────────────────────────────────
-        btn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            isOpen = !isOpen;
-            dropdown.classList.toggle('open', isOpen);
-
-            if (isOpen) {
-                fetchNotifications();
-            }
-        });
-
-        // Đóng khi click ngoài
-        document.addEventListener('click', function (e) {
-            if (isOpen && !dropdown.contains(e.target) && e.target !== btn) {
-                isOpen = false;
-                dropdown.classList.remove('open');
-            }
-        });
-
-        // ─ Đọc tất cả ────────────────────────────────────────────
-        markAllBtn.addEventListener('click', function () {
-            fetch(API_MARK_ALL, {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
-            })
-            .then(r => r.json())
-            .then(() => {
-                cache.forEach(n => n.is_read = true);
-                setBadge(0);
-                renderList(cache);
-            });
-        });
-
-        // ─ Polling mỗi 60 giây ───────────────────────────────────
-        fetchNotifications(true); // load badge ngay khi trang mở
+        btn.addEventListener('click', function(e) { e.stopPropagation(); isOpen = !isOpen; dropdown.classList.toggle('open', isOpen); if (isOpen) fetchNotifications(); });
+        document.addEventListener('click', function(e) { if (isOpen && !dropdown.contains(e.target) && e.target !== btn) { isOpen = false; dropdown.classList.remove('open'); } });
+        markAllBtn.addEventListener('click', function () { fetch(API_MARK_ALL, { method: 'POST', headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' } }).then(r => r.json()).then(() => { cache.forEach(n => n.is_read = true); setBadge(0); renderList(cache); }); });
+        fetchNotifications(true);
         setInterval(() => fetchNotifications(true), 60000);
-
-        // Spin animation cho loader
-        const styleEl = document.createElement('style');
-        styleEl.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
-        document.head.appendChild(styleEl);
     })();
     @endauth
     </script>

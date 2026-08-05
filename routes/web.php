@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\VoucherController as AdminVoucherController;
 use App\Http\Controllers\Admin\AttributeController as AdminAttributeController;
 use App\Http\Controllers\Admin\BannerController as AdminBannerController;
+use App\Http\Controllers\Admin\ContactController as AdminContactController;
 use App\Http\Controllers\Admin\EventController as AdminEventController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\LeadController as AdminLeadController;
@@ -114,10 +115,11 @@ Route::prefix('gio-hang')->name('cart.')->group(function () {
 Route::post('/chatbot/send', [ChatbotController::class, 'send'])->name('chatbot.send');
 // ─── THANH TOÁN (CHECKOUT) ────────────────────────────────────────
 Route::prefix('thanh-toan')->name('checkout.')->middleware('auth')->group(function () {
-    Route::get('/',                  [\App\Http\Controllers\CheckoutController::class, 'index'])->name('index');
-    Route::post('/',                 [\App\Http\Controllers\CheckoutController::class, 'store'])->name('store');
-    Route::get('/momo/return',       [\App\Http\Controllers\CheckoutController::class, 'momoReturn'])->name('momo.return');
-    Route::get('/thanh-cong/{order}', [\App\Http\Controllers\CheckoutController::class, 'success'])->name('success');
+    Route::get('/',                    [\App\Http\Controllers\CheckoutController::class, 'index'])->name('index');
+    Route::post('/',                   [\App\Http\Controllers\CheckoutController::class, 'store'])->name('store');
+    Route::post('/kiem-tra-ma',        [\App\Http\Controllers\CheckoutController::class, 'checkVoucher'])->name('check-voucher');
+    Route::get('/momo/return',         [\App\Http\Controllers\CheckoutController::class, 'momoReturn'])->name('momo.return');
+    Route::get('/thanh-cong/{order}',  [\App\Http\Controllers\CheckoutController::class, 'success'])->name('success');
 });
 
 // ─── ADMIN ────────────────────────────────────────────────────────
@@ -300,6 +302,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
         // ── Route thùng rác có tham số động (đặt cuối) ──
         Route::patch('/{id}/khoi-phuc',       [AdminVoucherController::class, 'restore'])->name('restore');
         Route::delete('/{id}/xoa-vinh-vien',  [AdminVoucherController::class, 'forceDelete'])->name('force-delete');
+    });
+
+    // ── Liên hệ (admin + staff) ──────────────────────────────────
+    Route::prefix('lien-he')->name('contacts.')->group(function () {
+        Route::get('/',                               [AdminContactController::class, 'index'])->name('index');
+        Route::get('/{contact}',                     [AdminContactController::class, 'show'])->name('show');
+        Route::post('/{contact}/phan-hoi',           [AdminContactController::class, 'reply'])->name('reply');
+        Route::patch('/{contact}/trang-thai',        [AdminContactController::class, 'updateStatus'])->name('status');
+        Route::delete('/{contact}',                  [AdminContactController::class, 'destroy'])->name('destroy');
     });
 
     // ── Phân quyền (chỉ admin) ────────────────────────────────────

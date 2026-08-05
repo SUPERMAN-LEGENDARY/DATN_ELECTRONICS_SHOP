@@ -110,6 +110,77 @@ class CheckoutController extends Controller
         return [$voucher, $discount];
     }
 
+    // ─── Kiểm tra mã giảm giá qua AJAX ───────────────────────────────────
+    public function checkVoucher(Request $request)
+    {
+        $code = trim($request->input('voucher_code', ''));
+
+        if (!$code) {
+            return response()->json([
+                'valid'   => false,
+                'message' => 'Vui lòng nhập mã giảm giá.',
+            ]);
+        }
+
+        [$items, $subtotal] = $this->buildCartItems();
+
+        if (empty($items)) {
+            return response()->json([
+                'valid'   => false,
+                'message' => 'Giỏ hàng trống.',
+            ]);
+        }
+
+        $user = $request->user();
+
+        // Kiểm tra voucher có tồn tại
+        $voucher = Voucher::where('code', $code)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$voucher) {
+            return response()->json(['valid' => false, 'message' => 'Mã giảm giá không hợp lệ hoặc đã hết hiệu lực.']);
+        }
+
+        if ($voucher->assigned_user_id && $voucher->assigned_user_id !== $user->id) {
+            return response()->json(['valid' => false, 'message' => 'Mã này không áp dụng được cho tài khoản của bạn.']);
+        }
+
+        if ($voucher->expires_at && $voucher->expires_at->isPast()) {
+            return response()->json(['valid' => false, 'message' => 'Mã giảm giá đã hết hạn.']);
+        }
+
+        if ($voucher->starts_at && $voucher->starts_at->isFuture()) {
+            return response()->json(['valid' => false, 'message' => 'Mã giảm giá chưa đến ngày áp dụng.']);
+        }
+
+        if ($voucher->usage_limit && $voucher->used_count >= $voucher->usage_limit) {
+            return response()->json(['valid' => false, 'message' => 'Mã giảm giá đã được sử dụng hết số lần cho phép.']);
+        }
+
+        if ($voucher->min_order_value && $subtotal < $voucher->min_order_value) {
+            return response()->json([
+                'valid'   => false,
+                'message' => 'Giá trị đơn hàng tối thiểu để áp mã là ' . number_format($voucher->min_order_value) . 'đ.',
+            ]);
+        }
+
+        $discount = $subtotal * ($voucher->discount_percent / 100);
+        $total    = $subtotal - $discount;
+
+        return response()->json([
+            'valid'            => true,
+            'message'          => 'Mã <strong>' . e($code) . '</strong> giảm ' . $voucher->discount_percent . '% — tiết kiệm ' . number_format($discount) . 'đ!',
+            'discount_percent' => $voucher->discount_percent,
+            'discount_amount'  => $discount,
+            'subtotal'         => $subtotal,
+            'total'            => $total,
+            'subtotal_fmt'     => number_format($subtotal) . 'đ',
+            'discount_fmt'     => '-' . number_format($discount) . 'đ',
+            'total_fmt'        => number_format($total) . 'đ',
+        ]);
+    }
+
     // ─── Xử lý đặt hàng (COD hoặc MoMo) ────────────────────────────
     public function store(Request $request)
     {

@@ -7,26 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 class Contact extends Model
 {
     protected $fillable = [
-
         'name',
-
         'email',
-
         'phone',
-
         'subject',
-
         'message',
-
         'status',
-
-        'processed_at'
-
+        'processed_at',
+        'reply_message',
+        'replied_at',
     ];
 
     protected $casts = [
-
-        'processed_at' => 'datetime'
-
+        'processed_at' => 'datetime',
+        'replied_at'   => 'datetime',
     ];
 }

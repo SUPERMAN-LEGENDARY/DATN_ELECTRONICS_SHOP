@@ -1406,6 +1406,7 @@
     /* ----------------------------------------------------------
        9. WISHLIST (toggle AJAX)
     ---------------------------------------------------------- */
+    /* Wishlist AJAX */
     let _hmToastTimer;
     function showHomeWishToast(msg, isErr) {
         let t = document.getElementById('_homeWlToast');
@@ -1424,23 +1425,16 @@
         clearTimeout(_hmToastTimer);
         _hmToastTimer = setTimeout(() => { t.style.opacity='0'; t.style.transform='translateY(10px)'; }, 2800);
     }
-
-    // AJAX-enabled buttons
     document.querySelectorAll('.sm-wish-ajax').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault(); e.stopPropagation();
             const icon = this.querySelector('i');
             const wasActive = this.classList.contains('active');
-
             this.classList.toggle('active', !wasActive);
             icon.className = wasActive ? 'bi bi-heart' : 'bi bi-heart-fill';
-
             fetch(this.dataset.url, {
                 method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                },
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' },
             })
             .then(r => r.json())
             .then(data => {

@@ -282,6 +282,18 @@
                 <i class="fas fa-brain"></i> Phân tích khách hàng
             </a>
 
+            <a href="{{ route('admin.contacts.index') }}"
+                class="nav-item {{ request()->routeIs('admin.contacts.*') ? 'active' : '' }}"
+                style="position:relative">
+                <i class="fas fa-envelope-open-text"></i> Liên hệ
+                @php $newContactCount = \App\Models\Contact::where('status','new')->count(); @endphp
+                @if($newContactCount > 0)
+                <span style="margin-left:auto;background:#ef4444;color:#fff;border-radius:999px;font-size:10px;font-weight:800;padding:1px 7px;line-height:16px">
+                    {{ $newContactCount }}
+                </span>
+                @endif
+            </a>
+
             @if(Auth::user()->role === 'admin')
             <div class="nav-section">Hệ thống</div>
             <a href="{{ route('admin.users.index') }}"

@@ -378,32 +378,28 @@
         color: var(--samsung-black);
     }
 
-    /* Voucher Row */
     .voucher-row {
         display: flex;
         gap: 10px;
-        margin: 28px 0 20px;
-        padding-bottom: 20px;
-        border-bottom: 1px solid var(--samsung-gray-light);
+        margin-bottom: 16px;
     }
-
     .voucher-row input {
         flex: 1;
-        padding: 13px 16px;
-        border: 1px solid #cccccc;
-        border-radius: 8px;
+        border: 1.5px solid var(--samsung-gray-light);
+        border-radius: 10px;
+        padding: 11px 14px;
         font-size: 14px;
+        font-family: inherit;
         outline: none;
-        background: #ffffff;
+        transition: border-color .2s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
     }
     .voucher-row input:focus { border-color: var(--samsung-gray-dark); }
+    .voucher-row input.is-valid   { border-color: #16a34a; background: #f0fdf4; }
+    .voucher-row input.is-invalid { border-color: #dc2626; background: #fff5f5; }
 
     .voucher-row button {
-        padding: 0 20px;
-        border: none;
-        background: var(--samsung-gray-dark);
-        color: #ffffff;
-        border-radius: 8px;
         font-weight: 700;
         cursor: pointer;
         font-size: 14px;
@@ -613,13 +609,25 @@
                     @endforeach
 
                     <div class="voucher-row">
-                        <input type="text" name="voucher_code" placeholder="Mã giảm giá (nếu có)" value="{{ old('voucher_code') }}">
-                        <button type="button">Áp dụng</button>
+                        <input type="text" name="voucher_code" id="voucherInput"
+                               placeholder="Nhập mã giảm giá..." value="{{ old('voucher_code') }}"
+                               autocomplete="off" style="text-transform:uppercase">
+                        <button type="button" id="voucherBtn">
+                            <i class="fas fa-tag" id="voucherBtnIcon"></i>
+                            <span id="voucherBtnText">Áp dụng</span>
+                        </button>
                     </div>
+
+                    {{-- Feedback áp mã --}}
+                    <div class="voucher-feedback" id="voucherFeedback"></div>
 
                     <div class="summary-row">
                         <span>Tạm tính</span>
-                        <strong>{{ number_format($subtotal) }}đ</strong>
+                        <strong id="summarySubtotal">{{ number_format($subtotal) }}đ</strong>
+                    </div>
+                    <div class="summary-discount" id="discountRow">
+                        <span><i class="fas fa-tag" style="color:#16a34a"></i> Giảm giá (<span id="discountPct"></span>%)</span>
+                        <span class="discount-val" id="summaryDiscount"></span>
                     </div>
                     <div class="summary-row">
                         <span>Phí vận chuyển</span>
@@ -629,7 +637,7 @@
                     </div>
                     <div class="summary-total">
                         <span>Tổng cộng</span>
-                        <span>{{ number_format($subtotal) }}đ</span>
+                        <span id="summaryTotal">{{ number_format($subtotal) }}đ</span>
                     </div>
 
                     {{-- Nút Submit giữ nguyên ID để JS xử lý spinner --}}
@@ -686,6 +694,121 @@ document.getElementById('checkoutForm')?.addEventListener('submit', function () 
         btn.disabled = true;
     }
 });
+
+/* ============================================================
+   VOUCHER AJAX - Áp mã giảm giá ngay lập tức
+   ============================================================ */
+(function () {
+    const input      = document.getElementById('voucherInput');
+    const btn        = document.getElementById('voucherBtn');
+    const btnIcon    = document.getElementById('voucherBtnIcon');
+    const btnText    = document.getElementById('voucherBtnText');
+    const feedback   = document.getElementById('voucherFeedback');
+    const discRow    = document.getElementById('discountRow');
+    const discPct    = document.getElementById('discountPct');
+    const discVal    = document.getElementById('summaryDiscount');
+    const totalEl    = document.getElementById('summaryTotal');
+    const CSRF       = document.querySelector('meta[name="csrf-token"]').content;
+    const API_URL    = '{{ route("checkout.check-voucher") }}';
+
+    let currentCode  = null; // mã đang áp dụng thành công
+
+    function showFeedback(msg, type) {
+        feedback.innerHTML = (type === 'success' ? '✔️ ' : '⚠️ ') + msg;
+        feedback.className = 'voucher-feedback ' + type;
+        feedback.style.display = 'block';
+    }
+
+    function updateSummary(data) {
+        discPct.textContent = data.discount_percent;
+        discVal.textContent = data.discount_fmt;
+        totalEl.textContent = data.total_fmt;
+        discRow.style.display = 'flex';
+    }
+
+    function resetDiscount() {
+        discRow.style.display = 'none';
+        // Khôi phục total về subtotal gốc
+        const sub = document.getElementById('summarySubtotal').textContent;
+        totalEl.textContent = sub;
+        currentCode = null;
+        input.classList.remove('is-valid', 'is-invalid');
+    }
+
+    function applyVoucher() {
+        const code = input.value.trim().toUpperCase();
+        if (!code) {
+            showFeedback('Vui lòng nhập mã giảm giá.', 'error');
+            input.focus();
+            return;
+        }
+
+        // Trạng thái loading
+        btn.disabled = true;
+        btnIcon.className = 'fas fa-spinner fa-spin';
+        btnText.textContent = 'Đang kiểm tra...';
+        feedback.style.display = 'none';
+
+        fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept':        'application/json',
+                'X-CSRF-TOKEN':  CSRF,
+            },
+            body: JSON.stringify({ voucher_code: code }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false;
+
+            if (data.valid) {
+                // Thành công
+                currentCode = code;
+                input.classList.add('is-valid');
+                input.classList.remove('is-invalid');
+                btnIcon.className = 'fas fa-check';
+                btnText.textContent = 'Đã áp';
+                showFeedback(data.message, 'success');
+                updateSummary(data);
+            } else {
+                // Thất bại
+                input.classList.add('is-invalid');
+                input.classList.remove('is-valid');
+                btnIcon.className = 'fas fa-tag';
+                btnText.textContent = 'Áp dụng';
+                showFeedback(data.message, 'error');
+                resetDiscount();
+            }
+        })
+        .catch(() => {
+            btn.disabled = false;
+            btnIcon.className = 'fas fa-tag';
+            btnText.textContent = 'Áp dụng';
+            showFeedback('Không thể kết nối, vui lòng thử lại.', 'error');
+        });
+    }
+
+    // Click nút áp dụng
+    btn.addEventListener('click', applyVoucher);
+
+    // Nhấn Enter trong ô input
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); applyVoucher(); }
+    });
+
+    // Xóa mã thì reset lại
+    input.addEventListener('input', function () {
+        if (!this.value.trim()) {
+            feedback.style.display = 'none';
+            resetDiscount();
+            btnIcon.className = 'fas fa-tag';
+            btnText.textContent = 'Áp dụng';
+        }
+        // Tự in hoa
+        this.value = this.value.toUpperCase();
+    });
+})();
 
 /* ============================================================
    ANIMATIONS
