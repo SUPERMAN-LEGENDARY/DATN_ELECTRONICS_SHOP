@@ -617,6 +617,19 @@
     transform: scale(1.06);
 }
 
+#ai-chat-input:disabled {
+    opacity: .6;
+}
+#ai-send-btn:disabled,
+#ai-mic-btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+#ai-send-btn:disabled:hover {
+    background: var(--ai-black);
+    transform: none;
+}
+
 .ai-disclaimer {
     text-align: center;
     font-size: 10.5px;
@@ -640,6 +653,32 @@
     const chips      = document.getElementById('ai-quick-chips');
     const chatBody   = document.getElementById('ai-chat-body');
     const timeElem   = document.getElementById('ai-current-time');
+    const sendBtn    = document.getElementById('ai-send-btn');
+    const micBtn     = document.getElementById('ai-mic-btn');
+
+    // Session token phía client: chatbot.send cần 1 sessionToken ổn định để
+    // GeminiChatService::handle() load đúng lịch sử hội thoại (AiSession::session_token).
+    // Lưu trong localStorage để giữ nguyên phiên chat qua các lần load lại trang.
+    const SESSION_TOKEN_KEY = 'ai_chat_session_token';
+    function getSessionToken() {
+        let token = localStorage.getItem(SESSION_TOKEN_KEY);
+        if (!token) {
+            token = (window.crypto && crypto.randomUUID)
+                ? crypto.randomUUID()
+                : 'sess-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+            localStorage.setItem(SESSION_TOKEN_KEY, token);
+        }
+        return token;
+    }
+
+    // Chống bấm gửi/enter nhiều lần liên tiếp trong lúc đang chờ phản hồi từ server.
+    let isSending = false;
+    function setSendingState(sending) {
+        isSending = sending;
+        input.disabled = sending;
+        if (sendBtn) sendBtn.disabled = sending;
+        if (micBtn) micBtn.disabled = sending;
+    }
 
     function updateTime() {
         const now = new Date();
@@ -670,6 +709,7 @@
 
     function resetChat() {
         messages.innerHTML = '';
+        localStorage.removeItem(SESSION_TOKEN_KEY);
         if (chips) chips.style.display = 'flex';
         appendBot('Dạ em có thể giúp gì ạ.');
     }
@@ -714,14 +754,22 @@
         row.appendChild(bubble);
         messages.appendChild(row);
 
-        // Typewriter animation
+        // Typewriter animation. Tổng thời gian hiển thị bị CHẶN TRẦN (không phụ thuộc độ dài
+        // text) — trước đây tính theo ms/ký tự không giới hạn tổng, nên câu trả lời dài (gần
+        // 2048 token) có thể mất tới 20-30s mới hiện hết chữ. Giờ luôn hoàn thành trong khoảng
+        // 300ms (text ngắn) đến 1.8s (text dài), bằng cách hiện nhiều ký tự mỗi tick thay vì 1.
+        const TICK_MS = 20;
+        const totalDurationMs = Math.min(1800, Math.max(300, text.length * 12));
+        const totalTicks = Math.max(1, Math.round(totalDurationMs / TICK_MS));
+        const charsPerTick = Math.max(1, Math.ceil(text.length / totalTicks));
+
         let i = 0;
-        const speed = Math.max(10, Math.min(25, Math.round(2000 / Math.max(text.length, 1))));
         function typeChar() {
             if (i < text.length) {
-                bubble.textContent += text[i++];
+                i = Math.min(text.length, i + charsPerTick);
+                bubble.textContent = text.slice(0, i);
                 scrollDown();
-                setTimeout(typeChar, speed);
+                setTimeout(typeChar, TICK_MS);
             } else if (products && products.length) {
                 renderProducts(bubble, products);
             }
@@ -792,6 +840,7 @@
     /* Submit Form */
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (isSending) return; // đang chờ phản hồi lượt trước, chặn gửi chồng request
         const text = input.value.trim();
         if (!text) return;
 
@@ -799,6 +848,7 @@
 
         appendUser(text);
         input.value = '';
+        setSendingState(true);
         showTyping();
 
         try {
@@ -809,7 +859,7 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
                     'Accept': 'application/json',
                 },
-                body: JSON.stringify({ message: text }),
+                body: JSON.stringify({ message: text, session_token: getSessionToken() }),
             });
             const data = await res.json();
             hideTyping();
@@ -822,6 +872,9 @@
         } catch (err) {
             hideTyping();
             appendBot('Không thể kết nối tới máy chủ, vui lòng thử lại sau.');
+        } finally {
+            setSendingState(false);
+            input.focus();
         }
     });
 })();

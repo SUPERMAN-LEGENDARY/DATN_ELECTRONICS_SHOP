@@ -43,7 +43,13 @@ return [
     ],
 
 'gemini' => [
-    'key'   => env('GEMINI_API_KEY'),
+    // Nhiều key (rotation để đỡ bị giới hạn rate/quota theo từng key): GEMINI_API_KEYS="key1,key2,key3".
+    // Vẫn giữ GEMINI_API_KEY đơn lẻ để tương thích ngược — nếu cả 2 đều có, key đơn lẻ sẽ được
+    // gộp thêm vào danh sách (không trùng lặp).
+    'keys' => array_values(array_unique(array_filter(array_merge(
+        array_map('trim', explode(',', (string) env('GEMINI_API_KEYS', ''))),
+        [env('GEMINI_API_KEY')]
+    )))),
     'model' => env('GEMINI_MODEL', 'gemini-2.0-flash'),
 ],
 ];

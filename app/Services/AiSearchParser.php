@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Services\Concerns\HasStoreTaxonomy;
+use App\Services\Concerns\InteractsWithGemini;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Phân tích câu tìm kiếm tự do (thanh search trên header) thành bộ lọc có cấu trúc:
@@ -15,9 +15,7 @@ use Illuminate\Support\Facades\Log;
  */
 class AiSearchParser
 {
-    protected string $apiKey;
-    protected string $model;
-    protected string $endpoint;
+    use InteractsWithGemini, HasStoreTaxonomy;
 
     protected const DEFAULTS = [
         'keywords'   => '',
@@ -31,9 +29,7 @@ class AiSearchParser
 
     public function __construct()
     {
-        $this->apiKey   = config('services.gemini.key');
-        $this->model    = config('services.gemini.model', 'gemini-2.5-flash');
-        $this->endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent";
+        $this->initGeminiClient();
     }
 
     /**
@@ -57,20 +53,35 @@ class AiSearchParser
 
     protected function callAndParse(string $query): array
     {
+        // Danh sách category/brand/thuộc tính THẬT trong DB — lấy động qua HasStoreTaxonomy
+        // (dùng CHUNG với GeminiChatService) thay vì hardcode, để search trên thanh header
+        // không lọc sai với sản phẩm ngoài danh sách category/thuộc tính cũ.
+        $categorySlugs = $this->allowedCategorySlugs();
+        $categoryList  = $categorySlugs ? implode(', ', $categorySlugs) : '(chưa có category nào trong hệ thống)';
+
+        $brandSlugs = $this->allowedBrandSlugs();
+        $brandList  = $brandSlugs ? implode(', ', $brandSlugs) : '(chưa có brand nào trong hệ thống)';
+
+        $attributeNames = $this->allowedAttributeNames();
+        $attributeList  = $attributeNames ? implode(', ', $attributeNames) : '(chưa có thuộc tính nào trong hệ thống)';
+
         $system = <<<PROMPT
 Bạn là bộ phân tích câu tìm kiếm cho thanh search của một cửa hàng điện tử online. Đọc câu tìm kiếm của khách
 rồi CHỈ trả về một JSON object hợp lệ, không thêm chữ nào khác, không markdown, không giải thích. Cấu trúc bắt buộc:
 
 {
   "keywords": string,            // từ khóa chính còn lại sau khi đã tách giá/thuộc tính, vd "điện thoại", "tai nghe chống ồn"
-  "category": string|null,       // một trong: dien-thoai, laptop, tai-nghe, may-tinh-bang, phu-kien, hoặc null nếu không rõ
-  "brand": string|null,          // tên hãng viết thường không dấu, vd apple, samsung, xiaomi, sony, dell, hoặc null
+  "category": string|null,       // CHỈ dùng đúng slug có trong danh sách category thật sau: {$categoryList}
+                                  // Nếu không có slug nào khớp rõ ràng, để null (không đoán bừa sang slug khác).
+  "brand": string|null,          // CHỈ dùng đúng slug có trong danh sách brand thật sau: {$brandList}
+                                  // Nếu không có slug nào khớp rõ ràng, để null (không đoán bừa sang slug khác).
   "price_min": number|null,
   "price_max": number|null,
   "sort": "price_asc" | "price_desc" | "newest" | "rating" | null,
-  "attributes": object           // cặp thuộc tính kỹ thuật, CHỈ dùng đúng tên trong danh sách:
-                                  // RAM, Bộ nhớ trong, Màn hình, Pin, CPU, GPU, Hệ điều hành, Màu sắc, Trọng lượng, Kết nối
-                                  // vd {"RAM":"8GB","Màu sắc":"đỏ"}. Rỗng {} nếu khách không nêu thuộc tính cụ thể.
+  "attributes": object           // cặp thuộc tính kỹ thuật, CHỈ dùng đúng tên trong danh sách sau:
+                                  // {$attributeList}
+                                  // vd {"RAM":"8GB","Màu sắc":"đỏ"}. Rỗng {} nếu khách không nêu thuộc tính cụ thể,
+                                  // hoặc nếu khách hỏi thuộc tính không có trong danh sách trên.
 }
 
 Quy tắc:
@@ -86,7 +97,7 @@ Quy tắc:
 - Nếu không chắc, đặt giá trị null (hoặc {} cho attributes) thay vì đoán bừa.
 PROMPT;
 
-        $raw = $this->callGemini($system, "Câu tìm kiếm: \"{$query}\"");
+        $raw = $this->callGemini($system, "Câu tìm kiếm: \"{$query}\"", jsonMode: true);
         $parsed = json_decode($this->stripJsonFence($raw), true);
 
         if (!is_array($parsed)) {
@@ -96,47 +107,20 @@ PROMPT;
         $result = array_merge(self::DEFAULTS, $parsed);
         $result['attributes'] = is_array($result['attributes'] ?? null) ? array_filter($result['attributes']) : [];
 
+        // An toàn thêm: nếu Gemini lỡ trả về category/brand ngoài danh sách slug thật (dù đã
+        // dặn trong prompt), bỏ về null thay vì để ProductController query nhầm slug không tồn tại.
+        if (!empty($result['category']) && !in_array($result['category'], $categorySlugs, true)) {
+            $result['category'] = null;
+        }
+        if (!empty($result['brand']) && !in_array($result['brand'], $brandSlugs, true)) {
+            $result['brand'] = null;
+        }
+
         // Nếu AI không tách được từ khóa nào, fallback về nguyên văn câu tìm kiếm
         if (trim((string) $result['keywords']) === '' && empty($result['attributes']) && empty($result['category'])) {
             $result['keywords'] = $query;
         }
 
         return $result;
-    }
-
-    protected function callGemini(string $systemPrompt, string $userPrompt): string
-    {
-        $body = [
-            'system_instruction' => ['parts' => [['text' => $systemPrompt]]],
-            'contents'           => [['role' => 'user', 'parts' => [['text' => $userPrompt]]]],
-            'generationConfig'   => [
-                'temperature'      => 0.1,
-                'maxOutputTokens'  => 512,
-                'responseMimeType' => 'application/json',
-            ],
-        ];
-
-        try {
-            $response = Http::timeout(15)
-                ->withHeaders(['Content-Type' => 'application/json'])
-                ->post($this->endpoint . '?key=' . $this->apiKey, $body);
-
-            if ($response->failed()) {
-                Log::error('AiSearchParser Gemini error', ['status' => $response->status(), 'body' => $response->body()]);
-                return '{}';
-            }
-
-            return data_get($response->json(), 'candidates.0.content.parts.0.text', '{}');
-        } catch (\Throwable $e) {
-            Log::error('AiSearchParser Gemini call failed: ' . $e->getMessage());
-            return '{}';
-        }
-    }
-
-    protected function stripJsonFence(string $text): string
-    {
-        $text = trim($text);
-        $text = preg_replace('/^```json\s*|^```\s*|```$/m', '', $text);
-        return trim($text);
     }
 }
