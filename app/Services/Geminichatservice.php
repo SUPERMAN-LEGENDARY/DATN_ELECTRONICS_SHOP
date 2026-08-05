@@ -54,7 +54,18 @@ class GeminiChatService
         $products = collect();
         $compareTable = null;
 
-        if (in_array($intent['intent'], ['search', 'buy'])) {
+        // Trước đây chỉ tìm sản phẩm khi intent === 'search'/'buy'. Vấn đề: nếu Gemini phân loại
+        // nhầm intent (vd do lượt trước vừa nói về voucher/tin tức/đơn hàng khiến ngữ cảnh "chảy"
+        // sang, gắn nhầm intent='support' cho câu hỏi sản phẩm rõ ràng tiếp theo) thì bước tìm sản
+        // phẩm bị BỎ QUA HOÀN TOÀN dù Gemini vẫn trích đúng keywords/compare_names — khiến bot báo
+        // "không tìm thấy" một cách oan uổng. Nới điều kiện: hễ Gemini có trích ra được từ khóa
+        // hoặc tên sản phẩm cụ thể (dù intent bị gắn nhãn support/unknown), vẫn cứ thử tìm — không
+        // để cả bước tìm kiếm phụ thuộc 100% vào việc phân loại intent phải tuyệt đối chính xác.
+        $looksLikeProductQuery = trim((string) ($intent['keywords'] ?? '')) !== '' || !empty($intent['compare_names']);
+        $shouldSearchProducts = in_array($intent['intent'], ['search', 'buy'])
+            || ($looksLikeProductQuery && in_array($intent['intent'], ['support', 'unknown']));
+
+        if ($shouldSearchProducts) {
             $products = $this->searchProducts($intent);
 
             // Fallback: nếu không ra kết quả và đây có vẻ là câu hỏi nối tiếp (không có lịch sử trống),
@@ -618,7 +629,7 @@ PROMPT;
     {
         $userId = Auth::id();
 
-        $vouchers = Voucher::where('is_active', true)
+        $query = Voucher::where('is_active', true)
             ->where(function ($q) use ($userId) {
                 $q->whereNull('assigned_user_id')
                   ->orWhere('assigned_user_id', $userId);
@@ -631,8 +642,22 @@ PROMPT;
             })
             ->whereColumn('used_count', '<', 'usage_limit')
             ->orderBy('expires_at')
-            ->limit(10)
-            ->get();
+            ->limit(10);
+
+        // DEBUG TẠM THỜI: log SQL/bindings/giờ hệ thống thật lúc chạy để chẩn đoán vì sao
+        // activeVouchersForPrompt() trả về rỗng dù DB có voucher còn hạn. Xoá sau khi debug xong.
+        \Illuminate\Support\Facades\Log::info('activeVouchersForPrompt debug', [
+            'now_app_tz'       => now()->toDateTimeString(),
+            'app_timezone'     => config('app.timezone'),
+            'db_timezone'      => config('database.connections.' . config('database.default') . '.timezone'),
+            'sql'              => $query->toSql(),
+            'bindings'         => $query->getBindings(),
+            'auth_user_id'     => $userId,
+            'matched_count'    => (clone $query)->count(),
+            'raw_voucher_rows' => Voucher::withoutGlobalScopes()->get(['id', 'code', 'is_active', 'starts_at', 'expires_at', 'used_count', 'usage_limit', 'assigned_user_id', 'deleted_at'])->toArray(),
+        ]);
+
+        $vouchers = $query->get();
 
         if ($vouchers->isEmpty()) {
             return '';
@@ -946,7 +971,7 @@ PROMPT;
         ];
     }
 
-    protected function formatHistoryShort(array $history, int $maxTurns = 6): string
+    protected function formatHistoryShort(array $history, int $maxTurns = 10): string
     {
         if (empty($history)) {
             return '(chưa có lịch sử)';
@@ -986,8 +1011,13 @@ PROMPT;
         $messages[] = ['role' => 'user', 'content' => $userMessage, 'at' => now()->toIso8601String()];
         $messages[] = ['role' => 'bot', 'content' => $reply, 'at' => now()->toIso8601String()];
 
+        // CHỈ lưu keywords khi intent thực sự liên quan sản phẩm (search/buy/compare/consult).
+        // Trước đây lưu vô điều kiện cho MỌI intent — nếu khách hỏi voucher/tin tức/đơn hàng xen
+        // giữa, keywords của lượt đó (vd "mã giảm giá", "tin tức mới nhất") sẽ đè lên làm từ khóa
+        // "gần nhất", khiến fallback ở handle() tìm nhầm khi khách quay lại hỏi sản phẩm mơ hồ.
+        $productIntents = ['search', 'buy', 'compare', 'consult'];
         $keywords = $session->search_keywords ?? [];
-        if (!empty($intent['keywords'])) {
+        if (in_array($intent['intent'], $productIntents, true) && !empty($intent['keywords'])) {
             $keywords[] = $intent['keywords'];
             $keywords = array_slice(array_unique($keywords), -30);
         }
