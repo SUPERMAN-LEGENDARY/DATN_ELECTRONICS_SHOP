@@ -129,12 +129,12 @@ body {
 .wl-card-img {
     width: 100%;
     aspect-ratio: 1;
-    background: #ffffff;
+    background: #f7f7f7;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    border-bottom: 1px solid #f4f4f4;
+    border-bottom: 1px solid #f0f0f0;
 }
 .wl-card-img img {
     width: 90%; height: 90%;

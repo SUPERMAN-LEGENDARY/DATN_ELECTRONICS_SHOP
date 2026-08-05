@@ -43,8 +43,10 @@ class NewPasswordController extends Controller
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user) use ($request) {
+                // User model có cast 'password' => 'hashed'
+                // nên KHÔNG gọi Hash::make() ở đây để tránh hash 2 lần
                 $user->forceFill([
-                    'password' => Hash::make($request->password),
+                    'password'       => $request->password,
                     'remember_token' => Str::random(60),
                 ])->save();
 

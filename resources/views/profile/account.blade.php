@@ -473,6 +473,9 @@ body {
                         <input type="password" name="password"
                                class="form-input {{ $errors->has('password') ? 'is-invalid' : '' }}"
                                placeholder="••••••••">
+                        <small style="color:#888;font-size:12px;margin-top:4px;display:block">
+                            Tối thiểu 8 ký tự, gồm chữ cái và chữ số.
+                        </small>
                         @error('password')<span class="invalid-msg"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                     </div>
 

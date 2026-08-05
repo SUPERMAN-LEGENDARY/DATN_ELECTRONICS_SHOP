@@ -151,8 +151,11 @@ class ProfileController extends Controller
      */
     public function updatePassword(UpdatePasswordRequest $request): RedirectResponse
     {
+        // Lưu ý: User model có cast 'password' => 'hashed'
+        // nên Laravel tự động hash khi gán giá trị.
+        // KHÔNG gọi Hash::make() ở đây để tránh hash 2 lần.
         $request->user()->update([
-            'password' => Hash::make($request->password),
+            'password' => $request->password,
         ]);
 
         return redirect()

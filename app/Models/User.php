@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPasswordNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -88,5 +89,13 @@ class User extends Authenticatable
     public function unreadNotificationsCount(): int
     {
         return $this->notifications()->where('is_read', false)->count();
+    }
+
+    /**
+     * Gửi email đặt lại mật khẩu bằng tiếng Việt.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }

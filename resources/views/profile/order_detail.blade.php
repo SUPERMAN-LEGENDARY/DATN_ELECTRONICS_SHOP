@@ -245,8 +245,8 @@ body {
     width: 82px; height: 82px; flex-shrink: 0;
     object-fit: contain; border-radius: 10px;
     border: 1px solid #e5e5e5;
-    background: #ffffff;
-    padding: 4px; box-sizing: border-box;
+    background: #f7f7f7;
+    padding: 8px; box-sizing: border-box;
     transition: transform .3s cubic-bezier(.16,1,.3,1);
 }
 .product-row:hover .product-img { transform: scale(1.04); }

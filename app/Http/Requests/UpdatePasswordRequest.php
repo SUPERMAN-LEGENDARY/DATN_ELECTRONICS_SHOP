@@ -25,8 +25,7 @@ class UpdatePasswordRequest extends FormRequest
                 'confirmed',
                 Password::min(8)
                     ->letters()
-                    ->numbers()
-                    ->mixedCase(),
+                    ->numbers(),
             ],
         ];
     }
@@ -34,12 +33,14 @@ class UpdatePasswordRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'current_password.required' => 'Vui lòng nhập mật khẩu hiện tại.',
+            'current_password.required'         => 'Vui lòng nhập mật khẩu hiện tại.',
             'current_password.current_password' => 'Mật khẩu hiện tại không đúng.',
 
-            'password.required' => 'Vui lòng nhập mật khẩu mới.',
+            'password.required'  => 'Vui lòng nhập mật khẩu mới.',
             'password.confirmed' => 'Xác nhận mật khẩu không khớp.',
-            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
+            'password.min'       => 'Mật khẩu phải có ít nhất 8 ký tự.',
+            'password.letters'   => 'Mật khẩu phải chứa ít nhất 1 chữ cái.',
+            'password.numbers'   => 'Mật khẩu phải chứa ít nhất 1 chữ số.',
         ];
     }
 }

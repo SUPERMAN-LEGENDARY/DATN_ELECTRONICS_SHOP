@@ -324,116 +324,148 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+{{-- CKEditor 5 (phiên bản mới nhất, bảo mật) --}}
+<script src="https://cdn.ckeditor.com/ckeditor5/41.3.1/classic/ckeditor.js"></script>
 <script>
-    // Khởi tạo CKEditor cho ô Mô tả ngắn (toolbar gọn) và Nội dung (đầy đủ)
-    CKEDITOR.replace('excerpt', {
-        height: 130,
-        toolbar: [{
-                name: 'basicstyles',
-                items: ['Bold', 'Italic', 'Underline']
-            },
-            {
-                name: 'paragraph',
-                items: ['NumberedList', 'BulletedList']
-            },
-            {
-                name: 'links',
-                items: ['Link', 'Unlink']
-            },
+/* ──────────────────────────────────────────────────────────
+   CKEditor 5 — Mô tả ngắn (excerpt): toolbar gọn
+   ────────────────────────────────────────────────────────── */
+let excerptEditor = null;
+ClassicEditor
+    .create(document.querySelector('#excerpt'), {
+        toolbar: [
+            'bold', 'italic', 'underline', '|',
+            'bulletedList', 'numberedList', '|',
+            'link', 'undo', 'redo'
         ],
+        language: 'vi',
+    })
+    .then(editor => {
+        excerptEditor = editor;
+        // Giới hạn chiều cao vùng soạn thảo
+        editor.editing.view.change(writer => {
+            writer.setStyle('min-height', '110px', editor.editing.view.document.getRoot());
+            writer.setStyle('max-height', '200px', editor.editing.view.document.getRoot());
+        });
+    })
+    .catch(error => {
+        console.error('CKEditor excerpt error:', error);
     });
 
-    CKEDITOR.replace('content', {
-        height: 420,
+/* ──────────────────────────────────────────────────────────
+   CKEditor 5 — Nội dung chính (content): toolbar đầy đủ
+   ────────────────────────────────────────────────────────── */
+let contentEditor = null;
+ClassicEditor
+    .create(document.querySelector('#content'), {
+        toolbar: [
+            'heading', '|',
+            'bold', 'italic', 'underline', 'strikethrough', '|',
+            'link', 'blockQuote', 'code', '|',
+            'bulletedList', 'numberedList', '|',
+            'insertTable', '|',
+            'outdent', 'indent', '|',
+            'undo', 'redo'
+        ],
+        language: 'vi',
+        table: {
+            contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells']
+        },
+    })
+    .then(editor => {
+        contentEditor = editor;
+        editor.editing.view.change(writer => {
+            writer.setStyle('min-height', '420px', editor.editing.view.document.getRoot());
+        });
+    })
+    .catch(error => {
+        console.error('CKEditor content error:', error);
     });
 
-    function previewThumb(input) {
-        const preview = document.getElementById('thumb-preview');
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                preview.src = e.target.result;
-                preview.classList.add('show');
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
+/* ──────────────────────────────────────────────────────────
+   Preview thumbnail
+   ────────────────────────────────────────────────────────── */
+function previewThumb(input) {
+    const preview = document.getElementById('thumb-preview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preview.classList.add('show');
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+/* ──────────────────────────────────────────────────────────
+   Validate + sync CKEditor5 → textarea khi submit
+   ────────────────────────────────────────────────────────── */
+(function () {
+    const form = document.getElementById('newsForm');
+
+    function setError(inputId, message) {
+        const input    = document.getElementById(inputId);
+        const errorDiv = document.getElementById(inputId + '-error');
+        if (input)    input.style.borderColor = '#C62828';
+        if (errorDiv) { errorDiv.textContent = message; errorDiv.style.display = 'block'; }
     }
 
-    // ── Validate form ─────────────────────────────────────────────
-    (function() {
-        const form = document.getElementById('newsForm');
+    function clearError(inputId) {
+        const input    = document.getElementById(inputId);
+        const errorDiv = document.getElementById(inputId + '-error');
+        if (input)    input.style.borderColor = '';
+        if (errorDiv) { errorDiv.textContent = ''; errorDiv.style.display = 'none'; }
+    }
 
-        function setError(inputId, message) {
-            const input = document.getElementById(inputId);
-            const errorDiv = document.getElementById(inputId + '-error');
-            if (input) input.style.borderColor = '#C62828';
-            if (errorDiv) {
-                errorDiv.textContent = message;
-                errorDiv.style.display = 'block';
-            }
+    ['title', 'content', 'news_category_id'].forEach(id => {
+        document.getElementById(id)?.addEventListener('input',  () => clearError(id));
+        document.getElementById(id)?.addEventListener('change', () => clearError(id));
+    });
+
+    form.addEventListener('submit', function (e) {
+        // Đồng bộ CKEditor 5 → textarea gốc trước khi validate
+        if (excerptEditor) {
+            document.getElementById('excerpt').value = excerptEditor.getData();
+        }
+        if (contentEditor) {
+            document.getElementById('content').value = contentEditor.getData();
         }
 
-        function clearError(inputId) {
-            const input = document.getElementById(inputId);
-            const errorDiv = document.getElementById(inputId + '-error');
-            if (input) input.style.borderColor = '';
-            if (errorDiv) {
-                errorDiv.textContent = '';
-                errorDiv.style.display = 'none';
-            }
+        let isValid = true;
+
+        // Tiêu đề
+        const title = document.getElementById('title');
+        if (!title || !title.value.trim()) {
+            setError('title', 'Vui lòng nhập tiêu đề bài viết.');
+            isValid = false;
+        } else {
+            clearError('title');
         }
 
-        ['title', 'content', 'news_category_id'].forEach(id => {
-            document.getElementById(id)?.addEventListener('input', () => clearError(id));
-            document.getElementById(id)?.addEventListener('change', () => clearError(id));
-        });
+        // Nội dung
+        const content = document.getElementById('content');
+        if (!content || !content.value.trim()) {
+            setError('content', 'Vui lòng nhập nội dung bài viết.');
+            isValid = false;
+        } else {
+            clearError('content');
+        }
 
-        form.addEventListener('submit', function(e) {
-            let isValid = true;
+        // Danh mục
+        const category = document.getElementById('news_category_id');
+        if (!category || !category.value) {
+            setError('news_category_id', 'Vui lòng chọn danh mục.');
+            isValid = false;
+        } else {
+            clearError('news_category_id');
+        }
 
-            // Đồng bộ dữ liệu từ CKEditor về <textarea> gốc trước khi kiểm tra
-            if (typeof CKEDITOR !== 'undefined') {
-                if (CKEDITOR.instances.content) CKEDITOR.instances.content.updateElement();
-                if (CKEDITOR.instances.excerpt) CKEDITOR.instances.excerpt.updateElement();
-            }
-
-            // Tiêu đề
-            const title = document.getElementById('title');
-            if (!title || !title.value.trim()) {
-                setError('title', 'Vui lòng nhập tiêu đề bài viết.');
-                isValid = false;
-            } else {
-                clearError('title');
-            }
-
-            // Nội dung
-            const content = document.getElementById('content');
-            if (!content || !content.value.trim()) {
-                setError('content', 'Vui lòng nhập nội dung bài viết.');
-                isValid = false;
-            } else {
-                clearError('content');
-            }
-
-            // Danh mục
-            const category = document.getElementById('news_category_id');
-            if (!category || !category.value) {
-                setError('news_category_id', 'Vui lòng chọn danh mục.');
-                isValid = false;
-            } else {
-                clearError('news_category_id');
-            }
-
-            if (!isValid) {
-                e.preventDefault();
-                const firstError = form.querySelector('[style*="border-color: rgb(198, 40, 40)"], [style*="border-color:#C62828"]');
-                if (firstError) firstError.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
-            }
-        });
-    })();
+        if (!isValid) {
+            e.preventDefault();
+            const firstError = form.querySelector('[style*="border-color: rgb(198, 40, 40)"], [style*="border-color:#C62828"]');
+            if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+})();
 </script>
 @endpush

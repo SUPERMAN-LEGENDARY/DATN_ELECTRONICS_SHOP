@@ -412,10 +412,10 @@
     background: var(--sm-surface); overflow: hidden; margin-bottom: 16px;
 }
 .sm-product-media img {
-    width: 100%; height: 100%; object-fit: contain; padding: 10%;
+    width: 100%; height: 100%; object-fit: contain; padding: 8%;
     transition: transform .6s var(--sm-ease);
 }
-.sm-product:hover .sm-product-media img { transform: scale(1.07); }
+.sm-product:hover .sm-product-media img { transform: scale(1.06); }
 .sm-product-ph {
     width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
     color: #c2c2c2; font-size: 26px;
