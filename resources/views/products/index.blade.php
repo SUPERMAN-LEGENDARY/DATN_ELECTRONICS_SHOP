@@ -71,57 +71,67 @@ body {
 /* ============================================================
    CATEGORY TILES (Samsung "Galaxy Tab / Watch / Buds" row)
    ============================================================ */
+/* CATEGORY TILES — nhỏ gọn */
 .cat-tiles {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(0, 1fr);
-    gap: 8px;
-    margin-bottom: 40px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
     overflow-x: auto;
     scrollbar-width: none;
 }
+
 .cat-tiles::-webkit-scrollbar { display: none; }
 
 .cat-tile {
+    width: 150px;
+    min-width: 150px;
+    height: 96px;
+    min-height: 96px;
+    box-sizing: border-box;
     background: var(--sam-gray);
     border: 1px solid transparent;
-    border-radius: 16px;
-    min-width: 168px;
-    min-height: 118px;
-    padding: 16px;
+    border-radius: 14px;
+    padding: 10px 14px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 6px;
     text-align: center;
     text-decoration: none;
     color: var(--sam-black);
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
-    line-height: 1.35;
+    line-height: 1.25;
     transition: background .2s, border-color .2s;
 }
+
 .cat-tile:hover { background: var(--sam-gray-2); }
+
 .cat-tile.active {
     background: var(--sam-white);
     border-color: var(--sam-black);
 }
+
 .cat-tile__img {
-    width: 52px;
-    height: 52px;
-    object-fit: cover;
-    border-radius: 10px;
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+    border-radius: 7px;
     flex-shrink: 0;
 }
+
 .cat-tile__icon {
-    width: 40px;
-    height: 40px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #c9c9c9;
-    font-size: 18px;
+    font-size: 14px;
     flex-shrink: 0;
 }
 
@@ -430,6 +440,7 @@ body {
 
 .product-card-img {
     height: 220px;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -437,16 +448,29 @@ body {
     overflow: hidden;
     border-radius: 12px;
     background: var(--sam-gray);
+    padding: 8px;
+    box-sizing: border-box;
 }
+
+/* Ảnh sản phẩm: đầy khung vừa phải, không crop và không méo */
 .product-card-img img {
+    display: block;
     width: 100%;
     height: 100%;
+    min-width: 0;
+    min-height: 0;
     object-fit: contain;
-    padding: 12px;
-    display: block;
-    transition: transform .3s cubic-bezier(.33,0,.3,1);
+    object-position: center;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    image-rendering: auto;
+    transition: none;
 }
-.product-card:hover .product-card-img img { transform: scale(1.05); }
+
+.product-card:hover .product-card-img img {
+    transform: none;
+}
 .img-placeholder { color: #c9c9c9; }
 .product-card-img:has(.img-placeholder) {
     display: flex;
@@ -791,7 +815,12 @@ body {
 
             <a href="{{ route('products.show', $product->slug) }}" class="product-card-img" tabindex="-1" aria-hidden="true">
                 @if($product->first_image)
-                    <img src="{{ $product->first_image }}" alt="{{ $product->name }}" loading="lazy">
+                    <img
+    src="{{ $product->first_image }}"
+    alt="{{ $product->name }}"
+    loading="lazy"
+    decoding="async"
+>
                 @else
                     <i class="fas fa-image fa-2x img-placeholder"></i>
                 @endif

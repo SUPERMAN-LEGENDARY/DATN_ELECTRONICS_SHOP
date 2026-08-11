@@ -439,7 +439,8 @@
                 <li><a href="{{ url('/') }}" class="{{ request()->is('/') ? 'active' : '' }}">Trang chủ</a></li>
                 <li><a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'active' : '' }}">Sản phẩm</a></li>
                 <li><a href="{{ route('news.index') }}" class="{{ request()->routeIs('news.*') ? 'active' : '' }}">Tin tức</a></li>
-                <li><a href="{{ route('contact.index') }}" class="{{ request()->routeIs('contact.*') ? 'active' : '' }}">Liên hệ</a></li>
+                <li><a href="{{ route('about.index') }}">Giới thiệu</a></li>
+                <li><a href="{{ route('contact.index') }}" class="{{ request()->routeIs('contact.*') ? 'active' : '' }}">Liên hệ & Hỗ trợ</a></li>
             </ul>
 
             <div class="sm-actions">
@@ -483,9 +484,7 @@
                     </div>
                 </div>
 
-                <a href="{{ route('profile.account') }}" class="sm-icon-btn" aria-label="Tài khoản">
-                    <i class="bi bi-person"></i>
-                </a>
+                <a href="{{ route('profile') }}" class="sm-icon-btn" aria-label="Tài khoản"> <i class="bi bi-person"></i> </a>
                 @else
                 <a href="{{ route('login') }}" class="sm-icon-btn" aria-label="Đăng nhập">
                     <i class="bi bi-person"></i>

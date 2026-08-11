@@ -408,19 +408,43 @@
 }
 .sm-product:hover { transform: translateY(-6px); box-shadow: 0 18px 44px rgba(0,0,0,.1); }
 .sm-product-media {
-    position: relative; aspect-ratio: 1/1; border-radius: 16px;
-    background: var(--sm-surface); overflow: hidden; margin-bottom: 16px;
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border-radius: 16px;
+    background: var(--sm-surface);
+    overflow: hidden;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
+/* Ảnh sản phẩm: giữ nguyên tỷ lệ, không kéo méo và không phóng đại ảnh nhỏ */
 .sm-product-media img {
-    width: 100%; height: 100%; object-fit: contain; padding: 8%;
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center;
+    padding: 0;
+    margin: auto;
+    box-sizing: border-box;
+    image-rendering: auto;
     transition: transform .6s var(--sm-ease);
 }
-.sm-product:hover .sm-product-media img { transform: scale(1.06); }
+
+/* Chỉ zoom rất nhẹ để tránh làm ảnh nguồn nhỏ bị vỡ */
+.sm-product:hover .sm-product-media img {
+    transform: scale(1.015);
+}
 .sm-product-ph {
     width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
     color: #c2c2c2; font-size: 26px;
 }
 .sm-wish {
+    border: none;
     position: absolute; top: 10px; right: 10px; z-index: 3;
     width: 34px; height: 34px; border-radius: 50%;
     background: rgba(255,255,255,.9); border: 1px solid rgba(0,0,0,.06);
@@ -477,14 +501,38 @@
 /* ============================================================
    10. NEWS
    ============================================================ */
-.sm-news { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.sm-news { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
 .sm-news-card { display: block; color: var(--sm-ink); }
 .sm-news-media {
-    aspect-ratio: 16/10; border-radius: var(--sm-radius);
-    overflow: hidden; background: var(--sm-surface); margin-bottom: 16px;
+    aspect-ratio: 16 / 10;
+    border-radius: var(--sm-radius);
+    overflow: hidden;
+    background: var(--sm-surface);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-.sm-news-media img { width: 100%; height: 100%; object-fit: cover; transition: transform .7s var(--sm-ease); }
-.sm-news-card:hover .sm-news-media img { transform: scale(1.06); }
+
+/* Ảnh tin tức: giữ nguyên tỷ lệ, không crop và không phóng đại ảnh nguồn nhỏ */
+.sm-news-media img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center;
+    margin: auto;
+    box-sizing: border-box;
+    image-rendering: auto;
+    transition: transform .7s var(--sm-ease);
+}
+
+/* Không zoom mạnh ảnh tin tức vì dễ làm ảnh nguồn nhỏ bị nhòe */
+.sm-news-card:hover .sm-news-media img {
+    transform: scale(1.015);
+}
 .sm-news-ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #c2c2c2; font-size: 26px; }
 .sm-news-title {
     font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 19px; line-height: 1.28;
@@ -938,7 +986,7 @@
                     </div>
                     <div class="sm-product-brand">{{ $product->brand->name ?? '' }}</div>
                     <div class="sm-product-name">{{ $product->name }}</div>
-                    <div class="sm-product-price">{{ number_format($product->sale_price) }}đ</div>
+                    <div class="sm-product-price">{{ number_format($product->sale_price > 0 ? $product->sale_price : $product->price) }}đ</div>
                     <div class="sm-product-buy">
                         <span class="sm-btn sm-btn--dark sm-btn--sm">Xem chi tiết</span>
                     </div>
@@ -975,9 +1023,13 @@
                             <i class="bi {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'bi-heart-fill' : 'bi-heart' }}"></i>
                         </button>
                         @else
-                        <a href="{{ route('login') }}" class="sm-wish" aria-label="Yêu thích" onclick="event.stopPropagation()">
-                            <i class="bi bi-heart"></i>
-                        </a>
+                            <button
+                                type="button"
+                                class="sm-wish"
+                                aria-label="Yêu thích"
+                                onclick="event.stopPropagation();window.location='{{ route('login') }}'">
+                                <i class="bi bi-heart"></i>
+                            </button>
                         @endauth
                         @if($product->first_image)
                         <img src="{{ $product->first_image }}" alt="{{ $product->name }}" loading="lazy">

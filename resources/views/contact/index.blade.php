@@ -28,6 +28,71 @@ body { background: #ffffff; color: #000000; }
 }
 
 /* ============================================================
+   TOP BANNER — thống kê + tìm kiếm nhanh (kiểu OPPO Support)
+   ============================================================ */
+.top-banner {
+    position: relative;
+    color: #fff; overflow: hidden;
+}
+.banner-bg-layer {
+    position: absolute; inset: 0; z-index: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #3a463a; /* màu nền dự phòng nếu ảnh chưa tải xong / lỗi link */
+    opacity: 0; transition: opacity .7s ease;
+}
+.banner-bg-layer.is-active { opacity: 1; }
+.top-banner { min-height: 420px; }
+.top-banner .container {
+    max-width: 1200px; margin: 0 auto; padding: 56px 24px 40px;
+    position: relative; z-index: 2;
+}
+.top-banner .stat-number {
+    font-size: 44px; font-weight: 800; line-height: 1;
+    display: inline-block; margin-right: 10px;
+}
+.top-banner .stat-label { font-size: 18px; font-weight: 500; opacity: .95; }
+.top-banner .banner-desc {
+    max-width: 560px; font-size: 16px; line-height: 1.5;
+    margin: 18px 0 32px; opacity: .92;
+}
+
+.top-search-box { position: relative; max-width: 520px; margin-bottom: 18px; }
+.top-search-box input {
+    width: 100%; border: none; border-radius: 12px;
+    padding: 14px 60px 14px 18px; font-size: 15px;
+    outline: none; font-family: inherit;
+}
+.top-search-box button {
+    position: absolute; right: 0; top: 0; bottom: 0;
+    width: 54px; border: none; border-radius: 0 12px 12px 0;
+    background: #181818; color: #fff; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+
+/* thanh danh mục dưới cùng banner */
+.top-category-bar {
+    position: relative; z-index: 3;
+    background: rgba(0,0,0,.28);
+    display: flex; justify-content: center; gap: 64px;
+    flex-wrap: wrap; padding: 22px 24px;
+}
+.top-category-bar .cat-item {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: #fff; text-decoration: none; min-width: 60px;
+}
+.top-category-bar .cat-item i { font-size: 22px; }
+.top-category-bar .cat-item span { font-size: 14px; font-weight: 500; }
+.top-category-bar .cat-item.active { background: rgba(255,255,255,.14); border-radius: 10px; padding: 10px 18px; margin: -10px 0; }
+
+@media (max-width: 768px) {
+    .top-banner { min-height: 340px; }
+    .top-banner .stat-number { font-size: 32px; }
+    .top-category-bar { gap: 32px; }
+}
+
+/* ============================================================
    HERO — "Chúng tôi có thể giúp gì cho bạn?"
    ============================================================ */
 .support-hero { padding: 64px 0 56px; text-align: center; }
@@ -189,6 +254,72 @@ body { background: #ffffff; color: #000000; }
     {{ session('success') }}
 </div>
 @endif
+
+{{-- ===== TOP BANNER: thống kê người dùng + tìm kiếm nhanh ===== --}}
+@php
+    // Ảnh nền riêng cho từng thương hiệu (key = slug của brand).
+    // Thay các link bên dưới bằng ảnh thật của bạn.
+    // Ảnh sản phẩm thật, cấp phép mở (Wikimedia Commons - CC BY-SA, được phép dùng lại nếu ghi nguồn)
+    // Special:FilePath là link trực tiếp chính thức của Wikimedia, luôn trỏ thẳng tới file ảnh gốc
+    $brandBackgrounds = [
+        'apple'   => 'https://commons.wikimedia.org/wiki/Special:FilePath/IPhone_16_series_in_Apple_Store_Nagoya_Sakae.jpg',
+        'samsung' => 'https://commons.wikimedia.org/wiki/Special:FilePath/Samsung_Galaxy_s24_series.jpg',
+        'xiaomi'  => 'https://commons.wikimedia.org/wiki/Special:FilePath/Xiaomi_Mi4.jpg',
+        'oppo'    => 'https://commons.wikimedia.org/wiki/Special:FilePath/OPPO_A57_Black_Color.jpg',
+    ];
+
+    // Ảnh nền mặc định khi chưa hover / chưa có ảnh riêng cho brand
+    $defaultBgImage = 'https://picsum.photos/seed/support-banner-default/1600/700';
+
+    // Link riêng cho từng thương hiệu (key = slug). Nếu có, mục brand sẽ trỏ tới link này
+    // thay vì trang sản phẩm nội bộ mặc định.
+    $brandLinks = [
+        'apple' => 'https://www.topzone.vn/tekzone/cac-dong-san-pham-apple-1576381',
+    ];
+
+    // Lớp phủ tối để chữ trắng vẫn đọc rõ trên mọi ảnh
+    $bannerBgCss = fn ($imageUrl) => "linear-gradient(rgba(20,25,20,.55), rgba(20,25,20,.55)), url('{$imageUrl}')";
+
+    $defaultBg = $bannerBgCss($defaultBgImage);
+@endphp
+<section class="top-banner reveal" id="topBanner">
+    <div class="banner-bg-layer bg-layer-a is-active" style="background-image: {{ $defaultBg }};"></div>
+    <div class="banner-bg-layer bg-layer-b" style="background-image: {{ $defaultBg }};"></div>
+
+    <div class="container">
+        <div>
+            <span class="stat-number" id="statNumber" data-target="{{ $userCount ?? 137843 }}">0</span>
+            <span class="stat-label">Người sử dụng</span>
+        </div>
+        <p class="banner-desc">Đồng hành và chọn lựa sử dụng dịch vụ tự phục vụ chính hãng hôm nay</p>
+
+        <form class="top-search-box" action="{{ Route::has('support.search') ? route('support.search') : '#' }}" method="GET">
+            <input type="text" name="q" placeholder="Tìm kiếm chủ đề bạn quan tâm">
+            <button type="submit"><i class="bi bi-search"></i></button>
+        </form>
+    </div>
+
+    <div class="top-category-bar" id="topCategoryBar" data-default-bg="{{ $defaultBg }}">
+        @foreach($brands as $brand)
+        @php
+            $brandImage = $brandBackgrounds[$brand->slug] ?? $defaultBgImage;
+            $brandHref = $brandLinks[$brand->slug] ?? route('products.index', ['brand' => $brand->slug]);
+            $isExternal = isset($brandLinks[$brand->slug]);
+        @endphp
+        <a href="{{ $brandHref }}"
+           class="cat-item {{ $loop->first ? 'active' : '' }}"
+           data-bg="{{ $bannerBgCss($brandImage) }}"
+           @if($isExternal) target="_blank" rel="noopener" @endif>
+            @if($brand->logo)
+                <img src="{{ $brand->logo_url }}" alt="{{ $brand->name }}" style="width:22px;height:22px;object-fit:contain;">
+            @else
+                <i class="bi bi-tag"></i>
+            @endif
+            <span>{{ $brand->name }}</span>
+        </a>
+        @endforeach
+    </div>
+</section>
 
 {{-- ===== HERO: Chúng tôi có thể giúp gì cho bạn? ===== --}}
 <section class="support-hero reveal">
@@ -364,6 +495,111 @@ document.querySelector('form[action="{{ route('contact.send') }}"]')
     }, { threshold: 0.07, rootMargin: '0px 0px -30px 0px' });
 
     document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+})();
+
+/* ===== TOP BANNER: số người sử dụng tự động đếm tăng + tiếp tục tăng liên tục ===== */
+(function () {
+    const el = document.getElementById('statNumber');
+    if (!el) return;
+
+    const target = parseInt(el.dataset.target, 10) || 0;
+    const duration = 1800; // ms cho lần đếm ban đầu
+    let started = false;
+    let currentValue = 0;
+
+    function formatNumber(n) {
+        return n.toLocaleString('vi-VN');
+    }
+
+    function render() {
+        el.textContent = formatNumber(currentValue);
+    }
+
+    // Sau khi đếm tới target, tiếp tục tăng dần đều đặn để mô phỏng người dùng mới liên tục
+    function startLiveGrowth() {
+        function scheduleNextTick() {
+            // mỗi lần tăng 1–4 người, cách nhau 2–6 giây (ngẫu nhiên cho tự nhiên)
+            const delay = 2000 + Math.random() * 4000;
+            setTimeout(() => {
+                const increment = 1 + Math.floor(Math.random() * 4);
+                currentValue += increment;
+                render();
+                scheduleNextTick();
+            }, delay);
+        }
+        scheduleNextTick();
+    }
+
+    function runCountUp() {
+        if (started) return;
+        started = true;
+
+        const startTime = performance.now();
+
+        function tick(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // easeOutCubic để số chạy nhanh lúc đầu, chậm dần lúc gần đích
+            const eased = 1 - Math.pow(1 - progress, 3);
+            currentValue = Math.floor(eased * target);
+            render();
+
+            if (progress < 1) {
+                requestAnimationFrame(tick);
+            } else {
+                currentValue = target;
+                render();
+                startLiveGrowth();
+            }
+        }
+
+        requestAnimationFrame(tick);
+    }
+
+    const statObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                runCountUp();
+                statObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.3 });
+
+    statObserver.observe(el);
+})();
+
+/* ===== TOP BANNER: đổi nền động khi hover thương hiệu ===== */
+(function () {
+    const bar = document.getElementById('topCategoryBar');
+    if (!bar) return;
+
+    const layerA = document.querySelector('.bg-layer-a');
+    const layerB = document.querySelector('.bg-layer-b');
+    const defaultBg = bar.dataset.defaultBg;
+    let showingA = true;
+
+    function setBanner(bg) {
+        const nextLayer = showingA ? layerB : layerA;
+        const currentLayer = showingA ? layerA : layerB;
+        nextLayer.style.backgroundImage = bg;
+        nextLayer.classList.add('is-active');
+        currentLayer.classList.remove('is-active');
+        showingA = !showingA;
+    }
+
+    bar.querySelectorAll('.cat-item').forEach(item => {
+        item.addEventListener('mouseenter', function () {
+            const bg = this.dataset.bg;
+            if (!bg) return;
+            setBanner(bg);
+            bar.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    bar.addEventListener('mouseleave', function () {
+        setBanner(defaultBg);
+    });
 })();
 </script>
 @endpush

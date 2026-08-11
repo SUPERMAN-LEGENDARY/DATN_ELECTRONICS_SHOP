@@ -56,19 +56,14 @@ body {
     margin-bottom: 24px;
 }
 .breadcrumb-row a { color: #111111; font-weight: 600; text-decoration: none; }
-.breadcrumb-row a:hover { text-decoration: underline; color: #0381fe; }
+.breadcrumb-row a:hover { text-decoration: underline; color: #000000; }
 
 /* ============================================================
    LAYOUT (sidebar + content)
    ============================================================ */
 .profile-layout {
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    gap: 28px;
-    align-items: start;
-}
-@media (max-width: 900px) {
-    .profile-layout { grid-template-columns: 1fr; }
+    max-width: 900px;
+    margin: 0 auto;
 }
 
 /* ============================================================
@@ -77,8 +72,8 @@ body {
 .content-card {
     background: #ffffff;
     border: 1px solid #e5e5e5;
-    border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(0,0,0,.03);
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.02);
     padding: 28px 32px;
 }
 
@@ -162,7 +157,7 @@ body {
     transition: color .2s;
 }
 .wl-card:hover .wl-card-name {
-    color: #0381fe;
+    color: #000000;
 }
 .wl-card-price {
     font-size: 16px;
@@ -226,7 +221,7 @@ body {
 .wl-badge {
     position: absolute;
     top: 10px; left: 10px;
-    background: #0381fe; /* Samsung Blue */
+    background: #ef4444;
     color: #ffffff;
     font-size: 11px;
     font-weight: 700;
@@ -353,11 +348,6 @@ body {
     </div>
 
     <div class="profile-layout">
-
-        {{-- ===== SIDEBAR ===== --}}
-        <aside class="reveal">
-            @include('profile.sidebar')
-        </aside>
 
         {{-- ===== MAIN CONTENT ===== --}}
         <main>

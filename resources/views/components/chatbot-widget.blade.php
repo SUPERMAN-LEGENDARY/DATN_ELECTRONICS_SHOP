@@ -104,12 +104,12 @@
     right: 24px;
     z-index: 9999;
     font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    --ai-black: var(--sm-black, #000000);
+    --ai-black: var(--sm-black, #2b2b2b);
     --ai-ink: var(--sm-ink, #121212);
     --ai-gray: var(--sm-gray, #545454);
     --ai-line: var(--sm-line, #dcdcdc);
     --ai-surface: var(--sm-surface, #f7f7f7);
-    --ai-blue: var(--sm-blue, #2189ff);
+    --ai-blue: var(--sm-blue, #2b2b2b);
     --ai-radius: var(--sm-radius, 24px);
     --ai-ease: var(--sm-ease, cubic-bezier(.25,.46,.45,.94));
 }

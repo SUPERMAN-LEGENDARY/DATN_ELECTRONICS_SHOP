@@ -40,12 +40,31 @@ body {
     position: relative; z-index: 1;
 }
 .myreviews-container {
-    max-width: 1200px; margin: 0 auto; padding: 0 16px;
-    display: grid; grid-template-columns: 260px 1fr;
-    gap: 32px; align-items: start;
+    max-width: 900px; margin: 0 auto; padding: 0 16px;
+    position: relative; z-index: 1;
 }
-@media (max-width: 991px) { .myreviews-container { grid-template-columns: 1fr; } }
-.profile-sidebar-wrap { position: sticky; top: 88px; }
+
+/* ============================================================
+   BACK BUTTON
+   ============================================================ */
+.myreviews-toprow {
+    display: flex; align-items: center; margin-bottom: 18px;
+}
+.btn-back-profile {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 18px; border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid #ebebeb;
+    color: #000; font-weight: 700; font-size: 13.5px;
+    text-decoration: none;
+    transition: background .2s, transform .18s, box-shadow .2s, border-color .2s;
+}
+.btn-back-profile:hover {
+    background: #f4f4f4; color: #000;
+    border-color: #d0d0d0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0,0,0,.06);
+}
 
 /* ============================================================
    MAIN CARD — Clean & Flat
@@ -212,6 +231,51 @@ body {
     background: #000;
     border-color: #000; color: #fff;
 }
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+@media (max-width: 576px) {
+    .myreviews-page { padding: 20px 0 50px; }
+    .myreviews-container { padding: 0 12px; gap: 16px; }
+
+    .myreviews-toprow { margin-bottom: 12px; }
+    .btn-back-profile { padding: 8px 14px; font-size: 12.5px; }
+
+    .myreviews-card { border-radius: 16px; }
+    .myreviews-card-header { padding: 16px 18px; }
+    .myreviews-card-header h4 { font-size: 17px; gap: 8px; }
+    .myreviews-card-header .header-icon { width: 30px; height: 30px; font-size: 12px; }
+    .myreviews-card-body { padding: 14px; }
+
+    .review-item { padding: 14px 16px; margin-bottom: 12px; border-radius: 14px !important; }
+    .review-product-row { gap: 12px; }
+    .review-thumb { width: 60px; height: 60px; border-radius: 10px; padding: 6px; }
+    .review-product-name { font-size: 14px; margin-bottom: 4px; }
+
+    .star-display { flex-wrap: wrap; gap: 1px; margin-bottom: 6px; }
+    .star-display .star { font-size: 15px; }
+    .review-rating-num { font-size: 11px; padding: 1px 7px; }
+
+    .review-content { font-size: 13px; margin-bottom: 6px; }
+    .review-date { font-size: 11px; }
+
+    .badge-pending { font-size: 11px; padding: 5px 10px; }
+    .review-badges { width: 100%; justify-content: flex-end; }
+
+    .admin-reply { padding: 12px 14px; margin-top: 12px; font-size: 13px; }
+    .admin-reply strong { font-size: 12px; }
+
+    .reviews-empty { padding: 56px 16px; }
+    .reviews-empty .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .reviews-empty h5 { font-size: 18px; margin-bottom: 8px; }
+    .reviews-empty p { font-size: 13px; margin-bottom: 22px; }
+    .btn-explore { padding: 11px 24px; font-size: 13px; }
+
+    .pagination-wrap { margin-top: 20px; }
+    .pagination-wrap .pagination { flex-wrap: wrap; justify-content: center; }
+    .pagination-wrap .pagination .page-link { width: 34px; height: 34px; font-size: 12.5px; }
+}
 </style>
 @endpush
 
@@ -220,13 +284,16 @@ body {
 <div class="myreviews-page">
 <div class="myreviews-container">
 
-    {{-- ===== SIDEBAR ===== --}}
-    <div class="profile-sidebar-wrap reveal">
-        @include('profile.sidebar')
-    </div>
-
     {{-- ===== CONTENT ===== --}}
     <div class="reveal">
+
+        {{-- Back to profile --}}
+        <div class="myreviews-toprow">
+            <a href="{{ route('profile') }}" class="btn-back-profile">
+                <i class="fas fa-arrow-left"></i> Quay lại Hồ sơ
+            </a>
+        </div>
+
         <div class="myreviews-card">
 
             {{-- Header --}}

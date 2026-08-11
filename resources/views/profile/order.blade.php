@@ -4,30 +4,8 @@
 @push('styles')
 <style>
 /* ============================================================
-   PAGE BACKGROUND — Samsung Minimalist
+   PAGE BACKGROUND — đồng bộ nền trắng phẳng như /profile
    ============================================================ */
-body {
-    background: linear-gradient(180deg,
-        #f8f9fa 0%, #f1f3f5 38%, #e9ecef 100%) fixed;
-    background-attachment: fixed;
-    color: #000000;
-}
-#sky-canvas {
-    position: fixed; inset: 0; width: 100%; height: 100%;
-    pointer-events: none; z-index: 0; opacity: .6;
-}
-.bubble {
-    position: fixed; border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,1), rgba(200,200,200,.2));
-    border: 1px solid rgba(0,0,0,.05);
-    pointer-events: none; z-index: 0;
-    animation: bubbleRise linear infinite;
-}
-@keyframes bubbleRise {
-    0%   { transform: translateY(0) scale(1);   opacity: .5; }
-    80%  { opacity: .2; }
-    100% { transform: translateY(-110vh) scale(1.1); opacity: 0; }
-}
 
 /* ============================================================
    SCROLL REVEAL
@@ -58,22 +36,14 @@ body {
 @keyframes rippleOut { to { transform:scale(4); opacity:0; } }
 
 /* ============================================================
-   PAGE WRAPPER
+   PAGE WRAPPER — 1 cột, đồng bộ /profile
    ============================================================ */
 .orders-page {
-    min-height: 100vh;
     padding: 32px 0 60px;
-    position: relative; z-index: 1;
 }
 .orders-container {
-    max-width: 1200px; margin: 0 auto; padding: 0 16px;
-    display: grid; grid-template-columns: 260px 1fr;
-    gap: 24px; align-items: start;
-    position: relative; z-index: 1;
+    max-width: 980px; margin: 0 auto; padding: 0 16px;
 }
-@media (max-width: 991px) { .orders-container { grid-template-columns: 1fr; } }
-
-.profile-sidebar-wrap { position: sticky; top: 88px; }
 
 /* ============================================================
    ALERTS
@@ -110,9 +80,9 @@ body {
     display: flex; flex-wrap: wrap; gap: 0;
     list-style: none; margin: 0 0 24px; padding: 0;
     background: #ffffff;
-    border: 1px solid #ebebeb;
+    border: 1px solid #e5e5e5;
     border-radius: 16px; overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,.02);
+    box-shadow: 0 2px 10px rgba(0,0,0,.02);
 }
 .order-tabs li { flex: 1; min-width: 100px; }
 
@@ -153,10 +123,10 @@ body {
    ============================================================ */
 .search-box {
     background: #ffffff;
-    border: 1px solid #ebebeb;
+    border: 1px solid #e5e5e5;
     border-radius: 16px; padding: 16px 20px;
     margin-bottom: 24px;
-    box-shadow: 0 4px 20px rgba(0,0,0,.02);
+    box-shadow: 0 2px 10px rgba(0,0,0,.02);
     display: flex; gap: 12px; align-items: center;
 }
 .search-box .search-icon {
@@ -190,9 +160,9 @@ body {
    ============================================================ */
 .order-card {
     background: #ffffff;
-    border: 1px solid #ebebeb;
+    border: 1px solid #e5e5e5;
     border-radius: 20px; overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,.03);
+    box-shadow: 0 2px 10px rgba(0,0,0,.02);
     margin-bottom: 20px;
     transition: transform .25s ease, box-shadow .25s, border-color .25s;
     position: relative;
@@ -231,7 +201,7 @@ body {
 .order-product .no-img {
     width: 84px; height: 84px; flex-shrink: 0;
     border-radius: 12px; object-fit: contain;
-    border: 1px solid #ebebeb;
+    border: 1px solid #e5e5e5;
     background: #f8f9fa;
     padding: 6px; box-sizing: border-box;
     transition: transform .3s ease;
@@ -292,18 +262,18 @@ body {
 .btn-reorder  { background: #000000; color: #ffffff; }
 .btn-reorder:hover { background: #333333; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
 
-.btn-review   { background: #2189ff; color: #ffffff; } /* Samsung Blue */
-.btn-review:hover { background: #0066cc; box-shadow: 0 4px 12px rgba(33,137,255,.3); }
+.btn-review   { background: linear-gradient(135deg,#d97706,#f59e0b); color: #ffffff; }
+.btn-review:hover { box-shadow: 0 4px 12px rgba(245,158,11,.35); }
 
 /* ============================================================
    EMPTY STATE
    ============================================================ */
 .orders-empty {
     background: #ffffff;
-    border: 1px solid #ebebeb;
+    border: 1px solid #e5e5e5;
     border-radius: 20px; padding: 70px 20px;
     text-align: center;
-    box-shadow: 0 4px 20px rgba(0,0,0,.02);
+    box-shadow: 0 2px 10px rgba(0,0,0,.02);
 }
 .orders-empty i {
     font-size: 64px; display: block; margin-bottom: 20px;
@@ -329,7 +299,7 @@ body {
    ============================================================ */
 .pagination-wrap { margin-top: 24px; }
 .pagination-wrap .pagination .page-link {
-    border: 1px solid #ebebeb !important;
+    border: 1px solid #e5e5e5 !important;
     color: #333333 !important;
     background: #ffffff !important;
     border-radius: 10px !important;
@@ -354,7 +324,7 @@ body {
 .pagination-wrap .pagination .page-item.disabled .page-link {
     color: #bbbbbb !important;
     background: #ffffff !important;
-    border-color: #ebebeb !important;
+    border-color: #e5e5e5 !important;
 }
 
 /* ============================================================
@@ -369,18 +339,9 @@ body {
 @endpush
 
 @section('content')
-{{-- Sky Canvas (Updated to Silver/Gray) --}}
-<canvas id="sky-canvas" aria-hidden="true"></canvas>
-
 <div class="orders-page">
 <div class="orders-container">
 
-    {{-- ===== SIDEBAR ===== --}}
-    <div class="profile-sidebar-wrap reveal">
-        @include('profile.sidebar')
-    </div>
-
-    {{-- ===== CONTENT ===== --}}
     <div>
 
         @if(session('success'))
@@ -587,47 +548,6 @@ body {
 @push('scripts')
 <script>
 (function () {
-    /* ---- Canvas clouds (Samsung Style: Silver/Gray) ---- */
-    const canvas = document.getElementById('sky-canvas');
-    if (canvas) {
-        const ctx = canvas.getContext('2d');
-        let W, H, clouds = [];
-        function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize); resize();
-        function makeCloud() {
-            return { x: Math.random()*W*1.2, y: Math.random()*H*.6,
-                     r: 50+Math.random()*110, dx: .1+Math.random()*.2, alpha: .02+Math.random()*.05 };
-        }
-        for (let i = 0; i < 6; i++) clouds.push(makeCloud());
-        function drawCloud(c) {
-            const g = ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,c.r);
-            g.addColorStop(0, `rgba(200,205,210,${c.alpha})`);
-            g.addColorStop(.6, `rgba(220,224,228,${c.alpha*.6})`);
-            g.addColorStop(1, 'rgba(230,230,230,0)');
-            ctx.beginPath(); ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
-            ctx.fillStyle = g; ctx.fill();
-        }
-        (function anim() {
-            ctx.clearRect(0,0,W,H);
-            clouds.forEach(c => { drawCloud(c); c.x += c.dx;
-                if (c.x-c.r > W*1.2) { c.x=-c.r*2; c.y=Math.random()*H*.6; } });
-            requestAnimationFrame(anim);
-        })();
-    }
-
-    /* ---- Bubbles ---- */
-    function spawnBubble() {
-        const el = document.createElement('div'); el.className = 'bubble';
-        const size = 3+Math.random()*10, dur = 10+Math.random()*15;
-        el.style.cssText = [`width:${size}px`,`height:${size}px`,
-            `left:${Math.random()*100}vw`,`bottom:-${size}px`,
-            `animation-duration:${dur}s`,`animation-delay:${Math.random()*5}s`].join(';');
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), (dur+5)*1000);
-    }
-    for (let i = 0; i < 6; i++) spawnBubble();
-    setInterval(spawnBubble, 4500);
-
     /* ---- Scroll Reveal ---- */
     const io = new IntersectionObserver(entries => {
         entries.forEach(e => {

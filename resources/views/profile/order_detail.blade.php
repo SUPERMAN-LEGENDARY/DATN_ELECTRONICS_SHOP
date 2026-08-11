@@ -4,29 +4,8 @@
 @push('styles')
 <style>
 /* ============================================================
-   PAGE BACKGROUND — Samsung Minimalist (White & Light Gray)
+   PAGE BACKGROUND — đồng bộ nền trắng phẳng như /profile
    ============================================================ */
-body {
-    background: #f4f4f4;
-    background-attachment: fixed;
-    color: #111111;
-}
-#sky-canvas {
-    position: fixed; inset: 0; width: 100%; height: 100%;
-    pointer-events: none; z-index: 0; opacity: .6;
-}
-.bubble {
-    position: fixed; border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,1), rgba(0,0,0,0.03));
-    border: 1px solid rgba(0,0,0,0.04);
-    pointer-events: none; z-index: 0;
-    animation: bubbleRise linear infinite;
-}
-@keyframes bubbleRise {
-    0%   { transform: translateY(0) scale(1);    opacity: .7; }
-    80%  { opacity: .3; }
-    100% { transform: translateY(-110vh) scale(1.1); opacity: 0; }
-}
 
 /* ============================================================
    SCROLL REVEAL
@@ -60,18 +39,11 @@ body {
    PAGE WRAPPER
    ============================================================ */
 .ordershow-page {
-    min-height: 100vh;
     padding: 32px 0 60px;
-    position: relative; z-index: 1;
 }
 .ordershow-container {
-    max-width: 1200px; margin: 0 auto; padding: 0 16px;
-    display: grid; grid-template-columns: 260px 1fr;
-    gap: 24px; align-items: start;
-    position: relative; z-index: 1;
+    max-width: 980px; margin: 0 auto; padding: 0 16px;
 }
-@media (max-width: 991px) { .ordershow-container { grid-template-columns: 1fr; } }
-.profile-sidebar-wrap { position: sticky; top: 88px; }
 
 /* ============================================================
    ALERTS
@@ -585,17 +557,9 @@ body {
 @endpush
 
 @section('content')
-<canvas id="sky-canvas" aria-hidden="true"></canvas>
-
 <div class="ordershow-page">
 <div class="ordershow-container">
 
-    {{-- ===== SIDEBAR ===== --}}
-    <div class="profile-sidebar-wrap reveal">
-        @include('profile.sidebar')
-    </div>
-
-    {{-- ===== CONTENT ===== --}}
     <div class="stagger-section">
 
         {{-- Alerts --}}
@@ -916,52 +880,6 @@ body {
 @push('scripts')
 <script>
 (function () {
-    /* ---- Canvas clouds (Subtle Gray theme) ---- */
-    const canvas = document.getElementById('sky-canvas');
-    if (canvas) {
-        const ctx = canvas.getContext('2d');
-        let W, H, clouds = [];
-        function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize); resize();
-        function makeCloud() {
-            return { x: Math.random()*W*1.2, y: Math.random()*H*.6,
-                     r: 50+Math.random()*110, dx: .13+Math.random()*.2, alpha: .01+Math.random()*.03 };
-        }
-        for (let i = 0; i < 8; i++) clouds.push(makeCloud());
-        function drawCloud(c) {
-            const g = ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,c.r);
-            g.addColorStop(0, `rgba(0,0,0,${c.alpha})`);
-            g.addColorStop(.6, `rgba(0,0,0,${c.alpha*.6})`);
-            g.addColorStop(1, 'rgba(0,0,0,0)');
-            ctx.beginPath(); ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
-            ctx.fillStyle = g; ctx.fill();
-            [-.5,.5].forEach(o => {
-                ctx.beginPath();
-                ctx.arc(c.x+c.r*.55*o, c.y-c.r*.18, c.r*.72, 0, Math.PI*2);
-                ctx.fillStyle = `rgba(0,0,0,${c.alpha*.7})`; ctx.fill();
-            });
-        }
-        (function anim() {
-            ctx.clearRect(0,0,W,H);
-            clouds.forEach(c => { drawCloud(c); c.x += c.dx;
-                if (c.x-c.r > W*1.2) { c.x=-c.r*2; c.y=Math.random()*H*.6; } });
-            requestAnimationFrame(anim);
-        })();
-    }
-
-    /* ---- Bubbles ---- */
-    function spawnBubble() {
-        const el = document.createElement('div'); el.className = 'bubble';
-        const size = 4+Math.random()*14, dur = 8+Math.random()*12;
-        el.style.cssText = [`width:${size}px`,`height:${size}px`,
-            `left:${Math.random()*100}vw`,`bottom:-${size}px`,
-            `animation-duration:${dur}s`,`animation-delay:${Math.random()*5}s`].join(';');
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), (dur+5)*1000);
-    }
-    for (let i = 0; i < 8; i++) spawnBubble();
-    setInterval(spawnBubble, 3500);
-
     /* ---- Scroll Reveal ---- */
     const io = new IntersectionObserver(entries => {
         entries.forEach(e => {

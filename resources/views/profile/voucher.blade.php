@@ -47,6 +47,8 @@ body {
 .stagger-vouchers.revealed > *:nth-child(4)  { opacity:1; transform:none; transition-delay:.23s; }
 .stagger-vouchers.revealed > *:nth-child(n+5){ opacity:1; transform:none; transition-delay:.28s; }
 
+
+
 /* ripple */
 .ripple-wave {
     position: absolute; border-radius: 50%;
@@ -65,13 +67,9 @@ body {
     position: relative; z-index: 1;
 }
 .voucher-container {
-    max-width: 1200px; margin: 0 auto; padding: 0 16px;
-    display: grid; grid-template-columns: 260px 1fr;
-    gap: 24px; align-items: start;
+    max-width: 980px; margin: 0 auto; padding: 0 16px;
     position: relative; z-index: 1;
 }
-@media (max-width: 991px) { .voucher-container { grid-template-columns: 1fr; } }
-.profile-sidebar-wrap { position: sticky; top: 88px; }
 
 /* ============================================================
    ALERT
@@ -93,9 +91,9 @@ body {
 .voucher-page {
     background: #ffffff;
     border: 1px solid #e5e5e5;
-    border-radius: 20px;
+    border-radius: 16px;
     padding: 24px;
-    box-shadow: 0 4px 20px rgba(0,0,0,.03);
+    box-shadow: 0 2px 10px rgba(0,0,0,.02);
 }
 
 /* ============================================================
@@ -129,25 +127,25 @@ body {
     border: 1px solid #d1d5db;
     border-radius: 20px; padding: 0 16px; /* Pill shape */
     outline: none; font-size: 14px;
-    background: #ffffff; color: gray-dark; /* Samsung gray-dark */
+    background: #ffffff; color: #111111;
     transition: border-color .2s, box-shadow .2s;
 }
 .voucher-search input::placeholder { color: #9ca3af; }
 .voucher-search input:focus {
-    border-color: gray-dark; /* Samsung gray-dark */
+    border-color: #000000;
     box-shadow: 0 0 0 2px rgba(0,0,0,.1);
 }
 .voucher-search button {
     height: 40px; padding: 0 20px; border: none;
     border-radius: 20px; /* Pill shape */
-    background: gray; /* Samsung gray-dark */
+    background: #000000;
     color: #fff; font-weight: 700; font-size: 13.5px;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(0,0,0,.1);
     transition: background .2s, transform .15s, box-shadow .2s;
 }
 .voucher-search button:hover { 
-    background: var(--samsung-gray-dark-hover); 
+    background: #333333; 
     transform: translateY(-1px); 
     box-shadow: 0 6px 14px rgba(0,0,0,.15); 
 }
@@ -254,20 +252,20 @@ body {
     padding: 16px;
 }
 .btn-use {
-    background: gray; /* Samsung gray-dark */
+    background: #000000;
     color: #fff; border: none; border-radius: 20px; /* Pill shape */
     padding: 9px 14px; font-size: 13px; font-weight: 700;
     cursor: pointer; width: 100%;
     display: flex; align-items: center; justify-content: center; gap: 6px;
     transition: background .2s, transform .15s, box-shadow .2s;
-    box-shadow: 0 4px 12px rgba(3,129,254,.2);
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
     position: relative; overflow: hidden;
     font-family: inherit;
 }
 .btn-use:hover { 
-    background: gray-dark-hover; 
+    background: #333333; 
     transform: translateY(-1px); 
-    box-shadow: 0 6px 16px rgba(3,129,254,.3); 
+    box-shadow: 0 6px 16px rgba(0,0,0,.2); 
 }
 .btn-use.copied {
     background: #16a34a;
@@ -322,40 +320,83 @@ body {
    ============================================================ */
 @media (max-width: 768px) {
     .voucher-card    { flex-direction: column; }
-    .voucher-left    { width: 100%; height: 90px; flex-direction: row; gap: 10px; }
+    .voucher-left    {
+        width: 100%; height: auto; min-height: 64px;
+        flex-direction: row; flex-wrap: wrap; gap: 10px;
+        padding: 12px 16px;
+    }
     .voucher-left::after { display: none; }
+    .voucher-left i    { font-size: 22px; }
+    .voucher-left span { font-size: 12.5px; white-space: nowrap; }
+    .voucher-left .brand-break { display: none; }
     .voucher-right   { width: 100%; border-left: none; border-top: 1.5px dashed #e5e5e5; padding: 14px; }
     .btn-use         { width: 100%; }
     .voucher-center  { padding: 16px; }
 }
-@media (max-width: 480px) {
-    .voucher-page    { padding: 16px; }
-    .voucher-center h4 { font-size: 17px; }
+@media (max-width: 576px) {
+    /* ---- Page spacing: tighter, app-like ---- */
+    .voucher-page-wrap { padding: 16px 0 40px; }
+    .voucher-container { padding: 0 12px; }
+    .voucher-page { padding: 16px; border-radius: 14px; }
+
+    /* ---- Title row ---- */
+    .voucher-title { margin-bottom: 16px; gap: 12px; }
+    .voucher-title h2 { font-size: 19px; gap: 8px; }
+    .voucher-title h2 .title-icon { width: 34px; height: 34px; border-radius: 9px; font-size: 14px; }
+
+    /* ---- Search: full-width, easy to tap ---- */
+    .voucher-search input { height: 44px; font-size: 15px; }
+    .voucher-search button { height: 44px; font-size: 14px; }
+
+    /* ---- Voucher list ---- */
+    .voucher-list { gap: 12px; }
+    .voucher-card { border-radius: 14px; min-height: 0; }
+    .voucher-center { padding: 14px; gap: 3px; }
+    .voucher-center h4 { font-size: 17px; margin-bottom: 6px; }
+    .voucher-code-badge { font-size: 13px; padding: 4px 10px; }
+    .voucher-center p { font-size: 13px; }
+    .voucher-center small { font-size: 11.5px; line-height: 1.6; }
+    .badge-personal { margin-left: 0; margin-top: 4px; display: inline-flex; }
+
+    /* ---- Copy button: full-width tap target ---- */
+    .voucher-right { padding: 12px 14px; }
+    .btn-use { padding: 11px 14px; font-size: 13.5px; }
+
+    /* ---- Empty state ---- */
+    .voucher-empty { padding: 44px 16px; }
+    .voucher-empty i { font-size: 52px; margin-bottom: 12px; }
+    .voucher-empty h3 { font-size: 17px; }
+    .voucher-empty p { font-size: 13px; margin-bottom: 18px; }
+    .btn-find { padding: 10px 20px; font-size: 13px; }
+
+    /* ---- Pagination: smaller tap targets, allow wrap ---- */
+    .pagination-wrap .pagination { flex-wrap: wrap; justify-content: center; }
+    .pagination-wrap .pagination .page-link { padding: 6px 11px; font-size: 13px; }
 }
 </style>
 @endpush
 
 @section('content')
+<noscript>
+    <style>
+        .reveal, .stagger-vouchers, .stagger-vouchers > * {
+            opacity: 1 !important;
+            transform: none !important;
+        }
+    </style>
+</noscript>
 <canvas id="sky-canvas" aria-hidden="true"></canvas>
 
 <div class="voucher-page-wrap">
 <div class="voucher-container">
 
-    {{-- ===== SIDEBAR ===== --}}
-    <div class="profile-sidebar-wrap reveal">
-        @include('profile.sidebar')
+    @if(session('success'))
+    <div class="alert-sky alert-sky-success">
+        <i class="fas fa-check-circle"></i> {{ session('success') }}
     </div>
+    @endif
 
-    {{-- ===== CONTENT ===== --}}
-    <div>
-
-        @if(session('success'))
-        <div class="alert-sky alert-sky-success">
-            <i class="fas fa-check-circle"></i> {{ session('success') }}
-        </div>
-        @endif
-
-        <div class="voucher-page reveal">
+    <div class="voucher-page reveal">
 
             {{-- Title + Search --}}
             <div class="voucher-title">
@@ -381,7 +422,7 @@ body {
                     {{-- LEFT --}}
                     <div class="voucher-left">
                         <i class="fas fa-ticket-alt"></i>
-                        <span>Electronic<br>Shop</span>
+                        <span class="voucher-left-brand">Electronic <br class="brand-break">Shop</span>
                     </div>
 
                     {{-- CENTER --}}
@@ -440,7 +481,6 @@ body {
 
         </div>{{-- /.voucher-page --}}
 
-    </div>{{-- /.content --}}
 </div>{{-- /.voucher-container --}}
 </div>{{-- /.voucher-page-wrap --}}
 @endsection
@@ -516,13 +556,28 @@ function copyVoucher(code, btn) {
     for (let i = 0; i < 8; i++) spawnBubble();
     setInterval(spawnBubble, 3500);
 
-    /* ---- Scroll Reveal ---- */
-    const io = new IntersectionObserver(entries => {
-        entries.forEach(e => {
-            if (e.isIntersecting) { e.target.classList.add('revealed'); io.unobserve(e.target); }
-        });
-    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
-    document.querySelectorAll('.reveal, .stagger-vouchers').forEach(el => io.observe(el));
+    /* ---- Scroll Reveal (with fallback so content never stays hidden) ---- */
+    const revealTargets = document.querySelectorAll('.reveal, .stagger-vouchers');
+    function revealAll() {
+        revealTargets.forEach(el => el.classList.add('revealed'));
+    }
+    if ('IntersectionObserver' in window) {
+        try {
+            const io = new IntersectionObserver(entries => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) { e.target.classList.add('revealed'); io.unobserve(e.target); }
+                });
+            }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
+            revealTargets.forEach(el => io.observe(el));
+        } catch (err) {
+            revealAll();
+        }
+    } else {
+        revealAll();
+    }
+    /* Safety net: guarantee visibility even if the observer never fires
+       (e.g. element already in a zero-height container on first paint) */
+    setTimeout(revealAll, 2500);
 
     /* ---- Ripple on copy button ---- */
     document.querySelectorAll('.btn-use').forEach(btn => {

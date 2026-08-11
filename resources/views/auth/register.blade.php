@@ -16,14 +16,16 @@
         }
 
         :root {
-            --sm-black: #000000;
+            --sm-black: #3a3a3a;
             --sm-white: #ffffff;
             --sm-ease: cubic-bezier(.4, 0, .2, 1);
         }
 
         body {
             font-family: 'Segoe UI', sans-serif;
-            background: #f4f4f4;
+            background:
+                linear-gradient(rgba(0, 0, 0, .5), rgba(0, 0, 0, .5)),
+                url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat fixed;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -45,7 +47,7 @@
         }
 
         .auth-header {
-            background: #000000;
+            background: #3a3a3a;
             padding: 28px 32px 24px;
             text-align: center
         }
@@ -111,7 +113,7 @@
         }
 
         .input-icon input:focus {
-            border-color: #000000;
+            border-color: #3a3a3a;
             box-shadow: 0 0 0 3px rgba(0, 0, 0, .1)
         }
 
@@ -124,7 +126,7 @@
         .btn-main {
             width: 100%;
             padding: 12px;
-            background: #000000;
+            background: #3a3a3a;
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -136,7 +138,7 @@
         }
 
         .btn-main:hover {
-            background: #333333
+            background: #4a4a4a
         }
 
         .auth-footer {
@@ -147,7 +149,7 @@
         }
 
         .auth-footer a {
-            color: #000000;
+            color: #3a3a3a;
             font-weight: 600;
             text-decoration: none
         }

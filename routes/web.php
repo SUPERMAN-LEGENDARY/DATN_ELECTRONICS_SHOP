@@ -44,52 +44,116 @@ Route::get('/compare', [CompareController::class, 'index'])->name('compare');
 Route::post('/compare/add/{product}', [CompareController::class, 'add'])->name('compare.add');
 Route::delete('/compare/remove/{product}', [CompareController::class, 'remove'])->name('compare.remove');
 
+Route::view('/about', 'about')->name('about.index');
+
 // ─── PROFILE ──────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
-    // Alias để tương thích với các link/scaffold cũ dùng route('profile.edit')
-    Route::get('/profile/edit', [ProfileController::class, 'account'])->name('profile.edit');
 
-    // ── Thông tin tài khoản ──
-    Route::get('/profile', [ProfileController::class, 'account'])->name('profile.account');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    // ============================================================
+    // HỒ SƠ
+    // URL: /profile
+    // ============================================================
+    Route::get('/profile', [ProfileController::class, 'myProfile'])
+        ->name('profile');
 
-    // ── Sổ địa chỉ ──
-    Route::post('/profile/address', [ProfileController::class, 'storeAddress'])->name('profile.address.store');
-    Route::patch('/profile/address/{address}', [ProfileController::class, 'updateAddress'])->name('profile.address.update');
-    Route::delete('/profile/address/{address}', [ProfileController::class, 'destroyAddress'])->name('profile.address.destroy');
-    Route::patch('/profile/address/{address}/default', [ProfileController::class, 'setDefaultAddress'])->name('profile.address.default');
+    // ============================================================
+    // THÔNG TIN CỦA TÔI
+    // ============================================================
+    Route::get('/profile/account', [ProfileController::class, 'account'])
+        ->name('profile.account');
 
-    // ── Đổi mật khẩu ──
-    Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+    // Alias cũ
+    Route::get('/profile/edit', [ProfileController::class, 'myProfile'])
+        ->name('profile.edit');
 
-    // ── Đơn hàng (trong trang tài khoản) ──
-    Route::get('/profile/order', [OrderController::class, 'index'])->name('profile.order');
-    Route::get('/profile/order/{order}', [OrderController::class, 'show'])->name('profile.order.show');
-    Route::patch('/profile/order/{order}/cancel', [OrderController::class, 'cancel'])->name('profile.order.cancel');
-    Route::patch('/profile/order/{order}/received', [OrderController::class, 'received'])->name('profile.order.received');
-    Route::post('/profile/order/{order}/reorder', [OrderController::class, 'reorder'])->name('profile.order.reorder');
-// Route::get('/profile/order/{order}/review', [ReviewController::class, 'create'])
-//     ->name('profile.review.create');
-Route::post('/profile/order/{order}/review', [ReviewController::class, 'store'])
-    ->name('profile.review.store');
-    
+    // ============================================================
+    // CẬP NHẬT THÔNG TIN
+    // ============================================================
+    Route::patch('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
 
-    // ── Voucher ──
-    Route::get('/profile/voucher', [VoucherController::class, 'index'])->name('profile.voucher');
+    // ============================================================
+    // XÓA TÀI KHOẢN
+    // ============================================================
+    Route::delete('/profile', [ProfileController::class, 'destroy'])
+        ->name('profile.destroy');
 
-    // ── Đánh giá của tôi ──
-    Route::get('/profile/review', [ReviewController::class, 'index'])->name('profile.review');
+    // ============================================================
+    // SỔ ĐỊA CHỈ
+    // ============================================================
+    Route::post('/profile/address', [ProfileController::class, 'storeAddress'])
+        ->name('profile.address.store');
 
-    // ── Yêu thích ──
-    Route::get('/profile/yeu-thich', [WishlistController::class, 'index'])->name('profile.wishlist');
-    Route::post('/yeu-thich/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::patch('/profile/address/{address}', [ProfileController::class, 'updateAddress'])
+        ->name('profile.address.update');
 
-    // ── Thông báo ──
+    Route::delete('/profile/address/{address}', [ProfileController::class, 'destroyAddress'])
+        ->name('profile.address.destroy');
+
+    Route::patch('/profile/address/{address}/default', [ProfileController::class, 'setDefaultAddress'])
+        ->name('profile.address.default');
+
+    // ============================================================
+    // ĐỔI MẬT KHẨU
+    // ============================================================
+    Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])
+        ->name('profile.password.update');
+
+    // ============================================================
+    // ĐƠN HÀNG
+    // ============================================================
+    Route::get('/profile/order', [OrderController::class, 'index'])
+        ->name('profile.order');
+
+    Route::get('/profile/order/{order}', [OrderController::class, 'show'])
+        ->name('profile.order.show');
+
+    Route::patch('/profile/order/{order}/cancel', [OrderController::class, 'cancel'])
+        ->name('profile.order.cancel');
+
+    Route::patch('/profile/order/{order}/received', [OrderController::class, 'received'])
+        ->name('profile.order.received');
+
+    Route::post('/profile/order/{order}/reorder', [OrderController::class, 'reorder'])
+        ->name('profile.order.reorder');
+
+    Route::post('/profile/order/{order}/review', [ReviewController::class, 'store'])
+        ->name('profile.review.store');
+
+    // ============================================================
+    // VOUCHER
+    // ============================================================
+    Route::get('/profile/voucher', [VoucherController::class, 'index'])
+        ->name('profile.voucher');
+
+    // ============================================================
+    // ĐÁNH GIÁ
+    // ============================================================
+    Route::get('/profile/review', [ReviewController::class, 'index'])
+        ->name('profile.review');
+
+    // ============================================================
+    // YÊU THÍCH
+    // ============================================================
+    Route::get('/profile/yeu-thich', [WishlistController::class, 'index'])
+        ->name('profile.wishlist');
+
+    Route::post('/yeu-thich/{product}', [WishlistController::class, 'toggle'])
+        ->name('wishlist.toggle');
+
+    // ============================================================
+    // THÔNG BÁO
+    // ============================================================
     Route::prefix('thong-bao')->name('notifications.')->group(function () {
-        Route::get('/',           [NotificationController::class, 'list'])->name('list');
-        Route::post('/{id}/doc', [NotificationController::class, 'markRead'])->name('mark-read');
-        Route::post('/doc-het',  [NotificationController::class, 'markAllRead'])->name('mark-all-read');
+
+        Route::get('/', [NotificationController::class, 'list'])
+            ->name('list');
+
+        Route::post('/{id}/doc', [NotificationController::class, 'markRead'])
+            ->name('mark-read');
+
+        Route::post('/doc-het', [NotificationController::class, 'markAllRead'])
+            ->name('mark-all-read');
     });
 });
 
@@ -191,15 +255,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
     Route::prefix('su-kien')->name('events.')->group(function () {
         Route::get('/',                          [AdminEventController::class, 'index'])->name('index');
         Route::get('/them',                      [AdminEventController::class, 'create'])->name('create');
-        Route::post('/',                         [AdminEventController::class, 'store'])->name('store');
         Route::get('/thung-rac',                 [AdminEventController::class, 'trash'])->name('trash');
         Route::patch('/khoi-phuc-tat-ca',        [AdminEventController::class, 'restoreAll'])->name('restore-all');
         Route::delete('/don-thung-rac',          [AdminEventController::class, 'emptyTrash'])->name('empty-trash');
+
+        // 2. Các route động có tham số ({event}) phải đặt ở phía dưới
+        Route::get('/{event}',                   [AdminEventController::class, 'show'])->name('show');
         Route::get('/{event}/sua',               [AdminEventController::class, 'edit'])->name('edit');
         Route::put('/{event}',                   [AdminEventController::class, 'update'])->name('update');
         Route::delete('/{event}',                [AdminEventController::class, 'destroy'])->name('destroy');
         Route::patch('/{event}/toggle-active',   [AdminEventController::class, 'toggleActive'])->name('toggle-active');
-        Route::post('/bulk-toggle',               [AdminEventController::class, 'bulkToggle'])->name('bulk-toggle');
+        Route::post('/bulk-toggle',              [AdminEventController::class, 'bulkToggle'])->name('bulk-toggle');
         Route::patch('/{id}/khoi-phuc',          [AdminEventController::class, 'restore'])->name('restore');
         Route::delete('/{id}/xoa-vinh-vien',     [AdminEventController::class, 'forceDelete'])->name('force-delete');
     });

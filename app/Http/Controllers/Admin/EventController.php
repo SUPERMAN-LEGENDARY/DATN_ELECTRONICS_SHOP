@@ -24,10 +24,84 @@ class EventController extends Controller
             });
         }
 
+        // ── Thêm mới: lọc theo trạng thái và khoảng thời gian (theo toolbar trong index.blade.php) ──
+        if ($request->filled('status')) {
+            $now = now();
+            switch ($request->status) {
+                case 'ongoing':
+                    $query->where('is_active', true)
+                        ->where('start_date', '<=', $now)
+                        ->where('end_date', '>=', $now);
+                    break;
+                case 'upcoming':
+                    $query->where('is_active', true)
+                        ->where('start_date', '>', $now);
+                    break;
+                case 'ended':
+                    $query->where('end_date', '<', $now);
+                    break;
+                case 'draft':
+                    $query->where('is_active', false);
+                    break;
+            }
+        }
+
+        if ($request->filled('from_date')) {
+            $query->whereDate('start_date', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('end_date', '<=', $request->to_date);
+        }
+        // ── Hết phần thêm mới ──
+
         $events = $query->ordered()->paginate(15)->withQueryString();
         $trashedCount = Event::onlyTrashed()->count();
 
-        return view('admin.events.index', compact('events', 'trashedCount'));
+        // ── Thêm mới: thống kê cho 4 thẻ, dữ liệu preview và lịch sắp tới ──
+        $now = now();
+
+        $totalCount = Event::count();
+
+        $ongoingCount = Event::where('is_active', true)
+            ->where('start_date', '<=', $now)
+            ->where('end_date', '>=', $now)
+            ->count();
+
+        $upcomingCount = Event::where('is_active', true)
+            ->where('start_date', '>', $now)
+            ->count();
+
+        $endedCount = Event::where('end_date', '<', $now)->count();
+
+        $upcomingEvents = Event::where('is_active', true)
+            ->where('start_date', '>', $now)
+            ->ordered()
+            ->limit(6)
+            ->get();
+
+        $previewEvent = Event::where('is_active', true)
+            ->where('start_date', '<=', $now)
+            ->where('end_date', '>=', $now)
+            ->ordered()
+            ->first() ?? $events->first();
+
+        $countdown = null;
+        if ($previewEvent && $previewEvent->end_date) {
+            $diff = $now->diff($previewEvent->end_date);
+            $countdown = [
+                'days'    => str_pad((string) $diff->days, 2, '0', STR_PAD_LEFT),
+                'hours'   => str_pad((string) $diff->h, 2, '0', STR_PAD_LEFT),
+                'minutes' => str_pad((string) $diff->i, 2, '0', STR_PAD_LEFT),
+                'seconds' => str_pad((string) $diff->s, 2, '0', STR_PAD_LEFT),
+            ];
+        }
+        // ── Hết phần thêm mới ──
+
+        return view('admin.events.index', compact(
+            'events', 'trashedCount',
+            'totalCount', 'ongoingCount', 'upcomingCount', 'endedCount',
+            'upcomingEvents', 'previewEvent', 'countdown'
+        ));
     }
 
     // ─── Form thêm mới ────────────────────────────────────────────
@@ -216,5 +290,11 @@ class EventController extends Controller
         unset($validated['image']);
 
         return $validated;
+    }
+
+    // ─── Xem chi tiết sự kiện ─────────────────────────────────────
+    public function show(Event $event): View
+    {
+        return view('admin.events.show', compact('event'));
     }
 }
