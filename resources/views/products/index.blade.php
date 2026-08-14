@@ -838,7 +838,7 @@ body {
                     @if($product->has_price_range)
                         <span class="product-card-price">Từ {{ number_format($product->min_price) }}đ</span>
                     @else
-                        <span class="product-card-price">{{ number_format($product->sale_price) }}đ</span>
+                        <span class="product-card-price">{{ number_format($product->price) }}đ</span>
                         @if($product->discount_percent > 0)
                             <span class="price-strike">{{ number_format($product->price) }}đ</span>
                         @endif

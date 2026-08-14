@@ -164,9 +164,7 @@
             <input type="text" name="name" id="name" value="{{ old('name', $product->name ?? '') }}"
                 placeholder="VD: iPhone 15 Pro Max 256GB Titan Tự Nhiên" autocomplete="off">
             <div class="error" id="name-error">@error('name'){{ $message }}@enderror</div>
-            <div class="error" id="name-duplicate-warning" style="display:none">
-                <i class="fas fa-triangle-exclamation"></i> Đã tồn tại sản phẩm khác có tên này. Vui lòng đặt tên khác.
-            </div>
+            <div class="error" id="name-duplicate-warning" style="display:none"></div>
         </div>
         <div class="form-row">
             <div class="form-group">
@@ -257,6 +255,7 @@
             <label>Ảnh đại diện <span style="color:#888;font-weight:400">(hiển thị ở danh sách, giỏ hàng)</span></label>
             <input type="file" name="thumbnail" accept="image/*" id="thumbnailInput">
             @error('thumbnail')<div class="error">{{ $message }}</div>@enderror
+            <div class="error" id="thumbnail-client-error"></div>
             @if(isset($product) && $product->thumbnail)
             <div style="margin-top:8px">
                 <p style="font-size:12px;color:#888;margin-bottom:4px">Ảnh đại diện hiện tại:</p>
@@ -274,6 +273,7 @@
             <label>Album ảnh <span style="color:#888;font-weight:400">(tối đa 6 ảnh, hiển thị ở trang chi tiết)</span></label>
             <input type="file" name="images[]" multiple accept="image/*" id="imageInput">
             @error('images.*')<div class="error">{{ $message }}</div>@enderror
+            <div class="error" id="images-client-error"></div>
             @if(isset($product) && !empty($product->images))
             <div style="margin-top:8px">
                 <p style="font-size:12px;color:#888;margin-bottom:4px">Album hiện tại:</p>
@@ -312,7 +312,9 @@
                     name="attributes[{{ $attr->id }}]"
                     list="attr-values-{{ $attr->id }}"
                     value="{{ old('attributes.' . $attr->id, $savedAttrs[$attr->id]->value ?? '') }}"
-                    placeholder="Chọn hoặc nhập {{ strtolower($attr->name) }}...">
+                    placeholder="Chọn hoặc nhập {{ strtolower($attr->name) }}..."
+                    required oninput="clearAttrError({{ $attr->id }})">
+                <div class="error" id="attributes-{{ $attr->id }}-error">@error('attributes.' . $attr->id){{ $message }}@enderror</div>
             </div>
             @endforeach
         </div>
@@ -322,7 +324,7 @@
         <p style="color:#999;font-size:12px;margin-top:8px">
             <i class="fas fa-circle-info"></i>
             Thuộc tính đánh dấu <strong>"chính"</strong> (xem trong "Quản lý thuộc tính") sẽ hiện thành nút chọn ở phần Biến thể bên dưới;
-            thuộc tính <strong>"phụ"</strong> chỉ hiện trong bảng thông số này.
+            thuộc tính <strong>"phụ"</strong> chỉ hiện trong bảng thông số này. Thuộc tính không áp dụng cho sản phẩm này, hãy bấm nút <i class="fas fa-times"></i> để bỏ, nếu không cần điền giá trị.
         </p>
 
         <div class="removed-chip-row" id="attrRemovedChips"></div>
@@ -410,6 +412,7 @@
                                     </label>
                                     <input type="file" name="variants[{{ $vi }}][thumbnail]" accept="image/*"
                                            class="variant-thumb-input" data-vidx="{{ $vi }}">
+                                    <div class="error" id="vThumbError-{{ $vi }}"></div>
                                     @if($v->thumbnail)
                                     <div style="margin-top:6px">
                                         <img src="{{ $v->thumbnail }}" alt="" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #e0e0e0">
@@ -424,6 +427,7 @@
                                     </label>
                                     <input type="file" name="variants[{{ $vi }}][images][]" multiple accept="image/*"
                                            class="variant-images-input" data-vidx="{{ $vi }}">
+                                    <div class="error" id="vImagesError-{{ $vi }}"></div>
                                     @if(!empty($v->images))
                                     <div style="margin-top:6px">
                                         <div class="image-preview-row">
@@ -714,6 +718,7 @@ function addVariant() {
                         </label>
                         <input type="file" name="variants[${idx}][thumbnail]" accept="image/*"
                                class="variant-thumb-input" data-vidx="${idx}">
+                        <div class="error" id="vThumbError-${idx}"></div>
                         <div class="image-preview-row" id="vThumbPreview-${idx}" style="margin-top:6px"></div>
                     </div>
                     <div class="form-group">
@@ -722,6 +727,7 @@ function addVariant() {
                         </label>
                         <input type="file" name="variants[${idx}][images][]" multiple accept="image/*"
                                class="variant-images-input" data-vidx="${idx}">
+                        <div class="error" id="vImagesError-${idx}"></div>
                         <div class="image-preview-row" id="vImagesPreview-${idx}" style="margin-top:6px"></div>
                     </div>
                 </div>
@@ -795,6 +801,12 @@ function toggleVariantCard(idx) {
 // ẨN / THÊM LẠI THUỘC TÍNH RIÊNG CHO TỪNG SẢN PHẨM / BIẾN THỂ
 // (chỉ ẩn khỏi form này, KHÔNG xóa thuộc tính khỏi hệ thống)
 // ══════════════════════════════════════════════════════════════
+
+// ── Xóa lỗi validate của 1 trường thông số kỹ thuật khi người dùng gõ lại ──
+function clearAttrError(id) {
+    const errEl = document.getElementById('attributes-' + id + '-error');
+    if (errEl) errEl.textContent = '';
+}
 
 // ── Khu vực "Thông số kỹ thuật" (thuộc tính gốc của sản phẩm) ──
 function removeBaseAttrField(id, name) {
@@ -1050,7 +1062,15 @@ if (nameInputEl) {
             })
                 .then(r => r.json())
                 .then(data => {
-                    warnEl.style.display = data.exists ? 'block' : 'none';
+                    if (!data.exists) {
+                        warnEl.style.display = 'none';
+                        warnEl.innerHTML = '';
+                        return;
+                    }
+                    warnEl.innerHTML = data.trashed
+                        ? '<i class="fas fa-triangle-exclamation"></i> Sản phẩm tên này đang nằm trong <strong>thùng rác</strong>. Hãy khôi phục sản phẩm đó thay vì tạo mới, hoặc đặt tên khác.'
+                        : '<i class="fas fa-triangle-exclamation"></i> Đã tồn tại sản phẩm khác có tên này. Vui lòng đặt tên khác.';
+                    warnEl.style.display = 'block';
                 })
                 .catch(() => {});
         }, 400);
@@ -1233,7 +1253,8 @@ function addFieldToForm(id, name, isVariant) {
                 <i class="fas fa-times"></i>
             </button>
         </label>
-        <input type="text" name="attributes[${id}]" list="attr-values-${id}" placeholder="Chọn hoặc nhập ${esc(name.toLowerCase())}...">`;
+        <input type="text" name="attributes[${id}]" list="attr-values-${id}" placeholder="Chọn hoặc nhập ${esc(name.toLowerCase())}..." required oninput="clearAttrError(${id})">
+        <div class="error" id="attributes-${id}-error"></div>`;
     document.getElementById('attrGrid').appendChild(div);
     ensureAttrDatalist(id, name);
 }
@@ -1321,26 +1342,76 @@ window.addEventListener('pageshow', function (event) {
     document.getElementById(id)?.addEventListener('change', validatePriceRules);
 });
 
+// ── Validate ảnh: định dạng + dung lượng + số lượng (khớp rule server trong ProductRequest) ──
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const MAX_IMAGE_SIZE_BYTES = 3 * 1024 * 1024; // 3MB — khớp 'max:3072' (KB) ở ProductRequest
+const MAX_ALBUM_IMAGES = 6;
+
+function validateImageFile(file) {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+        return `File "${file.name}" không đúng định dạng (chỉ nhận JPG, PNG, WEBP).`;
+    }
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+        return `File "${file.name}" nặng ${(file.size / 1024 / 1024).toFixed(1)}MB, vượt quá 3MB cho phép.`;
+    }
+    return null;
+}
+
+function setImageError(errorId, message) {
+    const el = document.getElementById(errorId);
+    if (el) el.textContent = message || '';
+}
+
 // ── Preview ảnh ───────────────────────────────────────────────
 document.getElementById('thumbnailInput').addEventListener('change', function() {
     const preview = document.getElementById('thumbnailPreview');
     preview.innerHTML = '';
-    if (this.files[0]) {
-        const reader = new FileReader();
-        reader.onload = e => {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.style.cssText = 'width:100px;height:100px;object-fit:cover;border-radius:6px;border:2px solid #1565C0';
-            preview.appendChild(img);
-        };
-        reader.readAsDataURL(this.files[0]);
+    setImageError('thumbnail-client-error', '');
+
+    const file = this.files[0];
+    if (!file) return;
+
+    const err = validateImageFile(file);
+    if (err) {
+        setImageError('thumbnail-client-error', err);
+        this.value = ''; // reset để không submit file lỗi
+        return;
     }
+
+    const reader = new FileReader();
+    reader.onload = e => {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.style.cssText = 'width:100px;height:100px;object-fit:cover;border-radius:6px;border:2px solid #1565C0';
+        preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
 });
 
 document.getElementById('imageInput').addEventListener('change', function() {
     const preview = document.getElementById('newImagePreview');
     preview.innerHTML = '';
-    Array.from(this.files).slice(0, 6).forEach(file => {
+    setImageError('images-client-error', '');
+
+    const files = Array.from(this.files);
+    if (!files.length) return;
+
+    if (files.length > MAX_ALBUM_IMAGES) {
+        setImageError('images-client-error', `Chỉ được chọn tối đa ${MAX_ALBUM_IMAGES} ảnh (bạn đang chọn ${files.length}).`);
+        this.value = '';
+        return;
+    }
+
+    for (const file of files) {
+        const err = validateImageFile(file);
+        if (err) {
+            setImageError('images-client-error', err);
+            this.value = '';
+            return;
+        }
+    }
+
+    files.forEach(file => {
         const reader = new FileReader();
         reader.onload = e => {
             const img = document.createElement('img');
@@ -1361,15 +1432,25 @@ document.getElementById('variantList').addEventListener('change', function (e) {
         const idx = target.dataset.vidx;
         const preview = document.getElementById('vThumbPreview-' + idx);
         preview.innerHTML = '';
-        if (target.files[0]) {
-            const reader = new FileReader();
-            reader.onload = ev => {
-                const img = document.createElement('img');
-                img.src = ev.target.result;
-                preview.appendChild(img);
-            };
-            reader.readAsDataURL(target.files[0]);
+        setImageError('vThumbError-' + idx, '');
+
+        const file = target.files[0];
+        if (!file) return;
+
+        const err = validateImageFile(file);
+        if (err) {
+            setImageError('vThumbError-' + idx, err);
+            target.value = '';
+            return;
         }
+
+        const reader = new FileReader();
+        reader.onload = ev => {
+            const img = document.createElement('img');
+            img.src = ev.target.result;
+            preview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
         return;
     }
 
@@ -1377,7 +1458,27 @@ document.getElementById('variantList').addEventListener('change', function (e) {
         const idx = target.dataset.vidx;
         const preview = document.getElementById('vImagesPreview-' + idx);
         preview.innerHTML = '';
-        Array.from(target.files).slice(0, 6).forEach(file => {
+        setImageError('vImagesError-' + idx, '');
+
+        const files = Array.from(target.files);
+        if (!files.length) return;
+
+        if (files.length > MAX_ALBUM_IMAGES) {
+            setImageError('vImagesError-' + idx, `Chỉ được chọn tối đa ${MAX_ALBUM_IMAGES} ảnh (bạn đang chọn ${files.length}).`);
+            target.value = '';
+            return;
+        }
+
+        for (const file of files) {
+            const err = validateImageFile(file);
+            if (err) {
+                setImageError('vImagesError-' + idx, err);
+                target.value = '';
+                return;
+            }
+        }
+
+        files.forEach(file => {
             const reader = new FileReader();
             reader.onload = ev => {
                 const img = document.createElement('img');

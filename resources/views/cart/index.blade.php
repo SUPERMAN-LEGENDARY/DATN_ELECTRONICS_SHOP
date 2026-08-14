@@ -595,7 +595,7 @@
                     @endif
                 </div>
                 <div class="cross-sell-name">{{ $p->name }}</div>
-                <div class="cross-sell-price">{{ number_format($p->sale_price) }}đ</div>
+                <div class="cross-sell-price">{{ number_format($p->min_price) }}đ</div>
             </a>
             @endforeach
         </div>

@@ -80,7 +80,10 @@ class CartController extends Controller
             $categoryIds      = collect($products)->pluck('product.category_id')->unique()->filter()->all();
 
             if (!empty($categoryIds)) {
-                $crossSell = Product::active()
+                // Eager-load 'variants' để accessor min_price (giá thấp nhất hiển thị)
+                // không phát sinh N+1 query cho từng sản phẩm cross-sell.
+                $crossSell = Product::with('variants')
+                    ->active()
                     ->whereIn('category_id', $categoryIds)
                     ->whereNotIn('id', $cartProductIds)
                     ->inRandomOrder()

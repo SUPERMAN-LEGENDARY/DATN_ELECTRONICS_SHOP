@@ -637,7 +637,7 @@ body {
                     <span class="price-old" id="priceOldDisplay" style="display:none"></span>
                     <span class="price-pct" id="pricePctDisplay" style="display:none"></span>
                 @else
-                    <span class="price-current" id="priceDisplay">{{ number_format($product->sale_price) }}đ</span>
+                    <span class="price-current" id="priceDisplay">{{ number_format($product->price) }}đ</span>
                     @if($product->discount_percent > 0)
                         <span class="price-old" id="priceOldDisplay">{{ number_format($product->price) }}đ</span>
                         <span class="price-pct" id="pricePctDisplay">-{{ $product->discount_percent }}%</span>
