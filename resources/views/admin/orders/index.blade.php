@@ -129,6 +129,20 @@ table.data-table {
     transition: background 0.15s;
 }
 .btn-del:hover { background: #ffcdd2; }
+.btn-edit {
+    background: #fff3e0;
+    color: #e65100;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: background 0.15s;
+}
+.btn-edit:hover { background: #ffe0b2; }
 
 /* ── Phân trang ──
    Project này không load Tailwind CSS, nên view pagination mặc định của Laravel
@@ -307,6 +321,9 @@ $allowedTransitions = [
                     <div class="action-group">
                         <a href="{{ route('admin.orders.show', $order) }}" class="btn-view">
                             <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{{ route('admin.orders.edit', $order) }}" class="btn-edit">
+                            <i class="fas fa-edit"></i>
                         </a>
                         <form action="{{ route('admin.orders.destroy', $order) }}" method="POST"
                               onsubmit="return confirm('Chuyển đơn hàng này vào thùng rác?')">

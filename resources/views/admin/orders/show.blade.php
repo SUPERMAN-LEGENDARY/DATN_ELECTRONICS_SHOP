@@ -128,6 +128,19 @@
         font-weight: 600;
     }
 
+    /* ── Biến thể đã chọn ── */
+    .variant-tag {
+        display: inline-block;
+        margin-top: 4px;
+        padding: 2px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #1565C0;
+        background: #e7f1fd;
+        border: 1px solid #bcdcfa;
+        border-radius: 12px;
+    }
+
     /* ── Header ── */
     .btn {
         display: inline-block;
@@ -142,6 +155,11 @@
     }
     .btn-secondary { background: #6c757d; color: #fff; }
     .btn-secondary:hover { background: #5a6268; }
+    .btn-primary { background: #1565C0; color: #fff; }
+    .btn-primary:hover { background: #0D47A1; }
+    .btn-danger-outline { background: #fff; color: #E53935; border: 1px solid #E53935; }
+    .btn-danger-outline:hover { background: #FFEBEE; }
+    .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     .header-bar {
         display: flex;
         justify-content: space-between;
@@ -179,10 +197,30 @@ $paymentMethods = [
 ];
 @endphp
 
+@php
+    // Chỉ cho phép hủy đơn (hoàn kho) khi đơn chưa vận chuyển/hoàn thành,
+    // khớp với điều kiện trong OrderController@cancel.
+    $isCancelable = in_array($order->status, ['pending', 'confirmed', 'processing']);
+@endphp
+
 @section('content')
 <div class="header-bar">
     <h1><i class="fas fa-receipt"></i> Chi tiết đơn hàng #{{ $order->id }}</h1>
-    <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary">← Quay lại danh sách</a>
+    <div class="header-actions">
+        <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary">← Quay lại danh sách</a>
+        <a href="{{ route('admin.orders.edit', $order) }}" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Chỉnh sửa
+        </a>
+        @if($isCancelable)
+        <form action="{{ route('admin.orders.cancel', $order) }}" method="POST"
+              onsubmit="return confirm('Hủy đơn hàng này và hoàn lại tồn kho?')">
+            @csrf @method('PATCH')
+            <button type="submit" class="btn btn-danger-outline">
+                <i class="fas fa-times-circle"></i> Hủy đơn hàng
+            </button>
+        </form>
+        @endif
+    </div>
 </div>
 
 <div class="order-detail">
@@ -191,15 +229,15 @@ $paymentMethods = [
     <div class="order-info-grid">
         <div class="info-item">
             <span class="label">Khách hàng</span>
-            <span class="value">{{ $order->user->name ?? 'N/A' }}</span>
+            <span class="value">{{ $order->customer_name ?? $order->user->name ?? 'N/A' }}</span>
         </div>
         <div class="info-item">
             <span class="label">Email</span>
-            <span class="value">{{ $order->user->email ?? 'N/A' }}</span>
+            <span class="value">{{ $order->contact_email ?? 'N/A' }}</span>
         </div>
         <div class="info-item">
     <span class="label">Số điện thoại</span>
-    <span class="value">{{ $order->address->phone ?? 'N/A' }}</span>
+    <span class="value">{{ $order->customer_phone ?? $order->address->phone ?? 'N/A' }}</span>
 </div>
         <div class="info-item">
             <span class="label">Địa chỉ giao hàng</span>
@@ -257,7 +295,16 @@ $paymentMethods = [
                 <tbody>
                     @foreach($order->items as $item)
                     <tr>
-                        <td style="font-weight:600;">{{ $item->product_name }}</td>
+                        <td style="font-weight:600;">
+                            @if($item->variant)
+                                {{ $item->product->name ?? $item->product_name }}
+                                <div><span class="variant-tag"><i class="fas fa-layer-group"></i> {{ $item->variant->label }}</span></div>
+                            @else
+                                {{-- Đơn hàng tạo trước khi có cột variant_id: product_name đã
+                                     lưu sẵn "Tên sản phẩm - Nhãn biến thể" nên hiển thị nguyên văn. --}}
+                                {{ $item->product_name }}
+                            @endif
+                        </td>
                         <td>
                             @forelse($item->attributes as $attr)
                                 <div class="attr-item">

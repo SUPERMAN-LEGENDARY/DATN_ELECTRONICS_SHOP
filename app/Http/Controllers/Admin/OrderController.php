@@ -3,19 +3,97 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrderConfirmedMail;
+use App\Mail\OrderDeliveredMail;
+use App\Mail\OrderPaymentReminderMail;
+use App\Mail\OrderPaymentConfirmedMail;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\Voucher;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\Address;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
+    /**
+     * Map trạng thái đơn hàng -> Mailable tương ứng cần gửi cho khách khi
+     * đơn hàng CHUYỂN SANG trạng thái đó (không gửi khi tạo/sửa các trạng
+     * thái khác). Ngoại lệ: nếu đơn "confirmed" mà payment_status vẫn
+     * "unpaid" thì gửi OrderPaymentReminderMail thay vì OrderConfirmedMail
+     * (xem sendOrderStatusMail()).
+     */
+    private const STATUS_MAILABLES = [
+        'confirmed' => OrderConfirmedMail::class,
+        'delivered' => OrderDeliveredMail::class,
+    ];
+
+    /**
+     * Gửi email thông báo trạng thái đơn hàng cho khách (nếu có địa chỉ
+     * email hợp lệ). Bỏ qua tài khoản khách vãng lai được tự tạo trong
+     * store() vì email dạng "guest_xxx@noemail.local" không nhận được thư.
+     * Lỗi gửi mail (SMTP down, cấu hình sai...) chỉ được ghi log, không
+     * được làm hỏng luồng cập nhật đơn hàng của nhân viên.
+     */
+    private function sendOrderStatusMail(Order $order, string $status): void
+    {
+        // Trường hợp đặc biệt: đơn "Đã xác nhận" nhưng vẫn CHƯA thanh toán
+        // (thanh toán online chưa hoàn tất) -> gửi mail nhắc khách thanh toán
+        // để đơn được tiếp tục xử lý, thay vì mail xác nhận thông thường.
+        if ($status === 'confirmed' && $order->payment_status === 'unpaid') {
+            $mailableClass = OrderPaymentReminderMail::class;
+        } else {
+            $mailableClass = self::STATUS_MAILABLES[$status] ?? null;
+        }
+
+        if (!$mailableClass) {
+            return;
+        }
+
+        $order->loadMissing('user');
+        $email = $order->contact_email;
+
+        if (!$email || str_ends_with($email, '@noemail.local')) {
+            return;
+        }
+
+        try {
+            Mail::to($email)->send(new $mailableClass($order));
+        } catch (\Throwable $e) {
+            Log::error("Gửi email trạng thái '{$status}' cho đơn hàng #{$order->id} thất bại: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Gửi mail xác nhận đã nhận thanh toán, dùng cho trường hợp
+     * payment_status chuyển unpaid -> paid mà KHÔNG đi kèm việc status
+     * chuyển sang "confirmed" trong cùng request (trường hợp đó đã được
+     * OrderConfirmedMail xử lý trong sendOrderStatusMail() rồi, tránh
+     * gửi trùng 2 email trong 1 lần cập nhật).
+     */
+    private function sendPaymentConfirmedMail(Order $order): void
+    {
+        $order->loadMissing('user');
+        $email = $order->contact_email;
+
+        if (!$email || str_ends_with($email, '@noemail.local')) {
+            return;
+        }
+
+        try {
+            Mail::to($email)->send(new OrderPaymentConfirmedMail($order));
+        } catch (\Throwable $e) {
+            Log::error("Gửi email xác nhận thanh toán cho đơn hàng #{$order->id} thất bại: " . $e->getMessage());
+        }
+    }
+
     /**
      * Ghi/cập nhật bản ghi thanh toán (bảng payments) tương ứng với
      * payment_status hiện tại của đơn — gọi mỗi khi payment_status thay đổi
@@ -76,7 +154,10 @@ class OrderController extends Controller
     {
         $users    = User::all();
         $vouchers = Voucher::where('is_active', 1)->get();
-        $products = Product::where('is_active', 1)->get();
+        $products = Product::with(['variants' => function ($q) {
+                $q->where('is_active', 1)->orderBy('sort_order');
+            }])
+            ->where('is_active', 1)->get();
         $addresses = Address::all();
 
         return view('admin.orders.create', compact('users', 'vouchers', 'products', 'addresses'));
@@ -88,6 +169,7 @@ class OrderController extends Controller
         $request->validate([
             'customer_phone'   => 'required|string|max:20',
             'customer_name'    => 'required|string|max:255',
+            'customer_email'   => 'required|email|max:255',
             'user_id'          => 'nullable|exists:users,id',
             'address_id'       => 'nullable|exists:addresses,id',
             'address_name'     => 'required_without:address_id|nullable|string|max:255',
@@ -103,6 +185,7 @@ class OrderController extends Controller
             'note'             => 'nullable|string|max:500',
             'items'            => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
+            'items.*.variant_id' => 'nullable|exists:product_variants,id',
             'items.*.quantity'   => 'required|integer|min:1',
             'items.*.unit_price' => 'nullable|numeric|min:0',
         ]);
@@ -148,12 +231,29 @@ class OrderController extends Controller
         $itemsData = [];
         foreach ($request->items as $item) {
             $product = Product::findOrFail($item['product_id']);
-            $unitPrice = $item['unit_price'] ?? $product->price;
+
+            // Nếu nhân viên có chọn biến thể (màu/dung lượng/RAM...) thì lấy
+            // giá & tồn kho theo biến thể đó thay vì sản phẩm gốc.
+            $variant = null;
+            if (!empty($item['variant_id'])) {
+                $variant = ProductVariant::where('id', $item['variant_id'])
+                    ->where('product_id', $product->id)
+                    ->first();
+                if (!$variant) {
+                    return back()->with('error', 'Biến thể sản phẩm không hợp lệ.')->withInput();
+                }
+            }
+
+            $unitPrice = $item['unit_price'] ?? ($variant->price ?? $product->price);
             $totalPrice = $unitPrice * $item['quantity'];
             $subtotal += $totalPrice;
+
+            $productName = $product->name . ($variant ? ' - ' . $variant->label : '');
+
             $itemsData[] = [
                 'product_id'   => $product->id,
-                'product_name' => $product->name,
+                'variant_id'   => $variant->id ?? null,
+                'product_name' => $productName,
                 'quantity'     => $item['quantity'],
                 'unit_price'   => $unitPrice,
                 'total_price'  => $totalPrice,
@@ -191,19 +291,28 @@ class OrderController extends Controller
                 'discount_amount' => $discount,
                 'total'          => $total,
                 'note'           => $request->note,
+                'customer_name'  => $request->customer_name,
+                'customer_phone' => $request->customer_phone,
+                'customer_email' => $request->customer_email,
             ]);
 
             foreach ($itemsData as $item) {
                 $order->items()->create($item);
-                // Trừ tồn kho vì đơn đã giao
-                $product = Product::find($item['product_id']);
-                if ($product) {
-                    $product->decrement('stock', $item['quantity']);
+                // Trừ tồn kho: nếu sản phẩm có biến thể được chọn thì trừ tồn
+                // kho của biến thể đó, ngược lại trừ tồn kho sản phẩm gốc.
+                if (!empty($item['variant_id'])) {
+                    ProductVariant::where('id', $item['variant_id'])->decrement('stock', $item['quantity']);
+                } else {
+                    Product::where('id', $item['product_id'])->decrement('stock', $item['quantity']);
                 }
             }
 
             $this->syncPaymentRecord($order, $order->payment_status);
         });
+
+        // Nếu nhân viên tạo đơn với trạng thái ban đầu là "Đã xác nhận" hoặc
+        // "Đã giao" thì vẫn cần báo mail cho khách như khi đổi trạng thái.
+        $this->sendOrderStatusMail($order, $order->status);
 
         return redirect()->route('admin.orders.show', $order)
             ->with('success', 'Đã tạo đơn hàng mới (đã giao).');
@@ -212,7 +321,7 @@ class OrderController extends Controller
     // ─── Chi tiết đơn hàng ────────────────────────────────────
     public function show(Order $order)
     {
-        $order->load(['items.product', 'items.attributes.attribute', 'user', 'address', 'voucher']);
+        $order->load(['items.product', 'items.variant', 'items.attributes.attribute', 'user', 'address', 'voucher']);
         return view('admin.orders.show', compact('order'));
     }
 
@@ -245,7 +354,24 @@ class OrderController extends Controller
             'note'           => $request->note,
         ]);
 
-        $this->syncPaymentRecord($order, $request->payment_status);
+        if ($order->wasChanged('payment_status')) {
+            $this->syncPaymentRecord($order, $request->payment_status);
+        }
+
+        // Báo mail cho khách khi đơn CHUYỂN SANG "Đã xác nhận" hoặc "Đã giao"
+        // (logic giống hệt updateStatus() bên dưới, vì form sửa đơn hàng này
+        // cũng có thể là nơi nhân viên đổi status/payment_status).
+        $statusChangedToConfirmed = $order->wasChanged('status') && $order->status === 'confirmed';
+        if ($order->wasChanged('status')) {
+            $this->sendOrderStatusMail($order, $order->status);
+        }
+
+        // Báo mail xác nhận đã nhận thanh toán khi payment_status chuyển
+        // sang "paid" mà KHÔNG phải do vừa chuyển status sang "confirmed"
+        // trong cùng lần lưu (trường hợp đó OrderConfirmedMail ở trên đã lo).
+        if ($order->wasChanged('payment_status') && $order->payment_status === 'paid' && !$statusChangedToConfirmed) {
+            $this->sendPaymentConfirmedMail($order);
+        }
 
         return redirect()->route('admin.orders.show', $order)
             ->with('success', 'Đã cập nhật đơn hàng.');
@@ -302,6 +428,19 @@ class OrderController extends Controller
 
         if ($order->wasChanged('payment_status')) {
             $this->syncPaymentRecord($order, $order->payment_status);
+        }
+
+        // Báo mail cho khách khi đơn CHUYỂN SANG "Đã xác nhận" hoặc "Đã giao".
+        $statusChangedToConfirmed = $order->wasChanged('status') && $order->status === 'confirmed';
+        if ($order->wasChanged('status')) {
+            $this->sendOrderStatusMail($order, $order->status);
+        }
+
+        // Báo mail xác nhận đã nhận thanh toán khi payment_status chuyển
+        // sang "paid" mà KHÔNG phải do vừa chuyển status sang "confirmed"
+        // (trường hợp đó OrderConfirmedMail ở trên đã đóng vai trò này rồi).
+        if ($order->wasChanged('payment_status') && $order->payment_status === 'paid' && !$statusChangedToConfirmed) {
+            $this->sendPaymentConfirmedMail($order);
         }
 
         return back()->with('success', 'Cập nhật trạng thái thành công.');

@@ -178,12 +178,28 @@ Route::prefix('gio-hang')->name('cart.')->group(function () {
 
 Route::post('/chatbot/send', [ChatbotController::class, 'send'])->name('chatbot.send');
 // ─── THANH TOÁN (CHECKOUT) ────────────────────────────────────────
-Route::prefix('thanh-toan')->name('checkout.')->middleware('auth')->group(function () {
-    Route::get('/',                    [\App\Http\Controllers\CheckoutController::class, 'index'])->name('index');
-    Route::post('/',                   [\App\Http\Controllers\CheckoutController::class, 'store'])->name('store');
-    Route::post('/kiem-tra-ma',        [\App\Http\Controllers\CheckoutController::class, 'checkVoucher'])->name('check-voucher');
-    Route::get('/momo/return',         [\App\Http\Controllers\CheckoutController::class, 'momoReturn'])->name('momo.return');
-    Route::get('/thanh-cong/{order}',  [\App\Http\Controllers\CheckoutController::class, 'success'])->name('success');
+Route::prefix('thanh-toan')->name('checkout.')->group(function () {
+
+    // Các bước đặt hàng từ giỏ hàng vẫn bắt buộc đăng nhập
+    Route::middleware('auth')->group(function () {
+        Route::get('/',             [\App\Http\Controllers\CheckoutController::class, 'index'])->name('index');
+        Route::post('/',            [\App\Http\Controllers\CheckoutController::class, 'store'])->name('store');
+        Route::post('/kiem-tra-ma', [\App\Http\Controllers\CheckoutController::class, 'checkVoucher'])->name('check-voucher');
+    });
+
+    // ── Các route dưới đây KHÔNG bắt buộc đăng nhập ──────────────────
+    // Lý do: khách bấm nút "Thanh toán ngay" trong email nhắc thanh toán
+    // (OrderPaymentReminderMail) hoặc được MoMo redirect về sau khi thanh
+    // toán, ở thời điểm đó trình duyệt có thể chưa có phiên đăng nhập.
+    // Bảo mật được đảm bảo bằng chữ ký URL (signed) thay vì bằng session:
+    //   - momo.retry: link chỉ được tạo hợp lệ từ hệ thống (trong mail),
+    //     có hạn sử dụng, middleware 'signed' sẽ chặn nếu bị sửa/hết hạn.
+    //   - success: chấp nhận nếu link có chữ ký hợp lệ (được sinh ra ngay
+    //     sau khi MoMo xác nhận thanh toán) HOẶC nếu người dùng đăng nhập
+    //     đúng là chủ đơn hàng (xem CheckoutController::success()).
+    Route::get('/momo/return',        [\App\Http\Controllers\CheckoutController::class, 'momoReturn'])->name('momo.return');
+    Route::get('/momo/lai/{order}',   [\App\Http\Controllers\CheckoutController::class, 'retryMomoPayment'])->name('momo.retry')->middleware('signed');
+    Route::get('/thanh-cong/{order}', [\App\Http\Controllers\CheckoutController::class, 'success'])->name('success');
 });
 
 // ─── ADMIN ────────────────────────────────────────────────────────

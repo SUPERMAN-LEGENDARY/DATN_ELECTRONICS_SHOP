@@ -307,7 +307,7 @@
             {{-- Khách hàng --}}
             <div class="form-group">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="customer_phone_input">Số điện thoại <span class="required">*</span></label>
                             <input type="text" name="customer_phone" id="customer_phone_input" class="form-control @error('customer_phone') is-invalid @enderror"
@@ -318,7 +318,7 @@
                             <div class="error" id="customer_phone_input-error" style="display:none;"></div>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="customer_name">Tên khách hàng <span class="required">*</span></label>
                             <input type="text" name="customer_name" id="customer_name" class="form-control @error('customer_name') is-invalid @enderror"
@@ -327,6 +327,18 @@
                                 <div class="error">{{ $message }}</div>
                             @enderror
                             <div class="error" id="customer_name-error" style="display:none;"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="customer_email">Email <span class="required">*</span></label>
+                            <input type="email" name="customer_email" id="customer_email" class="form-control @error('customer_email') is-invalid @enderror"
+                                   placeholder="Nhập email khách hàng" value="{{ old('customer_email') }}" autocomplete="off">
+                            <div class="help-text">Đơn hàng sẽ được gửi xác nhận về email này (kể cả khách vãng lai).</div>
+                            @error('customer_email')
+                                <div class="error">{{ $message }}</div>
+                            @enderror
+                            <div class="error" id="customer_email-error" style="display:none;"></div>
                         </div>
                     </div>
                 </div>
@@ -347,7 +359,7 @@
                     <div class="info-row"><span class="info-label">Số điện thoại:</span><span class="info-value" id="customer_info_phone"></span></div>
                 </div>
                 <div id="customer_new_hint" class="help-text" style="display:none;">
-                    Số điện thoại này chưa có tài khoản — hệ thống sẽ tạo khách hàng mới với tên bạn nhập ở trên.
+                    Số điện thoại này chưa có tài khoản — hệ thống sẽ tạo đơn cho khách vãng lai với tên và email bạn nhập ở trên.
                 </div>
 
                 {{-- Nguồn dữ liệu khách hàng để JS đối chiếu theo SĐT (không hiển thị) --}}
@@ -522,13 +534,41 @@
                         </thead>
                         <tbody id="productPickerBody">
                             @foreach($products as $product)
-                            <tr class="product-picker-row" data-id="{{ $product->id }}" data-name="{{ strtolower($product->name) }}" data-price="{{ $product->price }}" data-stock="{{ $product->stock }}">
+                            @php $hasVariants = $product->variants->count() > 0; @endphp
+                            <tr class="product-picker-row"
+                                data-id="{{ $product->id }}"
+                                data-name="{{ strtolower($product->name) }}"
+                                data-price="{{ $product->price }}"
+                                data-stock="{{ $product->stock }}"
+                                @if($hasVariants) data-has-variants="1" @endif>
                                 <td>{{ $product->name }}</td>
-                                <td class="text-right">{{ number_format($product->price) }}đ</td>
-                                <td class="text-right">{{ $product->stock }}</td>
-                                <td class="text-right">
-                                    <button type="button" class="btn btn-info btn-add-product">+ Thêm</button>
-                                </td>
+                                @if($hasVariants)
+                                    <td class="text-right text-muted">Theo biến thể</td>
+                                    <td class="text-right text-muted">—</td>
+                                    <td class="text-right">
+                                        <div style="display:flex; gap:6px; justify-content:flex-end; align-items:center;">
+                                            <select class="form-control variant-select" style="width:auto; min-width:220px;">
+                                                <option value="">-- Chọn biến thể --</option>
+                                                @foreach($product->variants as $variant)
+                                                    <option value="{{ $variant->id }}"
+                                                        data-price="{{ $variant->price }}"
+                                                        data-stock="{{ $variant->stock }}"
+                                                        data-label="{{ $variant->label }}"
+                                                        {{ $variant->stock < 1 ? 'disabled' : '' }}>
+                                                        {{ $variant->label }} — {{ number_format($variant->price) }}đ ({{ $variant->stock > 0 ? $variant->stock . ' còn lại' : 'hết hàng' }})
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <button type="button" class="btn btn-info btn-add-variant">+ Thêm</button>
+                                        </div>
+                                    </td>
+                                @else
+                                    <td class="text-right">{{ number_format($product->price) }}đ</td>
+                                    <td class="text-right">{{ $product->stock }}</td>
+                                    <td class="text-right">
+                                        <button type="button" class="btn btn-info btn-add-product">+ Thêm</button>
+                                    </td>
+                                @endif
                             </tr>
                             @endforeach
                         </tbody>
@@ -547,19 +587,30 @@
                     {{-- Dựng lại danh sách sản phẩm từ old('items') khi submit trước đó bị lỗi,
                          để nhân viên không phải chọn lại từ đầu mỗi lần validate fail --}}
                     @foreach(old('items', []) as $idx => $oldItem)
-                        @php $p = $products->firstWhere('id', (int) ($oldItem['product_id'] ?? 0)); @endphp
+                        @php
+                            $p = $products->firstWhere('id', (int) ($oldItem['product_id'] ?? 0));
+                            $v = $p && !empty($oldItem['variant_id'])
+                                ? $p->variants->firstWhere('id', (int) $oldItem['variant_id'])
+                                : null;
+                            $displayName = $p ? $p->name . ($v ? ' - ' . $v->label : '') : '';
+                            $displayStock = $v ? $v->stock : ($p->stock ?? 0);
+                            $displayPrice = $oldItem['unit_price'] ?? ($v->price ?? ($p->price ?? 0));
+                        @endphp
                         @if($p)
-                        <div class="product-row" data-product-id="{{ $p->id }}" data-stock="{{ $p->stock }}">
+                        <div class="product-row" data-product-id="{{ $p->id }}" @if($v) data-variant-id="{{ $v->id }}" @endif data-stock="{{ $displayStock }}">
                             <div class="col-md-5">
-                                <strong>{{ $p->name }}</strong>
+                                <strong>{{ $displayName }}</strong>
                                 <input type="hidden" name="items[{{ $idx }}][product_id]" value="{{ $p->id }}">
+                                @if($v)
+                                    <input type="hidden" name="items[{{ $idx }}][variant_id]" value="{{ $v->id }}">
+                                @endif
                             </div>
                             <div class="col-md-2">
-                                <input type="number" name="items[{{ $idx }}][quantity]" class="form-control quantity" min="1" max="{{ $p->stock }}" value="{{ $oldItem['quantity'] ?? 1 }}" required>
+                                <input type="number" name="items[{{ $idx }}][quantity]" class="form-control quantity" min="1" max="{{ $displayStock }}" value="{{ $oldItem['quantity'] ?? 1 }}" required>
                                 <div class="error quantity-error" style="display:none;"></div>
                             </div>
                             <div class="col-md-3">
-                                <input type="number" name="items[{{ $idx }}][unit_price]" class="form-control unit-price" step="1000" min="0" value="{{ $oldItem['unit_price'] ?? $p->price }}" readonly tabindex="-1">
+                                <input type="number" name="items[{{ $idx }}][unit_price]" class="form-control unit-price" step="1000" min="0" value="{{ $displayPrice }}" readonly tabindex="-1">
                             </div>
                             <div class="col-md-2 text-right">
                                 <button type="button" class="btn btn-danger remove-product">Xóa</button>
@@ -653,6 +704,7 @@
         // ─── 1. NHẬP SĐT → TỰ ĐỘNG DÒ TÀI KHOẢN CÓ SẴN ──────────
         const customerPhoneInput = document.getElementById('customer_phone_input');
         const customerNameInput = document.getElementById('customer_name');
+        const customerEmailInput = document.getElementById('customer_email');
         const userIdInput = document.getElementById('user_id');
         const customerInfoBlock = document.getElementById('customer_info_block');
         const customerNewHint = document.getElementById('customer_new_hint');
@@ -696,14 +748,21 @@
                 customerNewHint.style.display = 'none';
                 clearError('customer_phone_input');
 
-                // Tự điền tên nếu ô tên đang trống, để nhân viên không phải gõ lại
+                // Tự điền tên và email nếu các ô đang trống, để nhân viên không phải gõ lại
                 if (!customerNameInput.value.trim()) {
                     customerNameInput.value = matched.name;
                 }
+                if (!customerEmailInput.value.trim()) {
+                    customerEmailInput.value = matched.email;
+                }
+                clearError('customer_email');
             } else {
                 userIdInput.value = '';
                 customerInfoBlock.style.display = 'none';
                 customerNewHint.style.display = 'block';
+
+                // Khách vãng lai (chưa có tài khoản) → vẫn cần email để gửi xác nhận đơn hàng,
+                // ô email luôn cho phép nhập tự do, không bị khóa theo tài khoản nào cả.
 
                 // Khách hàng mới → chắc chắn chưa có địa chỉ lưu sẵn
                 addressNewRadio.checked = true;
@@ -810,24 +869,27 @@
 
         renderProductPicker();
 
-        // ─── 5. THÊM SẢN PHẨM TỪ BẢNG VÀO DANH SÁCH ĐÃ CHỌN ──────
+        // ─── 5. THÊM SẢN PHẨM (CÓ THỂ KÈM BIẾN THỂ) VÀO DANH SÁCH ĐÃ CHỌN ──
         // Bắt đầu đếm từ sau các dòng đã được dựng lại từ old('items') ở trên,
         // để tránh trùng index với input name="items[n][...]" đã có sẵn.
         let itemIndex = {{ count(old('items', [])) }};
-        document.getElementById('productPickerBody').addEventListener('click', function(e) {
-            if (!e.target.classList.contains('btn-add-product')) return;
-            const row = e.target.closest('.product-picker-row');
-            const id = row.dataset.id;
-            const name = row.querySelector('td').textContent.trim();
-            const price = row.dataset.price;
-            const stock = parseInt(row.dataset.stock) || 0;
+
+        // id + variantId (variantId rỗng nếu sản phẩm không có biến thể) xác định
+        // duy nhất 1 dòng trong giỏ, để 2 biến thể khác nhau của cùng 1 sản phẩm
+        // được thêm thành 2 dòng riêng biệt thay vì gộp nhầm vào nhau.
+        function addOrIncrementItem(id, variantId, name, price, stock) {
+            stock = parseInt(stock) || 0;
 
             if (stock < 1) {
-                alert('Sản phẩm "' + name + '" đã hết hàng, không thể thêm.');
+                alert('"' + name + '" đã hết hàng, không thể thêm.');
                 return;
             }
 
-            const existing = document.querySelector(`.product-row[data-product-id="${id}"]`);
+            const selector = variantId
+                ? `.product-row[data-product-id="${id}"][data-variant-id="${variantId}"]`
+                : `.product-row[data-product-id="${id}"]:not([data-variant-id])`;
+            const existing = document.querySelector(selector);
+
             if (existing) {
                 const qtyInput = existing.querySelector('.quantity');
                 const nextQty = parseInt(qtyInput.value || 0) + 1;
@@ -843,11 +905,13 @@
             const newRow = document.createElement('div');
             newRow.className = 'product-row';
             newRow.setAttribute('data-product-id', id);
+            if (variantId) newRow.setAttribute('data-variant-id', variantId);
             newRow.setAttribute('data-stock', stock);
             newRow.innerHTML = `
                 <div class="col-md-5">
                     <strong>${name}</strong>
                     <input type="hidden" name="items[${itemIndex}][product_id]" value="${id}">
+                    ${variantId ? `<input type="hidden" name="items[${itemIndex}][variant_id]" value="${variantId}">` : ''}
                 </div>
                 <div class="col-md-2">
                     <input type="number" name="items[${itemIndex}][quantity]" class="form-control quantity" min="1" max="${stock}" value="1" required>
@@ -862,6 +926,41 @@
             document.getElementById('product-list').appendChild(newRow);
             itemIndex++;
             updateSummary();
+        }
+
+        document.getElementById('productPickerBody').addEventListener('click', function(e) {
+            // Sản phẩm không có biến thể: thêm thẳng theo giá/tồn kho của sản phẩm
+            if (e.target.classList.contains('btn-add-product')) {
+                const row = e.target.closest('.product-picker-row');
+                const id = row.dataset.id;
+                const name = row.querySelector('td').textContent.trim();
+                addOrIncrementItem(id, null, name, row.dataset.price, row.dataset.stock);
+                return;
+            }
+
+            // Sản phẩm có biến thể: bắt buộc chọn 1 biến thể cụ thể trước khi thêm,
+            // giá & tồn kho lấy theo đúng biến thể đó (không dùng giá sản phẩm gốc).
+            if (e.target.classList.contains('btn-add-variant')) {
+                const row = e.target.closest('.product-picker-row');
+                const id = row.dataset.id;
+                const productName = row.querySelector('td').textContent.trim();
+                const select = row.querySelector('.variant-select');
+                const option = select.options[select.selectedIndex];
+
+                if (!select.value) {
+                    alert('Vui lòng chọn biến thể cho "' + productName + '".');
+                    return;
+                }
+
+                const variantId = select.value;
+                const label = option.getAttribute('data-label');
+                const price = option.getAttribute('data-price');
+                const stock = option.getAttribute('data-stock');
+                const name = productName + ' - ' + label;
+
+                addOrIncrementItem(id, variantId, name, price, stock);
+                select.value = '';
+            }
         });
 
         document.getElementById('product-list').addEventListener('click', function(e) {
@@ -967,6 +1066,10 @@
             return /^(0|\+84)\d{9,10}$/.test((value || '').trim());
         }
 
+        function isValidEmail(value) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((value || '').trim());
+        }
+
         form.addEventListener('submit', function(e) {
             let isValid = true;
 
@@ -988,6 +1091,19 @@
                 isValid = false;
             } else {
                 clearError('customer_name');
+            }
+
+            // Email: bắt buộc với mọi khách hàng, kể cả khách vãng lai (không có tài khoản),
+            // vì hệ thống sẽ gửi email xác nhận đơn hàng về địa chỉ này.
+            const customerEmailField = document.getElementById('customer_email');
+            if (!customerEmailField.value.trim()) {
+                setError('customer_email', 'Vui lòng nhập email khách hàng để gửi xác nhận đơn hàng.');
+                isValid = false;
+            } else if (!isValidEmail(customerEmailField.value)) {
+                setError('customer_email', 'Email không hợp lệ.');
+                isValid = false;
+            } else {
+                clearError('customer_email');
             }
 
             // Địa chỉ

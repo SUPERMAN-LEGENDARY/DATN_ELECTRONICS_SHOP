@@ -35,6 +35,45 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
 .alert-success { background:#E8F5E9; border:1px solid #A5D6A7; color:#2E7D32; padding:10px 16px; border-radius:6px; margin-bottom:16px; font-size:14px; }
 .empty-state { text-align:center; padding:50px 20px; color:#aaa; }
 .empty-state i { font-size:36px; display:block; margin-bottom:10px; color:#ddd; }
+
+/* ── Phân trang ──
+   Đồng bộ với index.blade.php: project này không load Tailwind CSS, nên view
+   pagination mặc định của Laravel (icon SVG mũi tên dùng class h-5 w-5) bị mất
+   kích thước và hiển thị to bất thường. Dùng view "bootstrap-4" (chữ « » thay
+   vì SVG) và style thủ công cho khớp giao diện admin. */
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+.pagination .page-item .page-link {
+    display: inline-block;
+    padding: 6px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    color: #1565C0;
+    font-size: 13px;
+    text-decoration: none;
+    background: #fff;
+    cursor: pointer;
+}
+.pagination .page-item .page-link:hover {
+    background: #f0f6ff;
+    border-color: #1565C0;
+}
+.pagination .page-item.active .page-link {
+    background: #1565C0;
+    border-color: #1565C0;
+    color: #fff;
+}
+.pagination .page-item.disabled .page-link {
+    color: #bdbdbd;
+    cursor: not-allowed;
+    background: #fafafa;
+}
 </style>
 @endpush
 
@@ -166,5 +205,5 @@ table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
     </table>
 </div>
 
-<div style="margin-top:16px">{{ $orders->links() }}</div>
+<div style="margin-top:16px">{{ $orders->links('pagination::bootstrap-4') }}</div>
 @endsection

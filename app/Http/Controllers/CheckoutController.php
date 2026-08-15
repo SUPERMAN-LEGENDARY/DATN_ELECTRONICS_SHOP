@@ -7,9 +7,13 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Voucher;
+use App\Mail\OrderPaymentConfirmedMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
@@ -297,6 +301,7 @@ class CheckoutController extends Controller
                 foreach ($items as $it) {
                     $order->items()->create([
                         'product_id'   => $it['product']->id,
+                        'variant_id'   => $it['variant']->id ?? null,
                         'product_name' => $it['product']->name . ($it['variant'] ? ' - ' . $it['variant']->label : ''),
                         'quantity'     => $it['quantity'],
                         'unit_price'   => $it['price'],
@@ -317,7 +322,7 @@ class CheckoutController extends Controller
 
                 // Ghi lại giao dịch thanh toán (COD: chờ thu tiền khi giao;
                 // MoMo: đã thanh toán thành công ngay tại thời điểm tạo đơn)
-                $order->payments()->create([
+                $payment = $order->payments()->create([
                     'gateway'        => $orderPayload['payment_method'],
                     'transaction_id' => $paymentInfo['transaction_id'] ?? null,
                     'amount'         => $orderPayload['total'],
@@ -325,11 +330,78 @@ class CheckoutController extends Controller
                     'paid_at'        => $paymentInfo['paid_at'] ?? ($paymentStatus === 'paid' ? now() : null),
                 ]);
 
+                // Đơn được thanh toán thành công ngay khi tạo (MoMo) => xuất CSV
+                if ($paymentStatus === 'paid') {
+                    $this->logPaymentToCsv($order, $payment);
+                }
+
                 return $order;
             });
         } catch (\Throwable $e) {
             report($e);
             return null;
+        }
+    }
+
+    /**
+     * Ghi lại 1 dòng giao dịch thanh toán thành công vào file CSV
+     * (storage/app/private/payments/payments-{Y-m}.csv). Mỗi tháng 1 file,
+     * dòng mới được append vào cuối, có ghi header nếu file chưa tồn tại.
+     * Dùng để đối soát / export cho kế toán, không thay thế bảng `payments`.
+     */
+    private function logPaymentToCsv(Order $order, $payment): void
+    {
+        try {
+            $order->loadMissing('user');
+
+            $disk = Storage::disk('local'); // storage/app/private (Laravel 11+) hoặc storage/app
+            $path = 'payments/payments-' . now()->format('Y-m') . '.csv';
+
+            $isNewFile = !$disk->exists($path);
+
+            $absolutePath = $disk->path($path);
+            if (!is_dir(dirname($absolutePath))) {
+                mkdir(dirname($absolutePath), 0755, true);
+            }
+
+            $handle = fopen($absolutePath, 'a');
+            if (!$handle) {
+                throw new \RuntimeException("Không thể mở file CSV: {$absolutePath}");
+            }
+
+            // Khóa file khi ghi để tránh xung đột khi nhiều request cùng ghi
+            flock($handle, LOCK_EX);
+
+            if ($isNewFile) {
+                fputcsv($handle, [
+                    'order_id',
+                    'user_id',
+                    'customer_name',
+                    'gateway',
+                    'transaction_id',
+                    'amount',
+                    'status',
+                    'paid_at',
+                ]);
+            }
+
+            fputcsv($handle, [
+                $order->id,
+                $order->user_id,
+                $order->user->name ?? '',
+                $payment->gateway,
+                $payment->transaction_id,
+                $payment->amount,
+                $payment->status,
+                optional($payment->paid_at)->format('Y-m-d H:i:s'),
+            ]);
+
+            flock($handle, LOCK_UN);
+            fclose($handle);
+        } catch (\Throwable $e) {
+            // Ghi CSV chỉ là log phụ trợ — lỗi ở đây không được làm hỏng
+            // luồng thanh toán chính, chỉ cần report lại để theo dõi.
+            report($e);
         }
     }
 
@@ -343,8 +415,8 @@ class CheckoutController extends Controller
         session(['cart' => $cart]);
     }
 
-    // ─── Gọi sang cổng thanh toán MoMo ─────────────────────────────
-    private function momoPayment(float $amount, array $orderPayload)
+    // ─── Gọi sang cổng thanh toán MoMo (dùng chung cho đặt hàng mới & thanh toán lại) ──
+    private function momoPaymentRequest(float $amount, string $orderInfo)
     {
         $endpoint    = config('services.momo.endpoint', 'https://test-payment.momo.vn/v2/gateway/api/create');
         $partnerCode = config('services.momo.partner_code');
@@ -353,15 +425,13 @@ class CheckoutController extends Controller
 
         $orderId   = 'DH' . time();
         $requestId = (string) time();
-        $orderInfo = 'Thanh toan don hang ' . $orderId . ' - ElectronicShop';
         $amount    = (string) (int) round($amount);
 
         $redirectUrl = route('checkout.momo.return');
         $ipnUrl      = route('checkout.momo.return');
         $requestType = 'payWithATM';
 
-        // Lưu mapping momo_order_id -> dữ liệu đơn hàng (vì MoMo redirect không giữ session đáng tin cậy 100%,
-        // nhưng ta vẫn ưu tiên session, momo_order_id chỉ để đối soát/log)
+        // momo_order_id chỉ để đối soát/log, không dùng để xác định luồng xử lý ở momoReturn().
         session(['momo_order_id' => $orderId]);
 
         $rawHash = "accessKey={$accessKey}&amount={$amount}&extraData=&ipnUrl={$ipnUrl}&orderId={$orderId}"
@@ -394,14 +464,68 @@ class CheckoutController extends Controller
             $result = $response->json();
         } catch (\Throwable $e) {
             report($e);
-            return back()->with('error', 'Không thể kết nối tới cổng thanh toán MoMo. Vui lòng thử lại sau.')->withInput();
+            return back()->with('error', 'Không thể kết nối tới cổng thanh toán MoMo. Vui lòng thử lại sau.');
         }
 
         if (!empty($result['payUrl'])) {
             return redirect()->away($result['payUrl']);
         }
 
-        return back()->with('error', 'Lỗi MoMo: ' . ($result['message'] ?? 'Không xác định'))->withInput();
+        return back()->with('error', 'Lỗi MoMo: ' . ($result['message'] ?? 'Không xác định'));
+    }
+
+    // ─── Gọi MoMo cho đơn hàng MỚI (từ giỏ hàng, lúc checkout) ──────
+    private function momoPayment(float $amount, array $orderPayload)
+    {
+        // orderInfo lúc này chỉ mang tính mô tả (đơn thật sự chưa được tạo,
+        // chỉ được tạo sau khi MoMo callback thành công ở momoReturn()).
+        return $this->momoPaymentRequest($amount, 'Thanh toan don hang moi - ElectronicShop');
+    }
+
+    /**
+     * Thanh toán lại MoMo cho một đơn hàng ĐÃ TỒN TẠI (khách bấm nút
+     * "Thanh toán ngay" trong email nhắc thanh toán). Khác với momoPayment()
+     * ở trên (tạo đơn mới từ giỏ hàng), luồng này KHÔNG tạo đơn mới —
+     * momoReturn() sẽ chỉ cập nhật payment_status của đơn có sẵn.
+     */
+    public function retryMomoPayment(Request $request, Order $order)
+    {
+        // Không còn kiểm tra $request->user() ở đây: route này không bắt
+        // buộc đăng nhập (khách bấm link từ email khi chưa/không đăng nhập).
+        // Quyền truy cập đã được đảm bảo bởi middleware 'signed' trên route
+        // (xem routes/web.php) — chỉ link do hệ thống tự sinh (trong
+        // OrderPaymentReminderMail) và còn hạn mới hợp lệ.
+        //
+        // Các nhánh return sớm bên dưới cũng điều hướng sang trang
+        // "checkout.success" — trang đó yêu cầu link có chữ ký hoặc đăng
+        // nhập đúng chủ đơn (xem success()), nên ở đây phải tự sinh signed
+        // URL thay vì dùng route() thường, nếu không khách chưa đăng nhập
+        // sẽ bị 403 khi bấm link từ email.
+        $successUrl = URL::temporarySignedRoute('checkout.success', now()->addMinutes(30), ['order' => $order->id]);
+
+        if ($order->payment_method !== 'momo') {
+            return redirect()->to($successUrl)
+                ->with('error', 'Đơn hàng này không sử dụng phương thức thanh toán MoMo.');
+        }
+
+        if ($order->payment_status === 'paid') {
+            return redirect()->to($successUrl)
+                ->with('success', 'Đơn hàng đã được thanh toán trước đó.');
+        }
+
+        if (in_array($order->status, ['cancelled', 'returned'])) {
+            return redirect()->to($successUrl)
+                ->with('error', 'Đơn hàng đã hủy/hoàn trả, không thể thanh toán.');
+        }
+
+        // Đánh dấu đây là luồng thanh toán lại cho đơn CÓ SẴN, để momoReturn()
+        // biết cần cập nhật đúng đơn này thay vì tạo đơn mới từ giỏ hàng.
+        session(['momo_retry_order_id' => $order->id]);
+
+        return $this->momoPaymentRequest(
+            (float) $order->total,
+            "Thanh toan lai don hang #{$order->id} - ElectronicShop"
+        );
     }
 
     // ─── MoMo redirect/IPN trả về sau khi thanh toán ───────────────
@@ -409,6 +533,80 @@ class CheckoutController extends Controller
     {
         $code = $request->input('resultCode', $request->input('errorCode', -1));
 
+        // ── Trường hợp 1: THANH TOÁN LẠI cho đơn đã tồn tại (từ email nhắc) ──
+        $retryOrderId = session('momo_retry_order_id');
+        if ($retryOrderId) {
+            session()->forget(['momo_retry_order_id', 'momo_order_id']);
+
+            $order = Order::find($retryOrderId);
+
+            if (!$order) {
+                return redirect()->route('home')->with('error', 'Không tìm thấy đơn hàng.');
+            }
+
+            // Trang "thanh-cong" yêu cầu đăng nhập đúng chủ đơn HOẶC link có
+            // chữ ký hợp lệ. Vì đây là luồng khách bấm link từ email (có thể
+            // chưa đăng nhập), ta tự sinh 1 link đã ký (hạn ngắn) để họ xem
+            // được kết quả thanh toán ngay sau khi MoMo redirect về.
+            $successUrl = URL::temporarySignedRoute('checkout.success', now()->addMinutes(30), ['order' => $order->id]);
+
+            if ($code != '0') {
+                $message = $request->input('message', 'Giao dịch bị từ chối hoặc đã hết hạn.');
+                return redirect()->to($successUrl)
+                    ->with('error', 'Thanh toán MoMo thất bại: ' . $message);
+            }
+
+            // Tránh ghi trùng payment nếu MoMo gọi callback nhiều lần (redirect + IPN)
+            if ($order->payment_status !== 'paid') {
+                DB::transaction(function () use ($order, $request) {
+                    $order->payment_status = 'paid';
+                    $order->save();
+
+                    $payment = $order->payments()->create([
+                        'gateway'        => 'momo',
+                        'transaction_id' => $request->input('transId'),
+                        'amount'         => $order->total,
+                        'status'         => 'success',
+                        'paid_at'        => now(),
+                    ]);
+
+                    // Yêu cầu: khi thanh toán (thành công) thì tạo file CSV
+                    $this->logPaymentToCsv($order, $payment);
+                });
+
+                // Gửi mail xác nhận đã ghi nhận thanh toán. Đây đúng là tình
+                // huống nêu trong docblock của OrderPaymentConfirmedMail:
+                // payment_status chuyển unpaid -> paid mà KHÔNG kèm theo việc
+                // đổi `status` đơn hàng trong cùng request (đơn ở đây đã
+                // confirmed/processing/shipped từ trước, request này chỉ xử
+                // lý thanh toán). Đặt ngoài transaction để tránh trường hợp
+                // gửi mail bị rollback theo nếu mail thất bại; và nếu gửi
+                // mail lỗi cũng không ảnh hưởng tới việc đã lưu thanh toán.
+                //
+                // QUAN TRỌNG: phải dùng $order->contact_email (accessor trong
+                // Order model), KHÔNG dùng $order->user->email trực tiếp.
+                // Với đơn khách vãng lai do admin tạo (Admin\OrderController::
+                // store()), user_id trỏ tới 1 tài khoản "giả" có email dạng
+                // guest_xxx@noemail.local — email THẬT của khách nằm ở cột
+                // customer_email. contact_email ưu tiên customer_email trước,
+                // chỉ fallback sang user->email khi customer_email trống.
+                $order->loadMissing('user');
+                $contactEmail = $order->contact_email;
+
+                if ($contactEmail && !str_ends_with($contactEmail, '@noemail.local')) {
+                    try {
+                        Mail::to($contactEmail)->send(new OrderPaymentConfirmedMail($order));
+                    } catch (\Throwable $e) {
+                        report($e);
+                    }
+                }
+            }
+
+            return redirect()->to($successUrl)
+                ->with('success', 'Thanh toán MoMo thành công!');
+        }
+
+        // ── Trường hợp 2: ĐẶT HÀNG MỚI từ giỏ hàng (luồng checkout gốc) ──
         $orderPayload = session('pending_order');
 
         if ($code != '0' || !$orderPayload) {
@@ -448,7 +646,15 @@ class CheckoutController extends Controller
     // ─── Trang đặt hàng thành công ──────────────────────────────────
     public function success(Request $request, Order $order)
     {
-        if ($order->user_id !== $request->user()->id) {
+        $user = $request->user();
+
+        $isOwner  = $user && $order->user_id === $user->id;
+        // Truy cập qua link có chữ ký hợp lệ (được sinh ra ngay sau khi MoMo
+        // xác nhận thanh toán ở momoReturn()) — cho phép khách chưa đăng
+        // nhập vẫn xem được kết quả thanh toán khi bấm link từ email.
+        $isSigned = $request->hasValidSignature();
+
+        if (!$isOwner && !$isSigned) {
             abort(403);
         }
 

@@ -24,7 +24,15 @@ class Order extends Model
         'subtotal',
         'discount_amount',
         'total',
-        'note'
+        'note',
+        // Snapshot thông tin liên hệ tại thời điểm đặt hàng.
+        // Với khách vãng lai (user_id = null) đây là nguồn duy nhất để biết
+        // tên/SĐT/email khách hàng và gửi mail xác nhận đơn.
+        // Với khách có tài khoản, vẫn lưu lại để tránh trường hợp sau này
+        // khách đổi tên/email trong hồ sơ làm sai lệch dữ liệu đơn hàng cũ.
+        'customer_name',
+        'customer_phone',
+        'customer_email',
     ];
 
     // ─── Relationships ──────────────────────────────────────────
@@ -60,5 +68,26 @@ class Order extends Model
     public function payment()
     {
         return $this->hasOne(Payment::class)->latestOfMany();
+    }
+
+    // ─── Helpers ────────────────────────────────────────────────
+
+    /**
+     * Email để gửi thông báo đơn hàng (xác nhận, cập nhật trạng thái...).
+     * Ưu tiên customer_email đã lưu trên đơn (đúng với cả khách vãng lai
+     * lẫn khách có tài khoản), fallback sang email tài khoản nếu vì lý do
+     * gì đó customer_email bị thiếu (đơn cũ tạo trước khi có cột này).
+     */
+    public function getContactEmailAttribute(): ?string
+    {
+        return $this->customer_email ?: $this->user?->email;
+    }
+
+    /**
+     * true nếu đây là đơn của khách vãng lai (không có tài khoản).
+     */
+    public function getIsGuestOrderAttribute(): bool
+    {
+        return is_null($this->user_id);
     }
 }
