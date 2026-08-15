@@ -109,18 +109,103 @@
             display: flex; align-items: center; gap: 34px;
         }
 
-        /* Logo trong khung viền – y hệt logo SAMSUNG */
-        .sm-logo {
-            display: inline-flex; align-items: center; justify-content: center;
-            border: 1.5px solid var(--sm-black);
-            padding: 5px 12px;
-            font-family: 'Manrope', sans-serif;
-            font-weight: 800; font-size: 14px; letter-spacing: .14em;
-            color: var(--sm-black); text-transform: uppercase;
-            white-space: nowrap; flex-shrink: 0;
-            transition: background .25s var(--sm-ease), color .25s var(--sm-ease);
-        }
-        .sm-logo:hover { background: var(--sm-black); color: #fff; }
+       /* ============================================================
+   ELECTRONICSHOP LOGO — CODE ONLY
+   ============================================================ */
+
+/* ============================================================
+   ELECTRONICSHOP LOGO — HEADER + FOOTER
+   ============================================================ */
+
+.es-logo {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: flex-start;
+    width: 180px;
+    height: 56px;
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
+    overflow: hidden;
+    text-decoration: none;
+    color: #000;
+    line-height: 1;
+    transition: transform .25s ease;
+}
+
+.es-logo-img {
+    display: block !important;
+    width: 180px !important;
+    height: auto !important;
+    max-width: 180px !important;
+    max-height: 48px !important;
+    object-fit: contain;
+    object-position: left center;
+    border: 0;
+    outline: 0;
+}
+
+.es-logo:hover {
+    color: #000;
+    transform: translateY(-1px);
+}
+
+/* ================= HEADER ================= */
+
+.sm-header .es-logo {
+    width: 180px;
+    height: 56px;
+    transform: none !important;
+    transform-origin: center;
+}
+
+.sm-header .es-logo-img {
+    width: 180px !important;
+    max-width: 180px !important;
+    max-height: 48px !important;
+}
+
+/* ================= FOOTER ================= */
+
+.sm-footer .es-logo {
+    width: 180px;
+    height: 55px;
+    margin-bottom: 20px;
+    transform: none !important;
+}
+
+.sm-footer .es-logo-img {
+    width: 180px !important;
+    max-width: 180px !important;
+    max-height: 55px !important;
+    height: auto !important;
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 640px) {
+    .sm-header .es-logo {
+        width: 145px;
+        height: 48px;
+    }
+
+    .sm-header .es-logo-img {
+        width: 145px !important;
+        max-width: 145px !important;
+        max-height: 42px !important;
+    }
+
+    .sm-footer .es-logo {
+        width: 160px;
+        height: 50px;
+    }
+
+    .sm-footer .es-logo-img {
+        width: 160px !important;
+        max-width: 160px !important;
+        max-height: 50px !important;
+    }
+}
 
         /* Nav chính */
         .sm-nav { display: flex; align-items: center; gap: 30px; margin: 0; padding: 0; list-style: none; flex: 1; }
@@ -433,7 +518,9 @@
     {{-- ===== MAIN HEADER ===== --}}
     <header class="sm-header" id="smHeader">
         <div class="inner">
-            <a href="{{ url('/') }}" class="sm-logo">ElectronicShop</a>
+            <a href="{{ url('/') }}" class="es-logo" aria-label="ElectronicsShop">
+                <img src="{{ asset('images/logo.png') }}" alt="ElectronicsShop" class="es-logo-img">
+            </a>
 
             <ul class="sm-nav">
                 <li><a href="{{ url('/') }}" class="{{ request()->is('/') ? 'active' : '' }}">Trang chủ</a></li>
@@ -546,7 +633,9 @@
     <footer class="sm-footer">
         <div class="sm-footer-top">
             <div class="sm-footer-col">
-                <h2>ElectronicShop</h2>
+                <a href="{{ url('/') }}" class="es-logo" aria-label="ElectronicsShop">
+                    <img src="{{ asset('images/logo.png') }}" alt="ElectronicsShop" class="es-logo-img">
+                </a>
                 <p>
                     123 Đường Nguyễn Văn Linh, Quận Hải Châu,<br>
                     TP Đà Nẵng<br>
@@ -565,7 +654,6 @@
                 <h3>Hỗ trợ khách hàng</h3>
                 <a href="#">Hướng dẫn mua hàng</a>
                 <a href="#">Chính sách bảo hành</a>
-                <a href="#">Chính sách đổi trả</a>
                 <a href="#">Tra cứu đơn hàng</a>
                 <a href="#">Câu hỏi thường gặp</a>
             </div>
@@ -573,7 +661,6 @@
             <div class="sm-footer-col">
                 <h3>Về chúng tôi</h3>
                 <a href="#">Giới thiệu ElectronicShop</a>
-                <a href="#">Tuyển dụng</a>
                 <a href="#">Hệ thống cửa hàng</a>
                 <a href="#">Chính sách bảo mật</a>
                 <a href="#">Liên hệ đối tác</a>

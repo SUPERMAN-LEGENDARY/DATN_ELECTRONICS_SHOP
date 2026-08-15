@@ -302,6 +302,56 @@
     }
 
     /* ============================================================
+       ADDRESS COMBOBOX (Tỉnh/Thành phố, Quận/Huyện, Phường/Xã)
+       ============================================================ */
+    .addr-combo { position: relative; }
+
+    .addr-combo-input.is-disabled {
+        background: #f0f0f0;
+        color: #999;
+        cursor: not-allowed;
+    }
+
+    .addr-combo-list {
+        display: none;
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        z-index: 60;
+        max-height: 260px;
+        overflow-y: auto;
+        background: #fff;
+        border: 1px solid #cccccc;
+        border-radius: 10px;
+        box-shadow: 0 14px 34px rgba(0, 0, 0, .10);
+        padding: 6px;
+    }
+
+    .addr-combo-list.is-open { display: block; }
+
+    .addr-combo-item {
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 14.5px;
+        color: var(--samsung-black);
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .addr-combo-item:hover,
+    .addr-combo-item.is-active { background: #f2f2f2; }
+
+    .addr-combo-empty,
+    .addr-combo-hint {
+        padding: 10px 12px;
+        font-size: 13px;
+        color: #999;
+    }
+
+    /* ============================================================
        ORDER SUMMARY BOX — SAMSUNG STYLE
        ============================================================ */
     .order-box {
@@ -400,13 +450,36 @@
     .voucher-row input.is-invalid { border-color: #dc2626; background: #fff5f5; }
 
     .voucher-row button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        padding: 0 22px;
+
+        background: var(--samsung-gray-dark);
+        color: #ffffff;
+        border: none;
+        border-radius: var(--samsung-radius-pill);
+
         font-weight: 700;
         cursor: pointer;
         font-size: 14px;
-        transition: background 0.2s ease, transform 0.15s ease;
+        white-space: nowrap;
+
+        box-shadow: 0 6px 20px rgba(20, 40, 160, 0.25);
+        transition: background 0.2s ease, transform 0.18s ease, box-shadow 0.2s ease;
     }
     .voucher-row button:hover {
+        background: var(--samsung-gray-dark-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(20, 40, 160, 0.35);
+    }
+    .voucher-row button:disabled {
         background: var(--samsung-gray-dark);
+        box-shadow: none;
+        cursor: not-allowed;
+        transform: none;
     }
 
     .summary-row {
@@ -535,15 +608,27 @@
                         </div>
                         <div class="form-group">
                             <label>Tỉnh / Thành phố</label>
-                            <input type="text" name="province" value="{{ old('province') }}">
+                            <div class="addr-combo" id="provinceCombo">
+                                <input type="text" class="addr-combo-input" id="provinceInput" name="province" value="{{ old('province') }}" autocomplete="off" placeholder="Tỉnh / Thành phố">
+                                <input type="hidden" name="province_code" id="provinceCode">
+                                <div class="addr-combo-list" id="provinceList"></div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Quận / Huyện</label>
-                            <input type="text" name="district" value="{{ old('district') }}">
+                            <div class="addr-combo" id="districtCombo">
+                                <input type="text" class="addr-combo-input is-disabled" id="districtInput" name="district" value="{{ old('district') }}" autocomplete="off" placeholder="Chọn Tỉnh / Thành phố trước" disabled>
+                                <input type="hidden" name="district_code" id="districtCode">
+                                <div class="addr-combo-list" id="districtList"></div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Phường / Xã</label>
-                            <input type="text" name="ward" value="{{ old('ward') }}">
+                            <div class="addr-combo" id="wardCombo">
+                                <input type="text" class="addr-combo-input is-disabled" id="wardInput" name="ward" value="{{ old('ward') }}" autocomplete="off" placeholder="Chọn Quận / Huyện trước" disabled>
+                                <input type="hidden" name="ward_code" id="wardCode">
+                                <div class="addr-combo-list" id="wardList"></div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Số nhà, tên đường</label>
@@ -658,6 +743,264 @@
      KHÔNG THAY ĐỔI ĐOẠN SCRIPT DƯỚI ĐÂY ĐỂ ĐẢM BẢO 100% NGHIỆP VỤ NHƯ YÊU CẦU
      ========================================================================= --}}
 <script>
+/* ============================================================
+   ĐỊA CHỈ: TỈNH / QUẬN-HUYỆN / PHƯỜNG-XÃ (combobox có gợi ý + lọc)
+   ============================================================ */
+(function () {
+
+    const provinceInput = document.getElementById('provinceInput');
+    if (!provinceInput) return;
+
+    const provinceCode  = document.getElementById('provinceCode');
+    const provinceList  = document.getElementById('provinceList');
+
+    const districtInput = document.getElementById('districtInput');
+    const districtCode  = document.getElementById('districtCode');
+    const districtList  = document.getElementById('districtList');
+
+    const wardInput = document.getElementById('wardInput');
+    const wardCode  = document.getElementById('wardCode');
+    const wardList  = document.getElementById('wardList');
+
+    const API_BASE = 'https://provinces.open-api.vn/api';
+
+    let provinces      = [];
+    let districtsCache = {};
+    let wardsCache      = {};
+
+    function stripAccents(str) {
+        return str
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd')
+            .replace(/Đ/g, 'D')
+            .toLowerCase()
+            .trim();
+    }
+
+    const ADMIN_PREFIXES = [
+        'thanh pho', 'tinh', 'quan', 'huyen', 'thi xa',
+        'phuong', 'xa', 'thi tran',
+    ];
+
+    function coreName(name) {
+        let s = stripAccents(name);
+        for (let i = 0; i < ADMIN_PREFIXES.length; i++) {
+            const p = ADMIN_PREFIXES[i] + ' ';
+            if (s.indexOf(p) === 0) {
+                s = s.slice(p.length);
+                break;
+            }
+        }
+        return s;
+    }
+
+    function setDisabled(input, disabled, placeholder) {
+        input.disabled = disabled;
+        input.classList.toggle('is-disabled', disabled);
+        if (placeholder) input.placeholder = placeholder;
+    }
+
+    function closeList(listEl) {
+        listEl.classList.remove('is-open');
+        listEl.innerHTML = '';
+    }
+
+    function renderList(listEl, items, onPick, query) {
+        listEl.innerHTML = '';
+
+        const q = stripAccents(query || '');
+
+        const filtered = q
+            ? items.filter(function (it) {
+                return coreName(it.name).indexOf(q) === 0
+                    || stripAccents(it.name).indexOf(q) === 0;
+            })
+            : items;
+
+        if (!filtered.length) {
+            const empty = document.createElement('div');
+            empty.className = 'addr-combo-empty';
+            empty.textContent = 'Không tìm thấy kết quả phù hợp';
+            listEl.appendChild(empty);
+            listEl.classList.add('is-open');
+            return;
+        }
+
+        filtered.slice(0, 200).forEach(function (it) {
+            const opt = document.createElement('div');
+            opt.className = 'addr-combo-item';
+            opt.textContent = it.name;
+            opt.addEventListener('mousedown', function (e) {
+                e.preventDefault();
+                onPick(it);
+            });
+            listEl.appendChild(opt);
+        });
+
+        listEl.classList.add('is-open');
+    }
+
+    function fetchJSON(url) {
+        return fetch(url, { headers: { 'Accept': 'application/json' } })
+            .then(function (res) {
+                if (!res.ok) throw new Error('Network error');
+                return res.json();
+            });
+    }
+
+    function loadProvinces() {
+        if (provinces.length) return Promise.resolve(provinces);
+
+        provinceList.innerHTML = '<div class="addr-combo-hint">Đang tải danh sách...</div>';
+        provinceList.classList.add('is-open');
+
+        return fetchJSON(API_BASE + '/p/')
+            .then(function (data) {
+                provinces = data.map(function (p) {
+                    return { code: p.code, name: p.name };
+                });
+                return provinces;
+            })
+            .catch(function () {
+                provinceList.innerHTML = '<div class="addr-combo-empty">Không thể tải danh sách, vui lòng thử lại</div>';
+                return [];
+            });
+    }
+
+    function loadDistricts(pCode) {
+        if (districtsCache[pCode]) return Promise.resolve(districtsCache[pCode]);
+
+        districtList.innerHTML = '<div class="addr-combo-hint">Đang tải danh sách...</div>';
+        districtList.classList.add('is-open');
+
+        return fetchJSON(API_BASE + '/p/' + pCode + '?depth=2')
+            .then(function (data) {
+                const list = (data.districts || []).map(function (d) {
+                    return { code: d.code, name: d.name };
+                });
+                districtsCache[pCode] = list;
+                return list;
+            })
+            .catch(function () {
+                districtList.innerHTML = '<div class="addr-combo-empty">Không thể tải danh sách, vui lòng thử lại</div>';
+                return [];
+            });
+    }
+
+    function loadWards(dCode) {
+        if (wardsCache[dCode]) return Promise.resolve(wardsCache[dCode]);
+
+        wardList.innerHTML = '<div class="addr-combo-hint">Đang tải danh sách...</div>';
+        wardList.classList.add('is-open');
+
+        return fetchJSON(API_BASE + '/d/' + dCode + '?depth=2')
+            .then(function (data) {
+                const list = (data.wards || []).map(function (w) {
+                    return { code: w.code, name: w.name };
+                });
+                wardsCache[dCode] = list;
+                return list;
+            })
+            .catch(function () {
+                wardList.innerHTML = '<div class="addr-combo-empty">Không thể tải danh sách, vui lòng thử lại</div>';
+                return [];
+            });
+    }
+
+    function resetDistrictAndWard() {
+        districtInput.value = '';
+        districtCode.value  = '';
+        setDisabled(districtInput, true, 'Chọn Tỉnh / Thành phố trước');
+        closeList(districtList);
+        resetWard();
+    }
+
+    function resetWard() {
+        wardInput.value = '';
+        wardCode.value  = '';
+        setDisabled(wardInput, true, 'Chọn Quận / Huyện trước');
+        closeList(wardList);
+    }
+
+    /* ----- Tỉnh / Thành phố ----- */
+    provinceInput.addEventListener('focus', function () {
+        loadProvinces().then(function (list) {
+            renderList(provinceList, list, pickProvince, '');
+        });
+    });
+
+    provinceInput.addEventListener('input', function () {
+        provinceCode.value = '';
+        loadProvinces().then(function (list) {
+            renderList(provinceList, list, pickProvince, provinceInput.value);
+        });
+        resetDistrictAndWard();
+    });
+
+    function pickProvince(item) {
+        provinceInput.value = item.name;
+        provinceCode.value  = item.code;
+        closeList(provinceList);
+        resetDistrictAndWard();
+        setDisabled(districtInput, false, 'Quận / Huyện');
+    }
+
+    /* ----- Quận / Huyện ----- */
+    districtInput.addEventListener('focus', function () {
+        if (districtInput.disabled || !provinceCode.value) return;
+        loadDistricts(provinceCode.value).then(function (list) {
+            renderList(districtList, list, pickDistrict, '');
+        });
+    });
+
+    districtInput.addEventListener('input', function () {
+        if (!provinceCode.value) return;
+        districtCode.value = '';
+        loadDistricts(provinceCode.value).then(function (list) {
+            renderList(districtList, list, pickDistrict, districtInput.value);
+        });
+        resetWard();
+    });
+
+    function pickDistrict(item) {
+        districtInput.value = item.name;
+        districtCode.value  = item.code;
+        closeList(districtList);
+        resetWard();
+        setDisabled(wardInput, false, 'Phường / Xã');
+    }
+
+    /* ----- Phường / Xã ----- */
+    wardInput.addEventListener('focus', function () {
+        if (wardInput.disabled || !districtCode.value) return;
+        loadWards(districtCode.value).then(function (list) {
+            renderList(wardList, list, pickWard, '');
+        });
+    });
+
+    wardInput.addEventListener('input', function () {
+        if (!districtCode.value) return;
+        wardCode.value = '';
+        loadWards(districtCode.value).then(function (list) {
+            renderList(wardList, list, pickWard, wardInput.value);
+        });
+    });
+
+    function pickWard(item) {
+        wardInput.value = item.name;
+        wardCode.value  = item.code;
+        closeList(wardList);
+    }
+
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('#provinceCombo')) closeList(provinceList);
+        if (!e.target.closest('#districtCombo')) closeList(districtList);
+        if (!e.target.closest('#wardCombo'))      closeList(wardList);
+    });
+
+})();
+
 function toggleNewAddressForm(show) {
     const el = document.getElementById('newAddressForm');
     if (!el) return;
