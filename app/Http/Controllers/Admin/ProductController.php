@@ -143,12 +143,24 @@ class ProductController extends Controller
             return response()->json(['exists' => false]);
         }
 
-        $exists = Product::query()
-            ->whereRaw('LOWER(name) = ?', [mb_strtolower($name)])
+        $normalized = mb_strtolower($name);
+
+        // Trùng với sản phẩm đang hoạt động (chưa xóa)
+        $activeMatch = Product::query()
+            ->whereRaw('LOWER(name) = ?', [$normalized])
             ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
             ->exists();
 
-        return response()->json(['exists' => $exists]);
+        // Trùng với sản phẩm đang nằm trong thùng rác
+        $trashedMatch = Product::onlyTrashed()
+            ->whereRaw('LOWER(name) = ?', [$normalized])
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->exists();
+
+        return response()->json([
+            'exists'  => $activeMatch || $trashedMatch,
+            'trashed' => $trashedMatch,
+        ]);
     }
 
     // ─── Form tạo mới ────────────────────────────────────────────
@@ -450,14 +462,27 @@ class ProductController extends Controller
 
     private function assertNameNotDuplicate(string $name, ?int $ignoreId = null): void
     {
-        $exists = Product::query()
-            ->whereRaw('LOWER(name) = ?', [mb_strtolower(trim($name))])
+        $normalized = mb_strtolower(trim($name));
+
+        $activeMatch = Product::query()
+            ->whereRaw('LOWER(name) = ?', [$normalized])
             ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
             ->exists();
 
-        if ($exists) {
+        if ($activeMatch) {
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'name' => "Đã tồn tại sản phẩm khác có tên \"{$name}\". Vui lòng đặt tên khác.",
+            ]);
+        }
+
+        $trashedMatch = Product::onlyTrashed()
+            ->whereRaw('LOWER(name) = ?', [$normalized])
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->exists();
+
+        if ($trashedMatch) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'name' => "Sản phẩm tên \"{$name}\" đang nằm trong thùng rác. Vui lòng khôi phục sản phẩm đó thay vì tạo mới, hoặc đặt tên khác.",
             ]);
         }
     }

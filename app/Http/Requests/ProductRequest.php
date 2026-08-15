@@ -23,10 +23,11 @@ class ProductRequest extends FormRequest
             'price'            => 'required|numeric|min:0',
             'stock'            => 'nullable|integer|min:0',
             'is_active'        => 'nullable|boolean',
+            'thumbnail'        => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072',
             'images'           => 'nullable|array|max:6',
             'images.*'         => 'image|mimes:jpg,jpeg,png,webp|max:3072',
             'attributes'       => 'nullable|array',
-            'attributes.*'     => 'nullable|string|max:255',
+            'attributes.*'     => 'required|string|max:255',
             // Biến thể
             'has_variants'            => 'nullable|boolean',
             'variants'                => 'nullable|array',
@@ -38,6 +39,9 @@ class ProductRequest extends FormRequest
             'variants.*.is_active'    => 'nullable|boolean',
             'variants.*.attrs'        => 'nullable|array',
             'variants.*.attrs.*'      => 'nullable|string|max:255',
+            'variants.*.thumbnail'    => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072',
+            'variants.*.images'       => 'nullable|array|max:6',
+            'variants.*.images.*'     => 'image|mimes:jpg,jpeg,png,webp|max:3072',
         ];
     }
 
@@ -57,6 +61,18 @@ class ProductRequest extends FormRequest
             'price.numeric'        => 'Giá phải là số.',
             'images.*.image'       => 'File tải lên phải là ảnh.',
             'images.*.max'         => 'Mỗi ảnh không được vượt quá 3MB.',
+            'thumbnail.image'      => 'Ảnh đại diện phải là file ảnh.',
+            'thumbnail.mimes'      => 'Ảnh đại diện chỉ nhận định dạng JPG, PNG, WEBP.',
+            'thumbnail.max'        => 'Ảnh đại diện không được vượt quá 3MB.',
+            'variants.*.thumbnail.image'  => 'Ảnh đại diện biến thể phải là file ảnh.',
+            'variants.*.thumbnail.mimes'  => 'Ảnh đại diện biến thể chỉ nhận định dạng JPG, PNG, WEBP.',
+            'variants.*.thumbnail.max'    => 'Ảnh đại diện biến thể không được vượt quá 3MB.',
+            'variants.*.images.max'       => 'Mỗi biến thể chỉ được tối đa 6 ảnh.',
+            'variants.*.images.*.image'   => 'File tải lên phải là ảnh.',
+            'variants.*.images.*.mimes'   => 'Ảnh biến thể chỉ nhận định dạng JPG, PNG, WEBP.',
+            'variants.*.images.*.max'     => 'Mỗi ảnh biến thể không được vượt quá 3MB.',
+            'attributes.*.required' => 'Vui lòng nhập giá trị cho thông số này (hoặc bấm nút x để bỏ nếu không áp dụng).',
+            'attributes.*.max'      => 'Giá trị thông số không được vượt quá 255 ký tự.',
         ];
     }
 

@@ -132,6 +132,19 @@ use HasFactory, SoftDeletes;
         return (float) $this->price < (float) $this->list_price;
     }
 
+    /** % giảm giá so với giá niêm yết (làm tròn, 0 nếu không giảm hoặc chưa có giá niêm yết) */
+    public function getDiscountPercentAttribute(): int
+    {
+        $list  = (float) $this->list_price;
+        $price = (float) $this->price;
+
+        if ($list <= 0 || $price >= $list) {
+            return 0;
+        }
+
+        return (int) round((1 - $price / $list) * 100);
+    }
+
     /** Điểm đánh giá trung bình */
     public function getAvgRatingAttribute(): float
     {
