@@ -107,7 +107,15 @@ class EventController extends Controller
     // ─── Form thêm mới ────────────────────────────────────────────
     public function create(): View
     {
-        return view('admin.events.form', ['event' => new Event()]);
+        $categories = \App\Models\Category::all();
+        $products = \App\Models\Product::orderBy('id', 'desc')->get();
+        $vouchers = \App\Models\Voucher::where('is_active', true)->get();
+        return view('admin.events.form', [
+            'event' => new Event(),
+            'categories' => $categories,
+            'products' => $products,
+            'vouchers' => $vouchers
+        ]);
     }
 
     // ─── Lưu sự kiện mới ──────────────────────────────────────────
@@ -119,7 +127,9 @@ class EventController extends Controller
             $data['image'] = Storage::url($request->file('image')->store('events', 'public'));
         }
 
-        Event::create($data);
+        $event = Event::create($data);
+
+        $this->syncRelations($event, $request);
 
         return redirect()->route('admin.events.index')
             ->with('success', 'Thêm sự kiện thành công!');
@@ -128,7 +138,10 @@ class EventController extends Controller
     // ─── Form chỉnh sửa ───────────────────────────────────────────
     public function edit(Event $event): View
     {
-        return view('admin.events.form', compact('event'));
+        $categories = \App\Models\Category::all();
+        $products = \App\Models\Product::orderBy('id', 'desc')->get();
+        $vouchers = \App\Models\Voucher::where('is_active', true)->get();
+        return view('admin.events.form', compact('event', 'categories', 'products', 'vouchers'));
     }
 
     // ─── Cập nhật sự kiện ─────────────────────────────────────────
@@ -146,6 +159,8 @@ class EventController extends Controller
         }
 
         $event->update($data);
+
+        $this->syncRelations($event, $request);
 
         return redirect()->route('admin.events.index')
             ->with('success', 'Cập nhật sự kiện thành công!');
@@ -260,6 +275,15 @@ class EventController extends Controller
             'sort_order'   => ['nullable', 'integer', 'min:0', 'max:9999'],
             'is_active'    => ['nullable', 'boolean'],
             'image'        => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'apply_scope'    => ['required', 'in:all,category,select'],
+            'discount_type'  => ['nullable', 'in:percent,amount,fixed'],
+            'discount_value' => ['nullable', 'numeric', 'min:0'],
+            'max_discount'   => ['nullable', 'numeric', 'min:0'],
+            'voucher_id'     => ['nullable', 'exists:vouchers,id'],
+            'product_ids'    => ['nullable', 'array'],
+            'product_ids.*'  => ['integer', 'exists:products,id'],
+            'category_ids'   => ['nullable', 'array'],
+            'category_ids.*' => ['integer', 'exists:categories,id'],
         ], [
             'title.required'      => 'Vui lòng nhập tên sự kiện.',
             'title.min'            => 'Tên sự kiện phải có ít nhất :min ký tự.',
@@ -287,9 +311,24 @@ class EventController extends Controller
         $validated['sort_order'] = $validated['sort_order'] ?? 0;
         $validated['is_active']  = $request->boolean('is_active');
 
-        unset($validated['image']);
+        unset($validated['image'], $validated['product_ids'], $validated['category_ids']);
 
         return $validated;
+    }
+
+    private function syncRelations(Event $event, Request $request): void
+    {
+        if ($request->apply_scope === 'select' && $request->has('product_ids')) {
+            $event->products()->sync($request->product_ids);
+        } else {
+            $event->products()->detach();
+        }
+
+        if ($request->apply_scope === 'category' && $request->has('category_ids')) {
+            $event->categories()->sync($request->category_ids);
+        } else {
+            $event->categories()->detach();
+        }
     }
 
     // ─── Xem chi tiết sự kiện ─────────────────────────────────────

@@ -474,12 +474,9 @@
         </div>
     </div>
     <div class="header-actions">
-        <a href="{{ route('admin.events.index') }}" class="btn btn-outline">Hủy</a>
-        <button type="submit" form="eventForm" name="is_active" value="0" class="btn btn-outline-primary">
-            <i class="fas fa-file"></i> Lưu nháp
-        </button>
-        <button type="submit" form="eventForm" name="is_active" value="1" class="btn btn-primary">
-            <i class="fas fa-check"></i> {{ $event->exists ? 'Cập nhật' : 'Tạo Event' }}
+        <a href="{{ route('admin.events.index') }}" class="btn btn-outline-secondary">Hủy bỏ</a>
+        <button type="submit" form="eventForm" class="btn btn-primary">
+            <i class="fas fa-save mr-1"></i> {{ $event->exists ? 'Cập nhật Sự kiện' : 'Tạo Sự kiện' }}
         </button>
     </div>
 </div>
@@ -517,10 +514,17 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Đường dẫn chuyển tiếp (Link) <span class="required">*</span></label>
+                    <input type="text" name="button_link" class="form-control @error('button_link') is-invalid @enderror" value="{{ old('button_link', $event->button_link ?? '') }}" placeholder="Vd: /tin-tuc/su-kien-8-3" required>
+                    @error('button_link')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    <div class="form-hint" style="margin-top: 6px; color: #64748b; font-size: 13px;">Khi khách hàng nhấn vào Banner sự kiện trên Trang chủ, họ sẽ được chuyển đến đường dẫn này (thường là link bài viết Tin tức thể lệ chương trình).</div>
+                </div>
+
+                <div class="form-group">
                     <div class="status-row">
                         <label style="margin:0">Trạng thái</label>
                         <label class="switch">
-                            <input type="checkbox" name="is_active_toggle" id="f_active"
+                            <input type="checkbox" name="is_active" value="1" id="f_active"
                                 {{ old('is_active', $event->is_active ?? true) ? 'checked' : '' }}>
                             <span class="slider"></span>
                         </label>
@@ -568,64 +572,76 @@
                 </div>
             </div>
 
-            {{-- 3. Sản phẩm áp dụng (giao diện — cần bảng quan hệ event_products để lưu thật) --}}
+            {{-- 3. Sản phẩm áp dụng --}}
+            @php
+                $selectedProductIds = old('product_ids', clone $event->products ? $event->products->pluck('id')->toArray() : []);
+                $selectedCategoryIds = old('category_ids', clone $event->categories ? $event->categories->pluck('id')->toArray() : []);
+            @endphp
             <div class="section-card">
-                <div class="section-title-row">
-                    <div class="section-title" style="margin:0">3. Sản phẩm áp dụng</div>
-                    <button type="button" class="btn btn-primary" style="padding:7px 14px" onclick="alert('Cần màn hình chọn sản phẩm — sẽ nối API sau.')">
-                        <i class="fas fa-plus"></i> Chọn sản phẩm
-                    </button>
-                </div>
+                <div class="section-title">3. Phạm vi áp dụng giảm giá</div>
 
                 <div class="radio-group">
-                    <label class="radio-line"><input type="radio" name="apply_scope" value="all"> Tất cả sản phẩm</label>
-                    <label class="radio-line"><input type="radio" name="apply_scope" value="category"> Theo danh mục</label>
-                    <label class="radio-line"><input type="radio" name="apply_scope" value="select" checked> Chọn sản phẩm</label>
+                    <label class="radio-line"><input type="radio" name="apply_scope" value="all" {{ old('apply_scope', $event->apply_scope) == 'all' ? 'checked' : '' }} onchange="toggleScope()"> Tất cả sản phẩm</label>
+                    <label class="radio-line"><input type="radio" name="apply_scope" value="category" {{ old('apply_scope', $event->apply_scope) == 'category' ? 'checked' : '' }} onchange="toggleScope()"> Theo danh mục</label>
+                    <label class="radio-line"><input type="radio" name="apply_scope" value="select" {{ old('apply_scope', $event->apply_scope) == 'select' ? 'checked' : '' }} onchange="toggleScope()"> Chọn sản phẩm</label>
                 </div>
 
-                <table class="products-table">
-                    <thead>
-                        <tr>
-                            <th style="width:30px"></th>
-                            <th>Sản phẩm</th>
-                            <th>Danh mục</th>
-                            <th>Giá gốc</th>
-                            <th>Mức giảm</th>
-                            <th style="width:50px">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productRows">
-                        {{-- Danh sách sản phẩm đã chọn sẽ được render tại đây khi có quan hệ Event <-> Product --}}
-                        <tr>
-                            <td colspan="6" style="text-align:center;color:#bbb;padding:20px">
-                                Chưa có sản phẩm nào — bấm "Chọn sản phẩm" để thêm.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="selected-note">Đã chọn 0 sản phẩm</div>
+                <div id="scope_category_box" style="display:none; margin-top:15px">
+                    <label>Chọn danh mục</label>
+                    <div style="max-height:200px;overflow-y:auto;border:1px solid #ddd;padding:10px;border-radius:4px">
+                        @foreach($categories as $cat)
+                        <label style="display:block;margin-bottom:5px;font-weight:400">
+                            <input type="checkbox" name="category_ids[]" value="{{ $cat->id }}" {{ in_array($cat->id, $selectedCategoryIds) ? 'checked' : '' }}>
+                            {{ $cat->name }}
+                        </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div id="scope_product_box" style="display:none; margin-top:15px">
+                    <label>Chọn sản phẩm</label>
+                    <div style="margin-bottom:10px;">
+                        <input type="text" id="productSearch" class="form-control" placeholder="Tìm kiếm sản phẩm..." onkeyup="filterProducts()">
+                    </div>
+                    <div id="productList" style="max-height:300px;overflow-y:auto;border:1px solid #ddd;padding:10px;border-radius:4px">
+                        @foreach($products as $prod)
+                        <label class="prod-item" style="display:block;margin-bottom:5px;font-weight:400">
+                            <input type="checkbox" name="product_ids[]" value="{{ $prod->id }}" {{ in_array($prod->id, $selectedProductIds) ? 'checked' : '' }}>
+                            <span class="prod-name">[{{ $prod->sku }}] {{ $prod->name }}</span> - {{ number_format($prod->price) }}đ
+                        </label>
+                        @endforeach
+                    </div>
+                </div>
             </div>
 
-            {{-- 4. Ưu đãi & Voucher (giao diện — cần cột discount_type/discount_value/voucher_id) --}}
+            {{-- 4. Ưu đãi & Voucher --}}
             <div class="section-card">
                 <div class="section-title">4. Ưu đãi &amp; Voucher</div>
 
                 <label>Hình thức giảm giá</label>
                 <div class="radio-group">
-                    <label class="radio-line"><input type="radio" id="event_discount_type" name="discount_type" value="percent" checked> Theo %</label>
-                    <label class="radio-line"><input type="radio" id="event_discount_type" name="discount_type" value="amount"> Theo số tiền</label>
-                    <label class="radio-line"><input type="radio" id="event_discount_type" name="discount_type" value="fixed"> Giá cố định</label>
+                    <label class="radio-line"><input type="radio" name="discount_type" value="percent" {{ old('discount_type', $event->discount_type) == 'percent' ? 'checked' : '' }}> Theo %</label>
+                    <label class="radio-line"><input type="radio" name="discount_type" value="amount" {{ old('discount_type', $event->discount_type) == 'amount' ? 'checked' : '' }}> Theo số tiền</label>
+                    <label class="radio-line"><input type="radio" name="discount_type" value="fixed" {{ old('discount_type', $event->discount_type) == 'fixed' ? 'checked' : '' }}> Giá cố định</label>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Giảm tối đa (tùy chọn)</label>
-                        <input type="text" name="max_discount" class="form-control" placeholder="Vd: 500.000">
+                        <label>Giá trị giảm</label>
+                        <input type="number" step="0.01" name="discount_value" class="form-control @error('discount_value') is-invalid @enderror" placeholder="Vd: 10 hoặc 500000" value="{{ old('discount_value', $event->discount_value ? floatval($event->discount_value) : '') }}">
+                        @error('discount_value')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="form-group">
+                        <label>Giảm tối đa (VNĐ - tùy chọn)</label>
+                        <input type="number" step="0.01" name="max_discount" class="form-control" placeholder="Vd: 500000" value="{{ old('max_discount', $event->max_discount ? floatval($event->max_discount) : '') }}">
                     </div>
                     <div class="form-group">
                         <label>Voucher áp dụng (tùy chọn)</label>
-                        <select id="event_voucher_id" name="voucher_id" class="form-control">
+                        <select name="voucher_id" class="form-control">
                             <option value="">-- Không áp dụng --</option>
+                            @foreach($vouchers as $v)
+                            <option value="{{ $v->id }}" {{ old('voucher_id', $event->voucher_id) == $v->id ? 'selected' : '' }}>{{ $v->code }}</option>
+                            @endforeach
                         </select>
                         <div class="form-hint">
                             <a href="{{ url('/admin/vouchers/create') }}">+ Tạo voucher mới</a>
@@ -757,6 +773,30 @@
             bg.style.display = 'block';
         }
     }
+
+    function toggleScope() {
+        const scope = document.querySelector('input[name="apply_scope"]:checked');
+        if(!scope) return;
+        document.getElementById('scope_category_box').style.display = scope.value === 'category' ? 'block' : 'none';
+        document.getElementById('scope_product_box').style.display = scope.value === 'select' ? 'block' : 'none';
+    }
+
+    function filterProducts() {
+        const input = document.getElementById('productSearch').value.toLowerCase();
+        const items = document.querySelectorAll('.prod-item');
+        items.forEach(item => {
+            const name = item.querySelector('.prod-name').textContent.toLowerCase();
+            item.style.display = name.includes(input) ? 'block' : 'none';
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!document.querySelector('input[name="apply_scope"]:checked')) {
+            const allRadio = document.querySelector('input[name="apply_scope"][value="all"]');
+            if(allRadio) allRadio.checked = true;
+        }
+        toggleScope();
+    });
 
     function updateCount() {
         document.getElementById('descCount').textContent = document.getElementById('f_desc').value.length;

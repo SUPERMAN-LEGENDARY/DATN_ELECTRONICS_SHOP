@@ -784,12 +784,12 @@
 
 <div class="breadcrumb">
     <a href="{{ route('admin.dashboard') }}">Dashboard</a> &rsaquo;
-    <a href="{{ route('admin.banners.index') }}">Banner</a> &rsaquo; Tạo mới
+    <a href="{{ route('admin.banners.index') }}">Banner</a> &rsaquo; {{ $banner->exists ? 'Cập nhật' : 'Tạo mới' }}
 </div>
 
 <div class="page-header">
     <div>
-        <div class="page-title">Tạo Banner Mới</div>
+        <div class="page-title">{{ $banner->exists ? 'Cập Nhật Banner' : 'Tạo Banner Mới' }}</div>
     </div>
     <div class="page-actions">
         <a href="{{ route('admin.banners.index') }}" class="btn btn-outline">
@@ -801,8 +801,11 @@
     </div>
 </div>
 
-<form method="POST" action="{{ route('admin.banners.store') }}" enctype="multipart/form-data" id="bannerForm">
+<form method="POST" action="{{ $banner->exists ? route('admin.banners.update', $banner) : route('admin.banners.store') }}" enctype="multipart/form-data" id="bannerForm">
     @csrf
+    @if($banner->exists)
+        @method('PUT')
+    @endif
 
     <div class="builder-wrap">
         {{-- ============ CỘT TRÁI: FORM ============ --}}
@@ -979,9 +982,9 @@
                 <div class="form-group" style="margin-bottom:0">
                     <label>Hiệu ứng</label>
                     <div class="fx-checks">
-                        <label><input type="checkbox" name="fx_shadow" id="f_fx_shadow" checked> Đổ bóng</label>
-                        <label><input type="checkbox" name="fx_gradient" id="f_fx_gradient" checked> Lớp phủ gradient</label>
-                        <label><input type="checkbox" name="fx_radius" id="f_fx_radius"> Bo góc</label>
+                        <label><input type="checkbox" name="fx_shadow" id="f_fx_shadow" value="1" {{ old('fx_shadow', $banner->fx_shadow ?? true) ? 'checked' : '' }}> Đổ bóng</label>
+                        <label><input type="checkbox" name="fx_gradient" id="f_fx_gradient" value="1" {{ old('fx_gradient', $banner->fx_gradient ?? true) ? 'checked' : '' }}> Lớp phủ gradient</label>
+                        <label><input type="checkbox" name="fx_radius" id="f_fx_radius" value="1" {{ old('fx_radius', $banner->fx_radius ?? false) ? 'checked' : '' }}> Bo góc</label>
                     </div>
                 </div>
             </div>
@@ -1002,53 +1005,51 @@
 
                 <div class="form-group">
                     <label>Nhãn nhỏ (Badge) <span class="char-count" id="cnt_badge">0/20</span></label>
-                    <input type="text" name="badge" id="f_badge" maxlength="20" value="{{ old('badge') }}"
+                    <input type="text" name="badge" id="f_badge" maxlength="20" value="{{ old('badge', $banner->label) }}"
                         class="form-control @error('badge') is-invalid @enderror" placeholder="VD: NEW">
                     @error('badge')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
 
                 <div class="form-group">
                     <label>Tiêu đề chính <span class="char-count" id="cnt_title">0/50</span></label>
-                    <input type="text" name="title" id="f_title" maxlength="50" value="{{ old('title') }}"
+                    <input type="text" name="title" id="f_title" maxlength="50" value="{{ old('title', $banner->title) }}"
                         class="form-control @error('title') is-invalid @enderror" placeholder="VD: Galaxy S24 Ultra">
                     @error('title')<div class="invalid-feedback" id="f_title-error">{{ $message }}</div>@enderror
-                    @unless($errors->has('title'))<div class="invalid-feedback" id="f_title-error"></div>@endunless
                 </div>
 
                 <div class="form-group">
-                    <label>Mô tả <span class="char-count" id="cnt_desc">0/100</span></label>
-                    <textarea name="description" id="f_desc" maxlength="100"
+                    <label>Mô tả <span class="char-count" id="cnt_desc">0/150</span></label>
+                    <textarea name="description" id="f_desc" rows="2" maxlength="150"
                         class="form-control @error('description') is-invalid @enderror"
-                        placeholder="VD: AI Camera. Chạm đến tương lai.&#10;Hiệu năng vượt trội.">{{ old('description') }}</textarea>
+                        placeholder="VD: AI Camera. Chạm đến tương lai.&#10;Hiệu năng vượt trội.">{{ old('description', $banner->description) }}</textarea>
                     @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
 
-                <div class="form-row">
+                <div class="form-row-2" id="group_price">
                     <div class="form-group">
-                        <label>Giá bán *</label>
-                        <input type="number" name="price" id="f_price" min="0" step="1000" value="{{ old('price') }}"
+                        <label>Giá bán (VNĐ)</label>
+                        <input type="number" name="price" id="f_price" min="0" step="1000" value="{{ old('price', $banner->price) }}"
                             class="form-control @error('price') is-invalid @enderror" placeholder="VD: 25990000">
                         @error('price')<div class="invalid-feedback" id="f_price-error">{{ $message }}</div>@enderror
-                        @unless($errors->has('price'))<div class="invalid-feedback" id="f_price-error"></div>@endunless
                     </div>
                     <div class="form-group">
-                        <label>Giá gốc (tùy chọn)</label>
-                        <input type="number" name="compare_price" id="f_compare_price" min="0" step="1000" value="{{ old('compare_price') }}"
+                        <label>Giá gốc (VNĐ)</label>
+                        <input type="number" name="compare_price" id="f_compare_price" min="0" step="1000" value="{{ old('compare_price', $banner->compare_price) }}"
                             class="form-control @error('compare_price') is-invalid @enderror" placeholder="VD: 29990000">
                         @error('compare_price')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                 </div>
 
-                <div class="form-row">
+                <div class="form-row-2">
                     <div class="form-group">
-                        <label>Nút bấm <span class="char-count" id="cnt_btn">0/20</span></label>
-                        <input type="text" name="button_text" id="f_btntext" maxlength="20" value="{{ old('button_text', 'Mua ngay') }}"
+                        <label>Nút bấm (Text)</label>
+                        <input type="text" name="button_text" id="f_btntext" maxlength="20" value="{{ old('button_text', $banner->button_text ?? 'Mua ngay') }}"
                             class="form-control @error('button_text') is-invalid @enderror" placeholder="VD: Mua ngay">
                         @error('button_text')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="form-group">
-                        <label>Link</label>
-                        <input type="text" name="button_link" id="f_link" value="{{ old('button_link') }}"
+                        <label>Đường dẫn Nút</label>
+                        <input type="text" name="button_link" id="f_link" value="{{ old('button_link', $banner->button_link) }}"
                             class="form-control @error('button_link') is-invalid @enderror" placeholder="/products/...">
                         @error('button_link')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
@@ -1066,12 +1067,10 @@
                     <input type="file" name="image" id="f_image" accept="image/*"
                         class="form-control @error('image') is-invalid @enderror">
                     @error('image')<div class="invalid-feedback" id="f_image-error">{{ $message }}</div>@enderror
-                    @unless($errors->has('image'))<div class="invalid-feedback" id="f_image-error"></div>@endunless
 
                     <input type="file" name="video" id="f_video" accept="video/mp4,.mp4" style="display:none"
                         class="form-control @error('video') is-invalid @enderror">
                     @error('video')<div class="invalid-feedback" id="f_video-error">{{ $message }}</div>@enderror
-                    @unless($errors->has('video'))<div class="invalid-feedback" id="f_video-error"></div>@endunless
 
                     <div class="info-box muted" id="videoSpecBox" style="display:none;margin-top:10px">
                         <i class="fas fa-circle-info"></i>
@@ -1092,21 +1091,27 @@
 
                 <div class="schedule-row">
                     <div class="form-group" style="margin-bottom:0">
-                        <label>Hiển thị từ</label>
-                        <input type="datetime-local" name="start_at" value="{{ old('start_at') }}" class="form-control @error('start_at') is-invalid @enderror">
+                        <label>Bắt đầu từ</label>
+                        <input type="datetime-local" name="start_at" value="{{ old('start_at', $banner->start_at?->format('Y-m-d\TH:i')) }}" class="form-control @error('start_at') is-invalid @enderror">
                         @error('start_at')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="form-group" style="margin-bottom:0">
                         <label>Hiển thị đến</label>
-                        <input type="datetime-local" name="end_at" value="{{ old('end_at') }}" class="form-control @error('end_at') is-invalid @enderror">
+                        <input type="datetime-local" name="end_at" value="{{ old('end_at', $banner->end_at?->format('Y-m-d\TH:i')) }}" class="form-control @error('end_at') is-invalid @enderror">
                         @error('end_at')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                 </div>
 
                 <div class="form-group" style="margin-top:16px;margin-bottom:0">
+                    <label>Thứ tự hiển thị</label>
+                    <input type="number" name="sort_order" value="{{ old('sort_order', $banner->sort_order ?? 0) }}" class="form-control @error('sort_order') is-invalid @enderror" min="0">
+                    @error('sort_order')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+
+                <div class="form-group" style="margin-top:16px;margin-bottom:0">
                     <div class="toggle-wrap">
                         <label class="toggle-input">
-                            <input type="checkbox" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
+                            <input type="checkbox" name="is_active" value="1" {{ old('is_active', $banner->exists ? $banner->is_active : true) ? 'checked' : '' }}>
                             <span class="toggle-slider"></span>
                         </label>
                         <span style="font-size:13.5px;font-weight:600;color:#333">Kích hoạt</span>
@@ -1257,6 +1262,24 @@ Hiệu năng vượt trội.</div>
             }
         });
     });
+
+    // ---- Toggle Giá bán dựa trên Loại Banner ----
+    const bannerTypeSelect = document.getElementById('f_banner_type');
+    const groupPrice = document.getElementById('group_price');
+    if (bannerTypeSelect && groupPrice) {
+        function togglePrice() {
+            if (bannerTypeSelect.value === 'promo') {
+                groupPrice.style.display = 'flex';
+            } else {
+                groupPrice.style.display = 'none';
+                document.getElementById('f_price').value = '';
+                document.getElementById('f_compare_price').value = '';
+                if (typeof updatePricePreview === 'function') updatePricePreview();
+            }
+        }
+        bannerTypeSelect.addEventListener('change', togglePrice);
+        togglePrice();
+    }
 
     // ---- Upload banner: chọn Ảnh hoặc Video ----
     document.querySelectorAll('.mt-btn').forEach(btn => {
@@ -1619,7 +1642,7 @@ Hiệu năng vượt trội.</div>
             }
 
             const price = document.getElementById('f_price');
-            if (!price || !price.value || parseFloat(price.value) <= 0) {
+            if (price && price.value && parseFloat(price.value) < 0) {
                 setError('f_price', 'Vui lòng nhập giá bán hợp lệ.');
                 isValid = false;
             } else {
@@ -1631,8 +1654,11 @@ Hiệu năng vượt trội.</div>
             const imageInput = document.getElementById('f_image');
             const videoInput = document.getElementById('f_video');
 
+            const hasImage = {{ $banner->image ? 'true' : 'false' }};
+            const hasVideo = {{ $banner->video ? 'true' : 'false' }};
+
             if (method === 'upload' && mediaType === 'video') {
-                if (!videoInput || !videoInput.files.length) {
+                if (!hasVideo && (!videoInput || !videoInput.files.length)) {
                     setError('f_video', 'Vui lòng chọn video cho banner.');
                     isValid = false;
                 } else {
@@ -1640,7 +1666,7 @@ Hiệu năng vượt trội.</div>
                 }
                 clearError('f_image');
             } else if (method === 'upload') {
-                if (!imageInput || !imageInput.files.length) {
+                if (!hasImage && (!imageInput || !imageInput.files.length)) {
                     setError('f_image', 'Vui lòng chọn ảnh cho banner.');
                     isValid = false;
                 } else {
@@ -1653,7 +1679,7 @@ Hiệu năng vượt trội.</div>
             }
 
             const customImageInput = document.getElementById('f_custom_image_desktop');
-            if (method === 'custom' && (!customImageInput || !customImageInput.files.length)) {
+            if (method === 'custom' && !hasImage && (!customImageInput || !customImageInput.files.length)) {
                 setError('f_custom_image_desktop', 'Vui lòng chọn ảnh Desktop cho banner.');
                 isValid = false;
             } else if (customImageInput) {

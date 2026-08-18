@@ -56,7 +56,9 @@ class CartController extends Controller
             }
 
             // Giá & tồn kho lấy theo variant nếu có, ngược lại lấy theo product
-            $price = $variant ? $variant->final_price : (float) $product->price;
+            $basePrice = $variant ? $variant->final_price : (float) $product->price;
+            $discountPercent = $variant ? $variant->discount_percent : $product->discount_percent;
+            $price = $basePrice * (1 - $discountPercent / 100);
             $stock = $variant ? $variant->stock : $product->stock;
 
             $subtotal = $price * $item['quantity'];

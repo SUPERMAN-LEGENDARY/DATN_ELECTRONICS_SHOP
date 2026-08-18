@@ -46,7 +46,10 @@ class CheckoutController extends Controller
                 if (!$variant) continue;
             }
 
-            $price = $variant ? $variant->final_price : (float) $product->price;
+            $basePrice = $variant ? $variant->final_price : (float) $product->price;
+            $discountPercent = $variant ? $variant->discount_percent : $product->discount_percent;
+            $price = $basePrice * (1 - $discountPercent / 100);
+            
             $stock = $variant ? $variant->stock : $product->stock;
             $qty   = (int) $row['quantity'];
 

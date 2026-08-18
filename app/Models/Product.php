@@ -129,20 +129,67 @@ use HasFactory, SoftDeletes;
     /** Sản phẩm có đang bán rẻ hơn giá niêm yết hay không (để hiển thị giá gạch ngang) */
     public function getIsOnSaleAttribute(): bool
     {
-        return (float) $this->price < (float) $this->list_price;
+        return false;
     }
 
-    /** % giảm giá so với giá niêm yết (làm tròn, 0 nếu không giảm hoặc chưa có giá niêm yết) */
-    public function getDiscountPercentAttribute(): int
-    {
-        $list  = (float) $this->list_price;
-        $price = (float) $this->price;
+    protected static $activeEventsCache = null;
 
-        if ($list <= 0 || $price >= $list) {
-            return 0;
+    public function getActiveEvent()
+    {
+        if (self::$activeEventsCache === null) {
+            $now = now();
+            self::$activeEventsCache = \App\Models\Event::with(['categories', 'products'])
+                ->where('is_active', true)
+                ->where('start_date', '<=', $now)
+                ->where('end_date', '>=', $now)
+                ->orderBy('sort_order', 'desc')
+                ->get();
         }
 
-        return (int) round((1 - $price / $list) * 100);
+        // Ưu tiên 1: Event chỉ định đích danh sản phẩm này
+        foreach (self::$activeEventsCache as $event) {
+            if ($event->apply_scope === 'select' && $event->products->contains('id', $this->id)) return $event;
+        }
+
+        // Ưu tiên 2: Event áp dụng cho danh mục / thương hiệu của sản phẩm này
+        foreach (self::$activeEventsCache as $event) {
+            if ($event->apply_scope === 'category' && ($event->categories->contains('id', $this->category_id) || $event->categories->contains('id', $this->brand_id))) return $event;
+        }
+
+        // Ưu tiên 3: Event áp dụng cho toàn bộ cửa hàng
+        foreach (self::$activeEventsCache as $event) {
+            if ($event->apply_scope === 'all') return $event;
+        }
+
+        return null;
+    }
+
+    /** % giảm giá lấy từ sự kiện đang diễn ra */
+    public function getDiscountPercentAttribute(): int
+    {
+        $event = $this->getActiveEvent();
+        if (!$event) return 0;
+
+        $price = (float) $this->attributes['price'];
+        if ($price <= 0) return 0;
+
+        $discount = 0;
+        if ($event->discount_type === 'percent') {
+            $discount = $price * ((float) $event->discount_value / 100);
+        } elseif ($event->discount_type === 'amount') {
+            $discount = (float) $event->discount_value;
+        } elseif ($event->discount_type === 'fixed') {
+            $discount = $price - (float) $event->discount_value;
+        }
+
+        if ($event->max_discount > 0 && $discount > $event->max_discount) {
+            $discount = (float) $event->max_discount;
+        }
+
+        if ($discount < 0) $discount = 0;
+        if ($discount > $price) $discount = $price;
+
+        return (int) round(($discount / $price) * 100);
     }
 
     /** Điểm đánh giá trung bình */
@@ -172,7 +219,14 @@ use HasFactory, SoftDeletes;
             }
         }
 
-        return (float) $prices->min();
+        $min = (float) $prices->min();
+        
+        $discountPercent = $this->discount_percent;
+        if ($discountPercent > 0) {
+            $min = $min * (1 - $discountPercent / 100);
+        }
+
+        return $min;
     }
 
     /** Sản phẩm có nhiều mức giá khác nhau (do biến thể) -> nên hiển thị "Từ ..." */

@@ -544,7 +544,7 @@
                     <th style="width:150px">Thời gian</th>
                     <th style="width:110px">Trạng thái</th>
                     <th style="width:110px">Loại</th>
-                    <th style="width:80px">Sản phẩm</th>
+
                     <th style="width:120px">Action</th>
                 </tr>
             </thead>
@@ -588,12 +588,15 @@
                             {{ $event->type === 'flash_sale' ? 'Flash Sale' : 'Khuyến mãi' }}
                         </span>
                     </td>
-                    <td>{{ $event->products_count ?? 0 }}</td>
                     <td>
                         <div class="actions">
-                            <a href="{{ route('admin.events.show', $event) }}" class="icon-btn" title="Xem trước">
-                                <i class="fas fa-eye"></i>
-                            </a>
+                            <form action="{{ route('admin.events.toggle-active', $event) }}" method="POST" style="display:inline-block">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="icon-btn" style="border:none;background:none;padding:0;" title="{{ $event->is_active ? 'Ẩn event' : 'Hiện event' }}">
+                                    <i class="fas {{ $event->is_active ? 'fa-eye' : 'fa-eye-slash' }}" style="color: {{ $event->is_active ? 'inherit' : '#94a3b8' }};"></i>
+                                </button>
+                            </form>
                             <a href="{{ route('admin.events.edit', $event) }}" class="icon-btn" title="Sửa">
                                 <i class="fas fa-edit"></i>
                             </a>

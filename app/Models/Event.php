@@ -23,6 +23,11 @@ class Event extends Model
         'end_date',
         'sort_order',
         'is_active',
+        'apply_scope',
+        'discount_type',
+        'discount_value',
+        'max_discount',
+        'voucher_id',
     ];
 
     protected function casts(): array
@@ -31,7 +36,24 @@ class Event extends Model
             'is_active'  => 'boolean',
             'start_date' => 'date',
             'end_date'   => 'date',
+            'discount_value' => 'decimal:2',
+            'max_discount'   => 'decimal:2',
         ];
+    }
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'event_product');
+    }
+
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'event_category');
+    }
+
+    public function voucher()
+    {
+        return $this->belongsTo(Voucher::class);
     }
 
     // Chỉ lấy event đang được bật hiển thị

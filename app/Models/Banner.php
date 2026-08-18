@@ -22,12 +22,33 @@ class Banner extends Model
         'text_color',
         'sort_order',
         'is_active',
+        // New fields
+        'creation_method',
+        'banner_type',
+        'template',
+        'image_mobile',
+        'btn_color',
+        'fx_shadow',
+        'fx_gradient',
+        'fx_radius',
+        'text_align',
+        'price',
+        'compare_price',
+        'media_type',
+        'video',
+        'start_at',
+        'end_at',
     ];
 
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
+            'fx_shadow' => 'boolean',
+            'fx_gradient' => 'boolean',
+            'fx_radius' => 'boolean',
+            'start_at' => 'datetime',
+            'end_at' => 'datetime',
         ];
     }
 
@@ -43,6 +64,6 @@ class Banner extends Model
 
     public function isImageOnly(): bool
     {
-        return $this->layout === 'image';
+        return $this->creation_method === 'upload';
     }
 }

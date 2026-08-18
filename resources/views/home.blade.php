@@ -159,8 +159,8 @@
 .sm-slide-content {
     position: relative; z-index: 2;
     max-width: 1440px; width: 100%; margin: 0 auto; padding: 0 clamp(24px, 5vw, 72px);
-    display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center;
 }
+.sm-slide-content.layout-split { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center; }
 .sm-slide-text > * {
     opacity: 0; transform: translateY(24px);
     transition: opacity .7s var(--sm-ease), transform .7s var(--sm-ease);
@@ -183,6 +183,37 @@
     background: #ececec; color: #b0b0b0; border-radius: var(--sm-radius);
     width: 100%; min-height: 240px;
 }
+
+/* Banner Dynamic Styles */
+.sm-slide.tpl-apple_minimal { background: linear-gradient(120deg,#f7f7f7,#e9e9e9); color:#222; }
+.sm-slide.tpl-xiaomi_orange { background: linear-gradient(120deg,#ff8a2b,#ff5a00); color:#fff; }
+.sm-slide.tpl-gaming_rgb { background: linear-gradient(120deg,#150826,#3a0ca3); color:#fff; }
+.sm-slide.tpl-flash_sale_red { background: linear-gradient(120deg,#7a0000,#c0392b); color:#fff; }
+.sm-slide.tpl-lifestyle_clean { background: linear-gradient(120deg,#e7ddc9,#c9b697); color:#3a2f22; }
+
+.sm-slide.has-video-bg { background: #000; }
+.sm-slide.has-video-bg .sm-slide-visual { display: none; }
+.sm-slide.has-video-bg::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(0,0,0,.65) 0%, rgba(0,0,0,.15) 60%, rgba(0,0,0,0) 100%); z-index: 1;
+}
+.sm-slide.has-gradient-overlay::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.55) 100%); z-index: 1;
+}
+
+.sm-slide-content.layout-text_center { display: flex; justify-content: center; text-align: center; }
+.sm-slide-content.layout-text_center .sm-slide-text { max-width: 800px; width: 100%; }
+
+.sm-slide-content.layout-text_left { display: flex; justify-content: flex-start; }
+.sm-slide-content.layout-text_left .sm-slide-text { max-width: 60%; width: 100%; }
+
+.sm-slide-content.layout-text_right { display: flex; justify-content: flex-end; text-align: right; }
+.sm-slide-content.layout-text_right .sm-slide-text { max-width: 60%; width: 100%; }
+.sm-slide-content.layout-text_right .sm-slide-btn { margin-left: auto; }
+
+.sm-slide-text { position: relative; z-index: 3; }
+.sm-slide-visual { position: relative; z-index: 3; }
 
 /* Điều hướng slider */
 .sm-slider-arrow {
@@ -706,9 +737,53 @@
                     @endif
                 </div>
                 @else
-                <div class="sm-slide {{ $i === 0 ? 'active' : '' }}" data-slide="{{ $i }}"
-                     style="{{ $banner->bg_color ? 'background:'.$banner->bg_color.';' : '' }}">
-                    <div class="sm-slide-content" style="{{ $banner->text_color ? 'color:'.$banner->text_color.';' : '' }}">
+                @php
+                    $slideClasses = "sm-slide " . ($i === 0 ? 'active ' : '');
+                    $isBgImage = false;
+                    $isVisualImage = false;
+
+                    if ($banner->creation_method === 'template' && $banner->template) {
+                        $slideClasses .= 'tpl-' . $banner->template . ' ';
+                        $isVisualImage = true;
+                    } else {
+                        // Custom and Upload default to background image
+                        $isBgImage = true;
+                    }
+
+                    // Promo banners ALWAYS show image on the side (visual), not as background
+                    if ($banner->banner_type === 'promo') {
+                        $isVisualImage = true;
+                        $isBgImage = false;
+                    }
+
+                    if ($banner->fx_gradient) $slideClasses .= 'has-gradient-overlay ';
+                    if ($banner->creation_method === 'custom' && $banner->media_type === 'video') {
+                        $slideClasses .= 'has-video-bg ';
+                        $isBgImage = false;
+                    }
+
+                    $bgStyle = '';
+                    if ($banner->creation_method === 'custom' && $banner->bg_color) {
+                        $bgStyle .= 'background:'.$banner->bg_color.';';
+                    }
+                    if ($isBgImage && $banner->media_type === 'image' && $banner->image) {
+                        $bgStyle .= "background-image:url('{$banner->image}');background-size:cover;background-position:center;";
+                    }
+                    if ($banner->fx_shadow) $bgStyle .= 'box-shadow: inset 0 0 100px rgba(0,0,0,0.5);';
+                    if ($banner->fx_radius) $bgStyle .= 'border-radius: 20px; margin: 10px; height: calc(100% - 20px); width: calc(100% - 20px);';
+
+                    $textStyle = '';
+                    if ($banner->text_color) $textStyle .= 'color:'.$banner->text_color.';';
+                    if ($banner->text_align) $textStyle .= 'text-align:'.$banner->text_align.';';
+                    
+                    // If it has a visual image, it MUST use layout-split (grid 50/50)
+                    $layoutClass = $isVisualImage ? 'layout-split' : ($banner->layout ? 'layout-'.$banner->layout : 'layout-text_left');
+                @endphp
+                <div class="{{ $slideClasses }}" data-slide="{{ $i }}" style="{{ $bgStyle }}">
+                    @if($banner->creation_method === 'custom' && $banner->media_type === 'video' && $banner->video)
+                    <video class="sm-slide-bg" muted loop autoplay playsinline src="{{ $banner->video }}" style="z-index: 0;"></video>
+                    @endif
+                    <div class="sm-slide-content {{ $layoutClass }}" style="{{ $textStyle }}">
                         <div class="sm-slide-text">
                             @if($banner->label)
                             <div class="sm-slide-label" style="{{ $banner->text_color ? 'color:'.$banner->text_color.';' : '' }}">{{ $banner->label }}</div>
@@ -727,10 +802,8 @@
                             @endif
                         </div>
                         <div class="sm-slide-visual">
-                            @if($banner->image)
+                            @if($isVisualImage && $banner->image)
                             <img src="{{ $banner->image }}" alt="{{ $banner->title }}">
-                            @else
-                            <div class="sm-slide-ph"><i class="bi bi-image"></i></div>
                             @endif
                         </div>
                     </div>
@@ -828,6 +901,14 @@
                         <div class="sm-event-title">{{ $event->title }}</div>
                         @if($event->offer_text)
                         <div class="sm-event-offer">{{ $event->offer_text }}</div>
+                        @endif
+                        @if($event->end_date && $event->end_date > now())
+                        <div class="sm-event-countdown" data-end="{{ $event->end_date->format('Y-m-d\TH:i:s') }}" style="margin-top: 16px; font-weight: 700; font-family: monospace; font-size: 14px; display: flex; gap: 6px;">
+                            <span style="background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">--N</span>
+                            <span style="background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">--G</span>
+                            <span style="background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">--P</span>
+                            <span style="background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">--S</span>
+                        </div>
                         @endif
                     </div>
                 </a>
@@ -1193,6 +1274,35 @@
 
 @push('scripts')
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const countdowns = document.querySelectorAll('.sm-event-countdown');
+        if(countdowns.length > 0) {
+            setInterval(() => {
+                const now = new Date().getTime();
+                countdowns.forEach(el => {
+                    // Check if dataset exists and replace timezone T issue if any
+                    const end = new Date(el.dataset.end).getTime();
+                    const distance = end - now;
+                    if(distance < 0) {
+                        el.innerHTML = "<span style='opacity:0.8'>Đã kết thúc</span>";
+                        return;
+                    }
+                    const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const s = Math.floor((distance % (1000 * 60)) / 1000);
+                    
+                    el.innerHTML = `
+                        <span style="background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">${d}N</span>
+                        <span style="background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">${h.toString().padStart(2,'0')}G</span>
+                        <span style="background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">${m.toString().padStart(2,'0')}P</span>
+                        <span style="background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">${s.toString().padStart(2,'0')}S</span>
+                    `;
+                });
+            }, 1000);
+        }
+    });
+
 /* ============================================================
    HOMEPAGE INTERACTIONS — SAMSUNG STYLE
    ============================================================ */

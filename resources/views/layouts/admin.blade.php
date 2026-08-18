@@ -221,8 +221,7 @@
     <aside class="sidebar">
         <div class="sidebar-logo">
             <a href="{{ route('home') }}">
-                <i class="fas fa-bolt"></i>
-                Electronic<span>Shop</span>
+                <img src="{{ asset('images/logo.png') }}" alt="ElectronicsShop" style="max-height: 50px; max-width: 100%; object-fit: contain;">
             </a>
         </div>
         <nav class="sidebar-nav">

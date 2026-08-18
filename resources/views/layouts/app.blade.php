@@ -121,8 +121,8 @@
     display: inline-flex !important;
     align-items: center;
     justify-content: flex-start;
-    width: 180px;
-    height: 56px;
+    width: 260px;
+    height: 80px;
     margin: 0;
     padding: 0;
     flex-shrink: 0;
@@ -135,10 +135,10 @@
 
 .es-logo-img {
     display: block !important;
-    width: 180px !important;
+    width: 260px !important;
     height: auto !important;
-    max-width: 180px !important;
-    max-height: 48px !important;
+    max-width: 260px !important;
+    max-height: 70px !important;
     object-fit: contain;
     object-position: left center;
     border: 0;
@@ -153,31 +153,31 @@
 /* ================= HEADER ================= */
 
 .sm-header .es-logo {
-    width: 180px;
-    height: 56px;
+    width: 260px;
+    height: 80px;
     transform: none !important;
     transform-origin: center;
 }
 
 .sm-header .es-logo-img {
-    width: 180px !important;
-    max-width: 180px !important;
-    max-height: 48px !important;
+    width: 260px !important;
+    max-width: 260px !important;
+    max-height: 70px !important;
 }
 
 /* ================= FOOTER ================= */
 
 .sm-footer .es-logo {
-    width: 180px;
-    height: 55px;
+    width: 260px;
+    height: 80px;
     margin-bottom: 20px;
     transform: none !important;
 }
 
 .sm-footer .es-logo-img {
-    width: 180px !important;
-    max-width: 180px !important;
-    max-height: 55px !important;
+    width: 260px !important;
+    max-width: 260px !important;
+    max-height: 80px !important;
     height: auto !important;
 }
 
@@ -185,25 +185,25 @@
 
 @media (max-width: 640px) {
     .sm-header .es-logo {
-        width: 145px;
-        height: 48px;
+        width: 200px;
+        height: 60px;
     }
 
     .sm-header .es-logo-img {
-        width: 145px !important;
-        max-width: 145px !important;
-        max-height: 42px !important;
+        width: 200px !important;
+        max-width: 200px !important;
+        max-height: 55px !important;
     }
 
     .sm-footer .es-logo {
-        width: 160px;
-        height: 50px;
+        width: 200px;
+        height: 60px;
     }
 
     .sm-footer .es-logo-img {
-        width: 160px !important;
-        max-width: 160px !important;
-        max-height: 50px !important;
+        width: 200px !important;
+        max-width: 200px !important;
+        max-height: 60px !important;
     }
 }
 

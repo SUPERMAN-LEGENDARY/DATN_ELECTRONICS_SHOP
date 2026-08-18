@@ -302,7 +302,7 @@
                     <div style="font-weight:600">{{ $banner->title ?: '(Chưa có tiêu đề)' }}</div>
                     @endif
                 </td>
-                <td style="color:#E53935;font-weight:700;font-size:13px">{{ $banner->isImageOnly() ? '—' : $banner->price_text }}</td>
+                <td style="color:#E53935;font-weight:700;font-size:13px">{{ $banner->isImageOnly() ? '—' : ($banner->price ? number_format($banner->price, 0, ',', '.') . '₫' : '') }}</td>
                 <td>{{ $banner->sort_order }}</td>
                 <td>
                     <span class="badge {{ $banner->is_active ? 'badge-success' : 'badge-muted' }}">

@@ -167,7 +167,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // ─── GIỎ HÀNG ─────────────────────────────────────────────────────
-Route::prefix('gio-hang')->name('cart.')->group(function () {
+Route::prefix('gio-hang')->name('cart.')->middleware(\App\Http\Middleware\CustomerOnlyMiddleware::class)->group(function () {
     Route::get('/',               [CartController::class, 'index'])->name('index');
     Route::post('/them',          [CartController::class, 'add'])->name('add');
     Route::post('/mua-ngay',      [CartController::class, 'buyNow'])->name('buy-now');
@@ -181,7 +181,7 @@ Route::post('/chatbot/send', [ChatbotController::class, 'send'])->name('chatbot.
 Route::prefix('thanh-toan')->name('checkout.')->group(function () {
 
     // Các bước đặt hàng từ giỏ hàng vẫn bắt buộc đăng nhập
-    Route::middleware('auth')->group(function () {
+    Route::middleware(['auth', \App\Http\Middleware\CustomerOnlyMiddleware::class])->group(function () {
         Route::get('/',             [\App\Http\Controllers\CheckoutController::class, 'index'])->name('index');
         Route::post('/',            [\App\Http\Controllers\CheckoutController::class, 'store'])->name('store');
         Route::post('/kiem-tra-ma', [\App\Http\Controllers\CheckoutController::class, 'checkVoucher'])->name('check-voucher');

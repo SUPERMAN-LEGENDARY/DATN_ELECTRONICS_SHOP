@@ -68,11 +68,16 @@ class Notification extends Model
             return 0;
         }
 
+        // Gửi email cho TẤT CẢ người đã đăng ký (kể cả không có user account)
+        foreach ($subscriberEmails as $email) {
+            \Illuminate\Support\Facades\Mail::to($email)->send(new \App\Mail\NewsPublishedMail($news));
+        }
+
         // Lấy user có email trùng với subscriber
         $users = User::whereIn('email', $subscriberEmails)->get();
 
         if ($users->isEmpty()) {
-            return 0;
+            return count($subscriberEmails);
         }
 
         $url   = route('news.show', $news->slug);
@@ -85,7 +90,7 @@ class Notification extends Model
                 'type'         => 'news',
                 'reference_id' => $news->id,
                 'title'        => 'Tin tức mới: ' . $news->title,
-                'body'         => $news->excerpt ?? \Illuminate\Support\Str::limit(strip_tags($news->content), 120),
+                'body'         => \Illuminate\Support\Str::limit(strip_tags($news->excerpt ?: $news->content), 120),
                 'url'          => $url,
                 'image'        => $news->thumbnail
                                     ? \Illuminate\Support\Facades\Storage::url($news->thumbnail)

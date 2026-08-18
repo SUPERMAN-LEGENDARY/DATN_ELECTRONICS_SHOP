@@ -631,13 +631,34 @@ body {
                 @endif
             </div>
 
+            @php
+                $activeEvent = $product->getActiveEvent();
+            @endphp
+            @if($activeEvent && $activeEvent->end_date && $activeEvent->end_date > now())
+            <div style="background: linear-gradient(90deg, var(--sam-sale), #ff4b4b); color: #fff; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong style="font-size: 16px; display: block;">{{ $activeEvent->title }}</strong>
+                    <span style="font-size: 13px; opacity: 0.9;">{{ $activeEvent->offer_text ?? 'Kết thúc trong:' }}</span>
+                </div>
+                <div class="product-countdown" data-end="{{ $activeEvent->end_date->format('Y-m-d\TH:i:s') }}" style="font-family: monospace; font-size: 18px; font-weight: bold; background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 6px;">
+                    --:--:--
+                </div>
+            </div>
+            @endif
+
             <div class="price-block" id="priceBlock">
                 @if($product->has_price_range)
                     <span class="price-current" id="priceDisplay">Từ {{ number_format($product->min_price) }}đ</span>
                     <span class="price-old" id="priceOldDisplay" style="display:none"></span>
                     <span class="price-pct" id="pricePctDisplay" style="display:none"></span>
                 @else
-                    <span class="price-current" id="priceDisplay">{{ number_format($product->price) }}đ</span>
+                    @php
+                        $discountedPrice = $product->price;
+                        if ($product->discount_percent > 0) {
+                            $discountedPrice = $product->price * (1 - $product->discount_percent / 100);
+                        }
+                    @endphp
+                    <span class="price-current" id="priceDisplay">{{ number_format($discountedPrice) }}đ</span>
                     @if($product->discount_percent > 0)
                         <span class="price-old" id="priceOldDisplay">{{ number_format($product->price) }}đ</span>
                         <span class="price-pct" id="pricePctDisplay">-{{ $product->discount_percent }}%</span>
@@ -1284,6 +1305,26 @@ $baseGalleryForJs = $galleryImages->values()->toArray();
         });
     })();
 
+    // Product page event countdown
+    const prodCountdown = document.querySelector('.product-countdown');
+    if (prodCountdown) {
+        setInterval(() => {
+            const now = new Date().getTime();
+            const end = new Date(prodCountdown.dataset.end).getTime();
+            const distance = end - now;
+            if (distance < 0) {
+                prodCountdown.innerHTML = "Đã kết thúc";
+                return;
+            }
+            const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            const hoursStr = (d * 24 + h).toString().padStart(2, '0');
+            prodCountdown.innerHTML = `${hoursStr}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }, 1000);
+    }
 })();
 </script>
 @endpush

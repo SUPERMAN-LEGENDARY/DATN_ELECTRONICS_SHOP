@@ -97,17 +97,10 @@ class ProductVariant extends Model
         return (float) $this->price;
     }
 
-    /** % giảm giá so với giá niêm yết của biến thể (làm tròn, 0 nếu không giảm) */
+    /** % giảm giá lấy từ sự kiện đang diễn ra của sản phẩm gốc */
     public function getDiscountPercentAttribute(): int
     {
-        $list  = (float) $this->list_price;
-        $price = (float) $this->price;
-
-        if ($list <= 0 || $price >= $list) {
-            return 0;
-        }
-
-        return (int) round((1 - $price / $list) * 100);
+        return $this->product->discount_percent;
     }
 
     /** Ảnh đại diện của biến thể — nếu biến thể không có ảnh riêng thì lấy ảnh của sản phẩm gốc */
