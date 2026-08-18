@@ -30,9 +30,11 @@
             --sm-white:  #ffffff;
             --sm-blue:   #2189ff;   /* accent / eyebrow */
             --sm-blue-d: #1428a0;   /* ElectronicShop deep blue */
+            --sm-blue-h: #0b6fd8;   /* button hover blue */
+            --sm-black-h:#2b2b2b;   /* button hover black */
             --sm-radius: 24px;
             --sm-ease:   cubic-bezier(.25,.46,.45,.94);
-            --sm-header-h: 56px;
+            --sm-header-h: 120px;
         }
 
         * { -webkit-tap-highlight-color: transparent; }
@@ -135,10 +137,10 @@
 
 .es-logo-img {
     display: block !important;
-    width: 260px !important;
+    width: 350px !important;
     height: auto !important;
-    max-width: 260px !important;
-    max-height: 70px !important;
+    max-width: 350px !important;
+    max-height: 100px !important;
     object-fit: contain;
     object-position: left center;
     border: 0;
@@ -153,31 +155,32 @@
 /* ================= HEADER ================= */
 
 .sm-header .es-logo {
-    width: 260px;
-    height: 80px;
+    width: 350px;
+    height: 110px;
     transform: none !important;
     transform-origin: center;
 }
 
 .sm-header .es-logo-img {
-    width: 260px !important;
-    max-width: 260px !important;
-    max-height: 70px !important;
+    width: 350px !important;
+    max-width: 350px !important;
+    max-height: 100px !important;
 }
 
 /* ================= FOOTER ================= */
 
 .sm-footer .es-logo {
-    width: 260px;
-    height: 80px;
+    width: 100%;
+    max-width: 210px;
+    height: auto;
     margin-bottom: 20px;
     transform: none !important;
 }
 
 .sm-footer .es-logo-img {
-    width: 260px !important;
-    max-width: 260px !important;
-    max-height: 80px !important;
+    width: 100% !important;
+    max-width: 210px !important;
+    max-height: 90px !important;
     height: auto !important;
 }
 
@@ -185,25 +188,26 @@
 
 @media (max-width: 640px) {
     .sm-header .es-logo {
-        width: 200px;
-        height: 60px;
+        width: 280px;
+        height: 85px;
     }
 
     .sm-header .es-logo-img {
-        width: 200px !important;
-        max-width: 200px !important;
-        max-height: 55px !important;
+        width: 280px !important;
+        max-width: 280px !important;
+        max-height: 75px !important;
     }
 
     .sm-footer .es-logo {
-        width: 200px;
-        height: 60px;
+        width: 100%;
+        max-width: 180px;
+        height: auto;
     }
 
     .sm-footer .es-logo-img {
-        width: 200px !important;
-        max-width: 200px !important;
-        max-height: 60px !important;
+        width: 100% !important;
+        max-width: 180px !important;
+        max-height: 75px !important;
     }
 }
 
@@ -355,14 +359,14 @@
             border: 1px solid transparent; cursor: pointer;
             transition: all .28s var(--sm-ease);
         }
-        .sm-btn--primary { background: var(--sm-blue); color: #fff; }
-        .sm-btn--primary:hover { background: #0b6fd8; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 22px rgba(33,137,255,.32); }
-        .sm-btn--dark { background: var(--sm-black); color: #fff; }
-        .sm-btn--dark:hover { background: #2b2b2b; color: #fff; transform: translateY(-2px); }
+        .sm-btn--primary { background: var(--sm-blue); color: var(--sm-white); }
+        .sm-btn--primary:hover { background: var(--sm-blue-h); color: var(--sm-white); transform: translateY(-2px); box-shadow: 0 8px 22px rgba(33,137,255,.32); }
+        .sm-btn--dark { background: var(--sm-black); color: var(--sm-white); }
+        .sm-btn--dark:hover { background: var(--sm-black-h); color: var(--sm-white); transform: translateY(-2px); }
         .sm-btn--ghost { background: transparent; color: var(--sm-black); border-color: var(--sm-black); }
-        .sm-btn--ghost:hover { background: var(--sm-black); color: #fff; }
-        .sm-btn--light { background: rgba(255,255,255,.14); color: #fff; border-color: rgba(255,255,255,.85); backdrop-filter: blur(6px); }
-        .sm-btn--light:hover { background: #fff; color: var(--sm-black); }
+        .sm-btn--ghost:hover { background: var(--sm-black); color: var(--sm-white); }
+        .sm-btn--light { background: rgba(255,255,255,.14); color: var(--sm-white); border-color: rgba(255,255,255,.85); backdrop-filter: blur(6px); }
+        .sm-btn--light:hover { background: var(--sm-white); color: var(--sm-black); }
         .sm-btn--sm { height: 40px; padding: 0 22px; font-size: 13.5px; }
 
         /* Link mũi tên kiểu Samsung */
@@ -374,10 +378,10 @@
         .sm-link:hover i { transform: translateX(5px); }
 
         /* ============================================================
-           5. FOOTER (trắng, hairline, tối giản)
+           5. FOOTER (4 cột ngang bằng nhau 1:1:1:1)
            ============================================================ */
         .sm-footer {
-            background: var(--sm-surface);
+            background: var(--sm-white);
             color: var(--sm-gray);
             margin-top: auto;
             border-top: 1px solid var(--sm-line);
@@ -385,8 +389,16 @@
         }
         .sm-footer-top {
             max-width: 1440px; margin: 0 auto;
-            padding: 56px 24px 40px;
-            display: grid; grid-template-columns: 1.4fr 1fr 1fr 1.3fr; gap: 40px;
+            padding: 64px 24px 48px;
+            /* Chia đều 4 cột tuyệt đối và căn đỉnh */
+            display: grid; 
+            grid-template-columns: repeat(4, minmax(0, 1fr)); 
+            gap: 32px;
+            align-items: start;
+        }
+        .sm-footer-col {
+            min-width: 0; /* Ngăn nội dung làm nở rộng cột */
+            overflow: hidden; /* Chặn logo/ảnh tràn ra ngoài cột, giữ 4 cột luôn bằng nhau */
         }
         .sm-footer h2 {
             font-size: 15px; letter-spacing: .14em; text-transform: uppercase;
@@ -396,6 +408,7 @@
         .sm-footer h3 {
             font-size: 13px; font-weight: 800; color: var(--sm-black);
             letter-spacing: .02em; margin: 0 0 18px; text-transform: uppercase;
+            line-height: 1.4;
         }
         .sm-footer p { line-height: 1.7; margin: 0 0 14px; color: var(--sm-gray); }
         .sm-footer-col a {
@@ -408,26 +421,28 @@
         .sm-socials { display: flex; gap: 10px; margin-top: 22px; }
         .sm-socials a {
             width: 38px; height: 38px; border-radius: 50%;
-            border: 1px solid var(--sm-line); background: #fff;
+            border: 1px solid var(--sm-line); background: var(--sm-white);
             display: inline-flex; align-items: center; justify-content: center;
             color: var(--sm-ink); font-size: 15px; margin: 0;
             transition: all .25s var(--sm-ease);
         }
-        .sm-socials a:hover { background: var(--sm-black); color: #fff; border-color: var(--sm-black); transform: translateY(-3px); }
+        .sm-socials a:hover { background: var(--sm-black); color: var(--sm-white); border-color: var(--sm-black); transform: translateY(-3px); }
 
         .sm-news-box {
-            display: flex; align-items: center; gap: 10px; margin-top: 16px;
+            display: flex; align-items: center; gap: 8px; margin-top: 16px;
             border-bottom: 1.5px solid var(--sm-black); padding-bottom: 8px;
         }
         .sm-news-box input {
             flex: 1; border: none; outline: none; background: transparent;
             font-size: 14px; font-weight: 500; color: var(--sm-black); padding: 6px 0;
+            min-width: 0; /* Tránh form input làm đẩy rộng cột 4 */
         }
-        .sm-news-box input::placeholder { color: #a8a8a8; }
+        .sm-news-box input::placeholder { color: var(--sm-line); }
         .sm-news-box button {
-            border: none; background: var(--sm-black); color: #fff;
-            border-radius: 999px; height: 34px; padding: 0 18px;
+            border: none; background: var(--sm-black); color: var(--sm-white);
+            border-radius: 999px; height: 34px; padding: 0 16px;
             font-size: 12px; font-weight: 800; cursor: pointer;
+            white-space: nowrap; flex-shrink: 0;
             transition: all .25s var(--sm-ease);
         }
         .sm-news-box button:hover { background: var(--sm-blue); }
@@ -435,14 +450,14 @@
         .sm-footer-bottom {
             border-top: 1px solid var(--sm-line);
             padding: 20px 24px;
-            font-size: 12.5px; color: #767676;
+            font-size: 12.5px; color: var(--sm-gray);
             max-width: 1440px; margin: 0 auto;
             display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap;
         }
         .sm-footer-bottom nav { display: flex; gap: 20px; flex-wrap: wrap; }
-        .sm-footer-bottom a { color: #767676; }
+        .sm-footer-bottom a { color: var(--sm-gray); }
         .sm-footer-bottom a:hover { color: var(--sm-black); }
-
+        
         /* ============================================================
            6. BACK TO TOP
            ============================================================ */
@@ -471,17 +486,17 @@
             .sm-footer-top { grid-template-columns: 1fr 1fr; }
         }
         @media (max-width: 640px) {
-            :root { --sm-radius: 18px; }
+            :root { --sm-radius: 18px; --sm-header-h: 95px; }
             .sm-utility { display: none; }
-            .sm-footer-top { grid-template-columns: 1fr; padding: 40px 20px 30px; }
-            .sm-footer-bottom { flex-direction: column; }
+            .sm-footer-top { grid-template-columns: 1fr; padding: 48px 20px 36px; }
+            .sm-footer-bottom { flex-direction: column; gap: 10px; align-items: flex-start; }
             .sm-header .inner { padding: 0 16px; }
         }
 
         /* Mobile drawer */
         .sm-drawer {
             position: fixed; top: 0; right: 0; bottom: 0; width: min(86vw, 340px);
-            background: #fff; z-index: 620; padding: 22px;
+            background: var(--sm-white); z-index: 620; padding: 22px;
             transform: translateX(100%); transition: transform .45s var(--sm-ease);
             display: flex; flex-direction: column; gap: 4px;
             box-shadow: -12px 0 40px rgba(0,0,0,.12);
@@ -490,7 +505,7 @@
         .sm-drawer a {
             font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 19px;
             color: var(--sm-black); padding: 14px 0;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid var(--sm-line);
         }
         .sm-drawer .close { align-self: flex-end; border: none; background: transparent; font-size: 22px; margin-bottom: 10px; cursor: pointer; }
 
