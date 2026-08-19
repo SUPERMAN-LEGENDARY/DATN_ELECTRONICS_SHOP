@@ -17,9 +17,41 @@
     }
 
     .news-hero {
+        position: relative;
+        isolation: isolate;
         padding: 72px 6%;
-        background: #f5f5f5;
+        min-height: 500px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         text-align: center;
+        overflow: hidden;
+
+        /* Ảnh nền */
+        background-image: url("{{ asset('images/news-banner.png') }}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-color: #f5f5f5;
+    }
+
+    /* Lớp phủ trắng trong suốt nằm trên ảnh */
+.news-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.20);
+    backdrop-filter: blur(1px);
+    z-index: 0;
+}
+
+    /* Nội dung luôn hiển thị phía trên ảnh nền */
+    .news-hero h1,
+    .news-hero p,
+    .news-hero .samsung-search {
+        position: relative;
+        z-index: 1;
     }
 
     .news-hero h1 {
@@ -245,12 +277,41 @@
     .news-promo {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        align-items: center;
+        align-items: stretch;
         gap: 36px;
         margin-top: 86px;
         padding: 48px;
         background: #f5f5f5;
         border-radius: 24px;
+        overflow: hidden;
+    }
+
+    .news-promo-content {
+        min-width: 0;
+    }
+
+    .news-promo-image {
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        overflow: hidden;
+        border-radius: 16px;
+        background: #e9e9e9;
+    }
+
+    .news-promo-image img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        object-fit: cover;
+        object-position: center;
+        border-radius: 16px;
+        transition: transform 0.4s ease;
+    }
+
+    .news-promo-image:hover img {
+        transform: scale(1.03);
     }
 
     .news-promo h2 {
@@ -304,16 +365,14 @@
     }
 
     .news-promo img {
-        width: 100%;
-        aspect-ratio: 1.7;
-        object-fit: cover;
-        border-radius: 12px;
-        background: #e9e9e9;
+        max-width: 100%;
     }
 
     @media (max-width: 800px) {
         .news-hero {
+            min-height: 420px;
             padding: 52px 6%;
+            background-position: center;
         }
 
         .news-container {
@@ -332,6 +391,33 @@
         .featured-content,
         .news-promo {
             padding: 30px;
+        }
+
+        .news-promo-image {
+            width: 100%;
+            height: 240px;
+            min-height: 240px;
+            border-radius: 14px;
+        }
+
+        .news-promo-image img {
+            width: 100%;
+            height: 240px;
+            min-height: 240px;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 14px;
+        }
+
+        .samsung-newsletter {
+            flex-direction: column;
+        }
+
+        .samsung-newsletter input,
+        .samsung-newsletter button {
+            width: 100%;
+            min-width: 100%;
+            box-sizing: border-box;
         }
 
         .news-grid {
@@ -478,21 +564,48 @@
 
         {{-- Form Đăng ký nhận tin --}}
         <section class="news-promo">
-            <div>
+
+            <div class="news-promo-content">
                 <h2>Luôn cập nhật cùng chúng tôi</h2>
+
                 <p>
-                    Nhận thông tin khuyến mãi mới nhất, xu hướng công nghệ và những câu 
+                    Nhận thông tin khuyến mãi mới nhất, xu hướng công nghệ và những câu
                     chuyện truyền cảm hứng từ ElectronicShop.
                 </p>
-                
-                <form id="newsNewsletterForm" onsubmit="return false;" class="samsung-newsletter">
-                    <input type="email" name="email" id="newsNewsletterEmail" placeholder="Email của bạn" required>
-                    <button type="submit" id="newsNewsletterBtn">ĐĂNG KÝ</button>
+
+                <form
+                    id="newsNewsletterForm"
+                    onsubmit="return false;"
+                    class="samsung-newsletter"
+                >
+                    <input
+                        type="email"
+                        name="email"
+                        id="newsNewsletterEmail"
+                        placeholder="Email của bạn"
+                        autocomplete="email"
+                        required
+                    >
+
+                    <button type="submit" id="newsNewsletterBtn">
+                        ĐĂNG KÝ
+                    </button>
                 </form>
-                <div id="newsNewsletterMsg" style="font-size:14px; font-weight: 600; margin-top:12px; display:none"></div>
+
+                <div
+                    id="newsNewsletterMsg"
+                    style="font-size:14px; font-weight:600; margin-top:12px; display:none"
+                ></div>
             </div>
 
-            <img src="/images/samsung-news-promo.jpg" alt="Hệ sinh thái công nghệ" loading="lazy">
+            <div class="news-promo-image">
+                <img
+                    src="{{ asset('images/samsung-news-promo.png') }}"
+                    alt="Hệ sinh thái công nghệ ElectronicShop"
+                    loading="lazy"
+                >
+            </div>
+
         </section>
     </main>
 </div>

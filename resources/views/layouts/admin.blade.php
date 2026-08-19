@@ -38,8 +38,23 @@
         }
 
         .sidebar-logo {
-            padding: 20px 20px 16px;
+            padding: 18px 14px 16px;
             border-bottom: 1px solid rgba(255, 255, 255, .1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sidebar-logo img {
+            width: 225px;
+            height: 86px;
+            max-width: 100%;
+            object-fit: contain;
+            object-position: center;
+            display: block;
+
+            /* Logo gốc màu đen nên đổi sang trắng để nổi bật trên nền xanh đậm */
+            filter: brightness(0) invert(1);
         }
 
         .sidebar-logo a {
@@ -221,7 +236,7 @@
     <aside class="sidebar">
         <div class="sidebar-logo">
             <a href="{{ route('home') }}">
-                <img src="{{ asset('images/logo.png') }}" alt="ElectronicsShop" style="max-height: 50px; max-width: 100%; object-fit: contain;">
+                <img src="{{ asset('images/logo.png') }}" alt="ElectronicsShop">
             </a>
         </div>
         <nav class="sidebar-nav">

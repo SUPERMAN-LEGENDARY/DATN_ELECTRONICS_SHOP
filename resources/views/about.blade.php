@@ -21,15 +21,20 @@ body { background: #ffffff; color: #000000; }
    HERO — Giới thiệu ElectronicShop
    ============================================================ */
 .about-hero {
-    position: relative; overflow: hidden; color: #fff;
-    background: url('{{ asset('images/about-hero-bg.jpg') }}') center/cover no-repeat;
-    padding: 88px 0 96px; text-align: center;
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+    background-image: url('{{ asset('images/about-hero.png') }}');
+    background-position: center center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    padding: 88px 0 96px;
+    text-align: center;
 }
+
+/* Hiển thị ảnh nền rõ, không phủ lớp xám/đen */
 .about-hero::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: rgba(0,0,0,.55);
-    z-index: 1;
+    content: none;
 }
 .about-hero .container { max-width: 900px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 2; }
 .about-hero .eyebrow {
