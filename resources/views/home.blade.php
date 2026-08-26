@@ -138,8 +138,19 @@
 /* ============================================================
    2. BANNER SLIDER (fade, dot progress)
    ============================================================ */
+/* ============================================================
+   KÍCH THƯỚC BANNER CHUẨN
+   Desktop/User: 1920x800 = tỷ lệ 12:5
+   Admin preview dùng cùng tỷ lệ để không bị lệch/crop.
+   ============================================================ */
 .sm-slider { position: relative; background: var(--sm-surface); overflow: hidden; }
-.sm-slider-track { position: relative; height: clamp(380px, 46vw, 620px); }
+.sm-slider-track {
+    position: relative;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 1920 / 800;
+}
 .sm-slide {
     position: absolute; inset: 0;
     opacity: 0; visibility: hidden;
@@ -149,11 +160,16 @@
 .sm-slide.active { opacity: 1; visibility: visible; }
 .sm-slide-img-only img,
 .sm-slide-bg {
-    position: absolute; inset: 0; width: 100%; height: 100%;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
+    object-position: center center;
 }
 /* Ken Burns nhẹ khi slide active */
-.sm-slide.active .sm-kb { animation: smKb 8s linear forwards; }
+/* Banner ảnh không được zoom vì zoom sẽ làm crop và phá tỷ lệ ảnh gốc. */
+.sm-slide.active .sm-kb { animation: none; transform: none; }
 @keyframes smKb { from { transform: scale(1.0); } to { transform: scale(1.07); } }
 
 .sm-slide-content {

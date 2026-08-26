@@ -259,17 +259,17 @@ body { background: #ffffff; color: #000000; }
 @php
     // Ảnh nền riêng cho từng thương hiệu (key = slug của brand).
     // Thay các link bên dưới bằng ảnh thật của bạn.
-    // Ảnh sản phẩm thật, cấp phép mở (Wikimedia Commons - CC BY-SA, được phép dùng lại nếu ghi nguồn)
-    // Special:FilePath là link trực tiếp chính thức của Wikimedia, luôn trỏ thẳng tới file ảnh gốc
     $brandBackgrounds = [
-        'apple'   => 'https://commons.wikimedia.org/wiki/Special:FilePath/IPhone_16_series_in_Apple_Store_Nagoya_Sakae.jpg',
-        'samsung' => 'https://commons.wikimedia.org/wiki/Special:FilePath/Samsung_Galaxy_s24_series.jpg',
-        'xiaomi'  => 'https://commons.wikimedia.org/wiki/Special:FilePath/Xiaomi_Mi4.jpg',
-        'oppo'    => 'https://commons.wikimedia.org/wiki/Special:FilePath/OPPO_A57_Black_Color.jpg',
+        'apple'   => 'https://via.placeholder.com/1600x700?text=Apple',
+        'samsung' => 'https://via.placeholder.com/1600x700?text=Samsung',
+        'xiaomi'  => 'https://via.placeholder.com/1600x700?text=Xiaomi',
+        'oppo'    => 'https://via.placeholder.com/1600x700?text=Oppo',
+        'vivo'    => 'https://via.placeholder.com/1600x700?text=Vivo',
+        'realme'  => 'https://via.placeholder.com/1600x700?text=Realme',
     ];
 
     // Ảnh nền mặc định khi chưa hover / chưa có ảnh riêng cho brand
-    $defaultBgImage = 'https://picsum.photos/seed/support-banner-default/1600/700';
+    $defaultBgImage = 'https://via.placeholder.com/1600x700?text=Default';
 
     // Link riêng cho từng thương hiệu (key = slug). Nếu có, mục brand sẽ trỏ tới link này
     // thay vì trang sản phẩm nội bộ mặc định.

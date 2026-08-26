@@ -389,10 +389,19 @@ body {
 
                 <h3>{{ $product->name }}</h3>
 
-                <div class="price">{{ number_format($product->sale_price) }}đ</div>
-                @if($product->discount_percent > 0)
-                <div class="old-price">{{ number_format($product->price) }}đ</div>
-                @endif
+                @php
+    $displayPrice = $product->min_price;
+@endphp
+
+<div class="price">
+    {{ number_format($displayPrice, 0, ',', '.') }}đ
+</div>
+
+@if($product->discount_percent > 0)
+    <div class="old-price">
+        {{ number_format($product->min_price / (1 - $product->discount_percent / 100), 0, ',', '.') }}đ
+    </div>
+@endif
 
                 <div class="card-buttons">
                     <a href="{{ route('products.show', $product->slug) }}" class="buy-btn">
