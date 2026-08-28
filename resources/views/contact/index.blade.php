@@ -32,21 +32,35 @@ body { background: #ffffff; color: #000000; }
    ============================================================ */
 .top-banner {
     position: relative;
-    color: #fff; overflow: hidden;
+    height: 560px;
+    min-height: 460px;
+    color: #fff;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 .banner-bg-layer {
     position: absolute; inset: 0; z-index: 0;
+    /* Giữ ảnh phủ kín banner, không làm vỡ bố cục */
     background-size: cover;
-    background-position: center;
+    background-position: center center;
     background-repeat: no-repeat;
-    background-color: #3a463a; /* màu nền dự phòng nếu ảnh chưa tải xong / lỗi link */
+    transform: translateZ(0);
+    will-change: opacity, background-image;
+    filter: brightness(1.08) saturate(1.08);
+    background-color: #111827; /* màu nền dự phòng */
     opacity: 0; transition: opacity .7s ease;
 }
 .banner-bg-layer.is-active { opacity: 1; }
-.top-banner { min-height: 420px; }
+
 .top-banner .container {
-    max-width: 1200px; margin: 0 auto; padding: 56px 24px 40px;
-    position: relative; z-index: 2;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 56px 24px 40px;
+    position: relative;
+    z-index: 2;
+    flex: 1;
 }
 .top-banner .stat-number {
     font-size: 44px; font-weight: 800; line-height: 1;
@@ -58,25 +72,31 @@ body { background: #ffffff; color: #000000; }
     margin: 18px 0 32px; opacity: .92;
 }
 
-.top-search-box { position: relative; max-width: 520px; margin-bottom: 18px; }
-.top-search-box input {
-    width: 100%; border: none; border-radius: 12px;
-    padding: 14px 60px 14px 18px; font-size: 15px;
-    outline: none; font-family: inherit;
-}
-.top-search-box button {
-    position: absolute; right: 0; top: 0; bottom: 0;
-    width: 54px; border: none; border-radius: 0 12px 12px 0;
-    background: #181818; color: #fff; font-size: 16px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-}
+/* QUICK SUPPORT ACTIONS */
+.banner-quick-actions { display:flex; align-items:stretch; gap:14px; margin-top:28px; flex-wrap:wrap; max-width:820px; }
+.quick-action { display:flex; align-items:center; gap:12px; min-width:220px; padding:14px 18px; color:#fff; text-decoration:none; background:rgba(18,18,18,.40); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,.18); border-radius:14px; transition:transform .25s ease,background .25s ease,border-color .25s ease; }
+.quick-action:hover { transform:translateY(-4px); background:rgba(18,18,18,.62); border-color:rgba(255,255,255,.38); color:#fff; }
+.quick-action-icon { width:42px; height:42px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:12px; background:rgba(255,255,255,.14); font-size:20px; }
+.quick-action strong { display:block; font-size:14px; font-weight:700; margin-bottom:3px; }
+.quick-action span { display:block; font-size:12px; line-height:1.35; color:rgba(255,255,255,.78); }
+
 
 /* thanh danh mục dưới cùng banner */
 .top-category-bar {
-    position: relative; z-index: 3;
-    background: rgba(0,0,0,.28);
-    display: flex; justify-content: center; gap: 64px;
-    flex-wrap: wrap; padding: 22px 24px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+    min-height: 122px;
+    background: rgba(0,0,0,.38);
+    backdrop-filter: blur(6px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 64px;
+    flex-wrap: wrap;
+    padding: 24px;
 }
 .top-category-bar .cat-item {
     display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -87,9 +107,13 @@ body { background: #ffffff; color: #000000; }
 .top-category-bar .cat-item.active { background: rgba(255,255,255,.14); border-radius: 10px; padding: 10px 18px; margin: -10px 0; }
 
 @media (max-width: 768px) {
-    .top-banner { min-height: 340px; }
+    .top-banner { height: 650px; min-height: 560px; }
+    .banner-bg-layer { background-position: center center; }
+    .top-banner .container { padding: 40px 20px 190px; }
     .top-banner .stat-number { font-size: 32px; }
-    .top-category-bar { gap: 32px; }
+    .banner-quick-actions { gap: 10px; margin-top: 22px; }
+    .quick-action { width: 100%; min-width: 100%; padding: 12px 14px; }
+    .top-category-bar { gap: 18px 28px; min-height: 140px; padding: 18px 16px; }
 }
 
 /* ============================================================
@@ -257,28 +281,23 @@ body { background: #ffffff; color: #000000; }
 
 {{-- ===== TOP BANNER: thống kê người dùng + tìm kiếm nhanh ===== --}}
 @php
-    // Ảnh nền riêng cho từng thương hiệu (key = slug của brand).
-    // Thay các link bên dưới bằng ảnh thật của bạn.
+    // Ảnh nền lấy từ thư mục public/images
+    // Mỗi thương hiệu dùng một ảnh riêng.
     $brandBackgrounds = [
-        'apple'   => 'https://via.placeholder.com/1600x700?text=Apple',
-        'samsung' => 'https://via.placeholder.com/1600x700?text=Samsung',
-        'xiaomi'  => 'https://via.placeholder.com/1600x700?text=Xiaomi',
-        'oppo'    => 'https://via.placeholder.com/1600x700?text=Oppo',
-        'vivo'    => 'https://via.placeholder.com/1600x700?text=Vivo',
-        'realme'  => 'https://via.placeholder.com/1600x700?text=Realme',
+        'apple'   => asset('images/apple.jpg'),
+        'samsung' => asset('images/samsung.jpg'),
+        'xiaomi'  => asset('images/xiaomi.jpg'),
+        'oppo'    => asset('images/oppo.jpg'),
+        'vivo'    => asset('images/vivo.jpg'),
+        'realme'  => asset('images/realme.jpg'),
     ];
 
-    // Ảnh nền mặc định khi chưa hover / chưa có ảnh riêng cho brand
-    $defaultBgImage = 'https://via.placeholder.com/1600x700?text=Default';
+    // Ảnh nền mặc định lấy từ thư mục public/images
+    $defaultBgImage = asset('images/apple.jpg');
 
-    // Link riêng cho từng thương hiệu (key = slug). Nếu có, mục brand sẽ trỏ tới link này
-    // thay vì trang sản phẩm nội bộ mặc định.
-    $brandLinks = [
-        'apple' => 'https://www.topzone.vn/tekzone/cac-dong-san-pham-apple-1576381',
-    ];
 
     // Lớp phủ tối để chữ trắng vẫn đọc rõ trên mọi ảnh
-    $bannerBgCss = fn ($imageUrl) => "linear-gradient(rgba(20,25,20,.55), rgba(20,25,20,.55)), url('{$imageUrl}')";
+    $bannerBgCss = fn ($imageUrl) => "linear-gradient(90deg, rgba(8,12,10,.72) 0%, rgba(8,12,10,.45) 42%, rgba(8,12,10,.08) 100%), url('{$imageUrl}')";
 
     $defaultBg = $bannerBgCss($defaultBgImage);
 @endphp
@@ -292,14 +311,14 @@ body { background: #ffffff; color: #000000; }
             <span class="stat-label">Người sử dụng</span>
         </div>
         <p class="banner-desc">Đồng hành và chọn lựa sử dụng dịch vụ tự phục vụ chính hãng hôm nay</p>
-
-        <form class="top-search-box" action="{{ Route::has('support.search') ? route('support.search') : '#' }}" method="GET">
-            <input type="text" name="q" placeholder="Tìm kiếm chủ đề bạn quan tâm">
-            <button type="submit"><i class="bi bi-search"></i></button>
-        </form>
+        <div class="banner-quick-actions">
+            <a href="#support-order" class="quick-action"><div class="quick-action-icon"><i class="bi bi-box-seam"></i></div><div><strong>Theo dõi đơn hàng</strong><span>Kiểm tra trạng thái đơn hàng của bạn</span></div></a>
+            <a href="#support-warranty" class="quick-action"><div class="quick-action-icon"><i class="bi bi-shield-check"></i></div><div><strong>Bảo hành sản phẩm</strong><span>Tra cứu và nhận hỗ trợ bảo hành</span></div></a>
+            <a href="#contact-section" class="quick-action"><div class="quick-action-icon"><i class="bi bi-headset"></i></div><div><strong>Liên hệ hỗ trợ</strong><span>Đội ngũ ElectronicShop luôn sẵn sàng</span></div></a>
+        </div>
     </div>
 
-    <div class="top-category-bar" id="topCategoryBar" data-default-bg="{{ $defaultBg }}">
+    <div class="top-category-bar" id="topCategoryBar" data-default-bg="{{ $defaultBgImage }}">
         @foreach($brands as $brand)
         @php
             $brandImage = $brandBackgrounds[$brand->slug] ?? $defaultBgImage;
@@ -308,7 +327,7 @@ body { background: #ffffff; color: #000000; }
         @endphp
         <a href="{{ $brandHref }}"
            class="cat-item {{ $loop->first ? 'active' : '' }}"
-           data-bg="{{ $bannerBgCss($brandImage) }}"
+           data-bg="{{ $brandImage }}"
            @if($isExternal) target="_blank" rel="noopener" @endif>
             @if($brand->logo)
                 <img src="{{ $brand->logo_url }}" alt="{{ $brand->name }}" style="width:22px;height:22px;object-fit:contain;">
@@ -346,7 +365,7 @@ body { background: #ffffff; color: #000000; }
 </section>
 
 {{-- ===== TÌM CHỦ ĐỀ HỖ TRỢ ===== --}}
-<section class="support-search-section reveal">
+<section class="support-search-section reveal" id="support-order">
     <div class="container">
         <h2>Tìm chủ đề hỗ trợ</h2>
 
@@ -362,7 +381,7 @@ body { background: #ffffff; color: #000000; }
                 <p>Theo dõi trạng thái giao hàng</p>
                 <span class="card-arrow"><i class="bi bi-chevron-right"></i></span>
             </a>
-            <a href="#" class="support-card">
+            <a href="#contact-section" class="support-card" id="support-warranty">
                 <div class="support-card-icon"><i class="bi bi-wrench-adjustable"></i></div>
                 <b>Bảo hành &amp; sửa chữa</b>
                 <p>Đặt lịch tại trung tâm gần nhất</p>
@@ -379,7 +398,7 @@ body { background: #ffffff; color: #000000; }
 </section>
 
 {{-- ===== LIÊN HỆ ElectronicShop ===== --}}
-<section class="contact-section reveal">
+<section class="contact-section reveal" id="contact-section">
     <div class="container">
         <h2>Liên hệ ElectronicShop</h2>
         <p class="lead">Đội ngũ chuyên viên luôn sẵn sàng lắng nghe và hỗ trợ bạn.</p>
@@ -578,10 +597,14 @@ document.querySelector('form[action="{{ route('contact.send') }}"]')
     const defaultBg = bar.dataset.defaultBg;
     let showingA = true;
 
-    function setBanner(bg) {
+    function setBanner(imageUrl) {
+        if (!imageUrl) return;
+
         const nextLayer = showingA ? layerB : layerA;
         const currentLayer = showingA ? layerA : layerB;
-        nextLayer.style.backgroundImage = bg;
+        const overlay = 'linear-gradient(90deg, rgba(8,12,10,.68) 0%, rgba(8,12,10,.38) 45%, rgba(8,12,10,.08) 100%)';
+
+        nextLayer.style.backgroundImage = `${overlay}, url("${imageUrl}")`;
         nextLayer.classList.add('is-active');
         currentLayer.classList.remove('is-active');
         showingA = !showingA;
@@ -597,9 +620,7 @@ document.querySelector('form[action="{{ route('contact.send') }}"]')
         });
     });
 
-    bar.addEventListener('mouseleave', function () {
-        setBanner(defaultBg);
-    });
+    // Giữ ảnh của thương hiệu đang hover/được chọn, không reset ngay khi rời thanh thương hiệu.
 })();
 </script>
 @endpush

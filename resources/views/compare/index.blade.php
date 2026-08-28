@@ -117,6 +117,189 @@ body {
 }
 
 /* ============================================================
+   RATING BADGES BELOW TABLE
+   ============================================================ */
+.rating-badges-below {
+    margin-top: 48px;
+    padding: 0;
+}
+
+.ai-suggest-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.ai-suggest-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: #000000;
+    color: #fff; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(0,0,0,.15);
+}
+
+.ai-suggest-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #000;
+    margin: 0 0 4px;
+}
+
+.ai-suggest-desc {
+    font-size: 13px;
+    color: #666;
+    margin: 0;
+}
+
+.rating-badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 28px;
+    margin-top: 28px;
+}
+
+.rating-badge-item {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 18px rgba(0,0,0,.05);
+    transition: transform .28s cubic-bezier(.16,1,.3,1), box-shadow .28s, border-color .25s;
+}
+
+.rating-badge-item:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 32px rgba(0,0,0,.12);
+    border-color: #d0d0d0;
+}
+
+.rating-badge-top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.rating-circle-small {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.rating-circle-small.excellent {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(76, 175, 80, 0.3);
+}
+
+.rating-circle-small.good {
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(33, 150, 243, 0.3);
+}
+
+.rating-circle-small.fair {
+    background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(255, 152, 0, 0.3);
+}
+
+.rating-percent-small {
+    font-size: 32px;
+    line-height: 1;
+}
+
+.rating-label-top {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.top-badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: #e8f0fe;
+    border: 1px solid #d2e3fc;
+}
+
+.top-badge-pill.best {
+    background: #e6f4ea;
+    border-color: #ceead6;
+}
+
+.top-badge-pill i {
+    font-size: 12px;
+    color: #1a73e8;
+}
+
+.top-badge-pill.best i {
+    color: #137333;
+}
+
+.top-badge-pill span {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1a73e8;
+    letter-spacing: 0.2px;
+}
+
+.top-badge-pill.best span {
+    color: #137333;
+}
+
+.rating-badge-desc {
+    padding: 0;
+}
+
+.desc-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #000;
+    margin: 0 0 14px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.desc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.desc-list li {
+    font-size: 12px;
+    color: #555;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.4;
+}
+
+.desc-list li i {
+    font-size: 11px;
+    color: #4CAF50;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+/* ============================================================
    COMPARE HEADER — product cards
    ============================================================ */
 .compare-header {
@@ -136,7 +319,10 @@ body {
     transition: transform .28s cubic-bezier(.16,1,.3,1),
                 box-shadow .28s, border-color .25s;
     position: relative; overflow: hidden;
-    text-align: center;   /* ← thêm dòng này */
+    text-align: center;
+    /* FIX: Use flexbox to align content vertically */
+    display: flex;
+    flex-direction: column;
 }
 
 /* top bar */
@@ -182,12 +368,26 @@ body {
     color: #000000; margin-bottom: 4px;
 }
 
+/* FIX: Reserve space for old-price even when empty */
 .old-price {
     font-size: 13px; color: #999999;
     text-decoration: line-through; margin-bottom: 16px;
+    min-height: 18px;  /* ← Ensures consistent spacing */
 }
 
-.card-buttons { display: flex; flex-direction: column; gap: 10px; }
+/* FIX: Flex-grow pushes buttons to bottom */
+.card-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-buttons { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px;
+    margin-top: auto;  /* ← Pushes buttons to bottom */
+}
 
 .buy-btn {
     display: flex; justify-content: center; align-items: center; gap: 8px;
@@ -218,128 +418,101 @@ body {
     display: flex; align-items: center; justify-content: center; gap: 6px;
 }
 .remove-btn:hover {
-    background: #ef4444; color: #fff;
+    background: rgba(239,68,68,.15);
+    box-shadow: 0 4px 12px rgba(239,68,68,.15);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(239,68,68,.3);
 }
 
-/* ============================================================
-   ADD CARD — dashed
-   ============================================================ */
 .compare-add {
-    display: flex; flex-direction: column;
-    justify-content: center; align-items: center;
-    gap: 8px;
+    display: flex !important; 
+    flex-direction: column !important; 
+    align-items: center; 
+    justify-content: center;
+    gap: 14px;
     background: #fafafa;
-    border: 2.5px dashed #cccccc !important;
-    color: #000000;
-    transition: background .2s, border-color .2s !important;
+    border: 2px dashed #e0e0e0;
 }
-.compare-add::before { display: none; }
 .compare-add:hover {
-    background: #f0f0f0 !important;
-    border-color: #999999 !important;
-    transform: translateY(-6px) scale(1.01) !important;
+    border-color: #bbb;
+    background: #f5f5f5;
 }
-.compare-add .add-icon {
-    font-size: 52px;
-    color: #000000;
-    margin-bottom: 10px;
-    animation: addPulse 2.4s ease-in-out infinite;
+.add-icon {
+    font-size: 56px;
+    color: #d0d0d0;
+    transition: transform .3s, color .3s;
 }
-@keyframes addPulse {
-    0%,100% { transform: scale(1);    opacity: .85; }
-    50%      { transform: scale(1.1); opacity: 1;  }
+.compare-add:hover .add-icon {
+    transform: scale(1.15) rotate(10deg);
+    color: #aaa;
 }
-.compare-add h3 { color: #000000; font-size: 16px; }
-.compare-add p  { color: #666666; font-size: 13px; text-align: center; margin: 0; }
+.compare-add h3 { font-size: 16px; margin: 0; min-height: auto; }
+.compare-add p  { color: #888; font-size: 13px; margin: 0; }
 
 /* ============================================================
    COMPARE TABLE
    ============================================================ */
-.compare-table {
-    overflow: auto;
-    border-radius: 16px;
-    box-shadow: 0 6px 24px rgba(0,0,0,.06);
-}
-
+.compare-table { width: 100%; overflow-x: auto; }
 .compare-table table {
     width: 100%;
-    border-collapse: separate; border-spacing: 0;
+    border-collapse: collapse;
     background: #ffffff;
-    border-radius: 16px; overflow: hidden;
-    border: 1px solid #e0e0e0;
-    min-width: 600px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.06);
+    border-radius: 14px;
+    overflow: hidden;
 }
-
-.compare-table thead th {
+.compare-table thead {
     background: #000000;
-    color: #fff; padding: 16px 18px;
-    font-size: 14.5px; font-weight: 700;
-    white-space: nowrap; letter-spacing: .2px;
-    text-align: center !important;    /* ← thêm !important */
-    position: sticky; top: 0; z-index: 10;
+    color: #fff;
+    position: sticky; top: 0; z-index: 20;
 }
-.compare-table thead th:first-child {
-    background: #000000;
-    text-align: left !important;      /* ← thêm !important, cột "Thông số" vẫn canh trái */
+.compare-table th, .compare-table td {
+    padding: 16px; text-align: center; border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
 }
-
-.compare-table td {
-    padding: 14px 16px;
-    border-bottom: 1px solid #eeeeee;
-    text-align: center;
-    font-size: 14px; color: #333333;
-    transition: background .15s;
+.compare-table th {
+    font-weight: 700;
+    letter-spacing: 0.3px;
 }
-
-.compare-table tbody tr:nth-child(even) td { background: #fafafa; }
-.compare-table tbody tr:hover td { background: #f0f0f0; }
-.compare-table tbody tr:last-child td { border-bottom: none; }
-
+.compare-table tbody tr:hover {
+    background: #f9f9f9;
+}
+.compare-table tbody tr:last-child td {
+    border-bottom: none;
+}
 .attribute-name {
-    text-align: left !important;
-    font-weight: 700; color: #000000;
-    background: #f4f4f4 !important;
-    min-width: 200px; white-space: nowrap;
+    font-weight: 700; color: #333; text-align: left;
 }
-.compare-table tbody tr:hover .attribute-name { background: #ececec !important; }
-
-.empty-cell { color: #cccccc; }
-
-/* ============================================================
-   DIFF HIGHLIGHT (giữ màu xanh lá — mang ý nghĩa "khác biệt")
-   ============================================================ */
+.empty-cell { color: #ccc; font-style: italic; }
 .diff {
-    background: rgba(187,247,208,.55) !important;
-    color: #166534; font-weight: 700;
-    position: relative;
+    background: #fff3cd;
+    color: #856404;
+    font-weight: 600;
+    animation: diffPulse 1.2s cubic-bezier(.16,1,.3,1);
 }
-.diff::after {
-    content: '';
-    position: absolute; left: 0; top: 0; bottom: 0;
-    width: 3px;
-    background: linear-gradient(180deg, #16a34a, #4ade80);
+@keyframes diffPulse {
+    0% { background: #ffeaa7; }
+    100% { background: #fff3cd; }
 }
 
 /* ============================================================
    RESPONSIVE
    ============================================================ */
-@media (max-width: 992px) {
-    .compare-header { flex-direction: column; align-items: center; }
-    .compare-card   { width: 100%; max-width: 420px; }
+@media (max-width: 1024px) {
+    .compare-card { width: 280px; }
 }
 @media (max-width: 768px) {
-    .compare-title  { font-size: 24px; }
-    .compare-image  { height: 160px; }
+    .compare-header { gap: 18px; }
+    .compare-card { width: 240px; padding: 18px; }
+    .compare-image { height: 160px; }
     .compare-image img { width: 140px; height: 140px; }
-    .price          { font-size: 20px; }
-    .compare-table th, .compare-table td { padding: 10px 12px; font-size: 13px; }
-    .attribute-name { min-width: 140px; }
+    .compare-card h3 { font-size: 13px; }
+    .price { font-size: 20px; }
 }
-@media (max-width: 576px) {
-    .compare-page   { padding: 20px 0; }
-    .compare-card   { padding: 18px; }
+@media (max-width: 480px) {
+    .compare-header { flex-direction: column; align-items: center; }
+    .compare-card, .compare-add { width: 100%; max-width: 320px; }
+    .compare-table { font-size: 12px; }
+    .compare-table th, .compare-table td { padding: 12px 8px; }
 }
 </style>
 @endpush
@@ -348,23 +521,17 @@ body {
 <section class="compare-page">
     <div class="container">
 
-        <h1 class="compare-title reveal">
+        {{-- ===== PAGE TITLE ===== --}}
+        <div class="compare-title">
             <i class="fas fa-code-compare"></i>
             So sánh sản phẩm
-        </h1>
-
-        @if(session('success'))
-        <div class="alert-success reveal">
-            <i class="fas fa-circle-check"></i>
-            {{ session('success') }}
         </div>
-        @endif
 
-        @if($products->count() == 0)
+        @if($products->isEmpty())
 
         {{-- ===== EMPTY STATE ===== --}}
-        <div class="compare-empty reveal">
-            <i class="fas fa-mobile-screen compare-empty-icon"></i>
+        <div class="compare-empty">
+            <i class="compare-empty-icon fas fa-cube"></i>
             <h2>Chưa có sản phẩm để so sánh</h2>
             <p>Hãy chọn tối đa 3 sản phẩm để bắt đầu so sánh.</p>
             <a href="{{ route('products.index') }}" class="btn-primary">
@@ -373,6 +540,14 @@ body {
         </div>
 
         @else
+
+        {{-- ===== SUCCESS ALERT ===== --}}
+        @if(session('success'))
+        <div class="alert-success">
+            <i class="fas fa-check-circle"></i>
+            {{ session('success') }}
+        </div>
+        @endif
 
         {{-- ===== PRODUCT CARDS ===== --}}
         <div class="compare-header stagger-cards">
@@ -387,21 +562,25 @@ body {
                     @endif
                 </div>
 
-                <h3>{{ $product->name }}</h3>
+                {{-- FIX: Wrap price/title in card-content to control flex layout --}}
+                <div class="card-content">
+                    <h3>{{ $product->name }}</h3>
 
-                @php
-    $displayPrice = $product->min_price;
-@endphp
+                    @php
+                        $displayPrice = $product->min_price;
+                    @endphp
 
-<div class="price">
-    {{ number_format($displayPrice, 0, ',', '.') }}đ
-</div>
+                    <div class="price">
+                        {{ number_format($displayPrice, 0, ',', '.') }}đ
+                    </div>
 
-@if($product->discount_percent > 0)
-    <div class="old-price">
-        {{ number_format($product->min_price / (1 - $product->discount_percent / 100), 0, ',', '.') }}đ
-    </div>
-@endif
+                    {{-- FIX: Always render old-price div, even if empty --}}
+                    <div class="old-price">
+                        @if($product->discount_percent > 0)
+                            {{ number_format($product->min_price / (1 - $product->discount_percent / 100), 0, ',', '.') }}đ
+                        @endif
+                    </div>
+                </div>
 
                 <div class="card-buttons">
                     <a href="{{ route('products.show', $product->slug) }}" class="buy-btn">
@@ -486,6 +665,118 @@ body {
                 </tbody>
             </table>
         </div>
+
+        {{-- ===== RATING BADGES BELOW TABLE ===== --}}
+        @if($products->count() > 0)
+        @php
+            // So sánh từng thông số giữa các sản phẩm để tìm ra
+            // thông số nào sản phẩm đang "vượt trội" (giá trị số lớn nhất, không hòa)
+            $highlights = [];
+            foreach ($products as $p) {
+                $highlights[$p->id] = [];
+            }
+
+            foreach ($attributes as $attribute) {
+                $numericValues = [];
+
+                foreach ($products as $p) {
+                    $rawValue = optional(
+                        $p->attributes->where('attribute_id', $attribute->id)->first()
+                    )->value;
+
+                    if ($rawValue !== null) {
+                        // Chuẩn hóa: TB -> nhân 1024 để so cùng đơn vị GB, rồi lấy TẤT CẢ
+                        // các số xuất hiện trong chuỗi, dùng số LỚN NHẤT để so sánh
+                        // (vd "1-120Hz" -> 120, "256GB/512GB/1TB" -> 1024)
+                        $normalized = preg_replace_callback(
+                            '/([\d.,]+)\s*TB/i',
+                            fn ($m) => ((float) str_replace(',', '.', $m[1]) * 1024) . 'GB',
+                            $rawValue
+                        );
+
+                        preg_match_all('/[\d]+(?:[.,]\d+)?/', str_replace(',', '.', $normalized), $matches);
+
+                        if (!empty($matches[0])) {
+                            $numbers = array_map(fn ($n) => (float) str_replace(',', '.', $n), $matches[0]);
+                            $numericValues[$p->id] = [
+                                'raw' => $rawValue,
+                                'num' => max($numbers),
+                            ];
+                        }
+                    }
+                }
+
+                // Cần ít nhất 2 sản phẩm có giá trị số để so sánh
+                if (count($numericValues) >= 2) {
+                    $maxVal  = max(array_column($numericValues, 'num'));
+                    $winners = array_filter($numericValues, fn($v) => $v['num'] == $maxVal);
+
+                    // Chỉ tính "vượt trội" khi đúng 1 sản phẩm đạt giá trị cao nhất (không hòa)
+                    if (count($winners) === 1) {
+                        $winnerId = array_key_first($winners);
+                        $highlights[$winnerId][] = [
+                            'label' => $attribute->name,
+                            'value' => $numericValues[$winnerId]['raw'],
+                        ];
+                    }
+                }
+            }
+        @endphp
+        <div class="rating-badges-below reveal">
+            <div class="ai-suggest-header">
+                <div class="ai-suggest-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div>
+                    <h3 class="ai-suggest-title">AI gợi ý cho bạn</h3>
+                    <p class="ai-suggest-desc">Dựa trên nhu cầu và sở thích, đây là sản phẩm phù hợp nhất với bạn.</p>
+                </div>
+            </div>
+            <div class="rating-badges-grid">
+                @foreach($products as $product)
+                <div class="rating-badge-item">
+                    <div class="rating-badge-top">
+                        <div class="rating-circle-small {{ $product->rating >= 85 ? 'excellent' : ($product->rating >= 75 ? 'good' : 'fair') }}">
+                            <div class="rating-percent-small">{{ intval($product->rating) }}%</div>
+                        </div>
+                        <div class="rating-label-top">
+                            @if($product->rating == $products->max('rating'))
+                                <div class="top-badge-pill best">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Phù hợp nhất</span>
+                                </div>
+                            @else
+                                <div class="top-badge-pill">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Phù hợp với bạn</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="rating-badge-desc">
+                        <p class="desc-title">{{ $product->name }}</p>
+                        <ul class="desc-list">
+                            @php $productHighlights = array_slice($highlights[$product->id], 0, 3); @endphp
+                            @if(count($productHighlights) > 0)
+                                @foreach($productHighlights as $h)
+                                <li><i class="fas fa-circle-check"></i> {{ $h['label'] }} vượt trội: {{ $h['value'] }}</li>
+                                @endforeach
+                            @elseif($product->attributes->count() > 0)
+                                @foreach($product->attributes->take(3) as $attr)
+                                <li><i class="fas fa-circle-check"></i> {{ $attr->attribute->name ?? '' }}: {{ $attr->value }}</li>
+                                @endforeach
+                            @else
+                                <li><i class="fas fa-circle-check"></i> Camera chất lượng cao</li>
+                                <li><i class="fas fa-circle-check"></i> Pin lâu dài</li>
+                                <li><i class="fas fa-circle-check"></i> Màn hình sắc nét</li>
+                            @endif
+                        </ul>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
 
         @endif
 
