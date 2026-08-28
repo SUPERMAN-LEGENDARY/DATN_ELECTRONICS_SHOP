@@ -513,7 +513,22 @@
                     <h2>Tin mới nhất</h2>
                 </div>
 
-                <div class="news-grid">
+                <!-- Skeleton Container -->
+                <div class="sm-skeleton-container" data-target="real-news-list">
+                    <div class="sm-skeleton-grid" style="--cols: 3">
+                        @for($i = 0; $i < 6; $i++)
+                        <div class="sm-skeleton-card">
+                            <div class="sm-skel-img sm-skel-shimmer" style="aspect-ratio: 16/9; margin-bottom: 16px;"></div>
+                            <div class="sm-skel-line sm-skel-shimmer"></div>
+                            <div class="sm-skel-line sm-skel-shimmer"></div>
+                            <div class="sm-skel-line short sm-skel-shimmer"></div>
+                        </div>
+                        @endfor
+                    </div>
+                </div>
+
+                <div id="real-news-list" style="display:none;">
+                    <div class="news-grid">
                     @foreach($news as $index => $post)
                         @if($index > 0)
                             <article class="news-card">
@@ -554,6 +569,7 @@
                     {{ $news->links() }}
                 </div>
             @endif
+            </div>
 
         @else
             <section style="text-align: center; padding: 60px 0;">

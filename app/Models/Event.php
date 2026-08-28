@@ -41,6 +41,24 @@ class Event extends Model
         ];
     }
 
+    public function getThemeEffectAttribute(): string
+    {
+        $titleLower = mb_strtolower($this->title, 'UTF-8');
+        $tagLower = mb_strtolower($this->tag ?? '', 'UTF-8');
+        
+        if (str_contains($titleLower, 'giáng sinh') || str_contains($titleLower, 'noel') || str_contains($tagLower, 'giáng sinh') || str_contains($tagLower, 'noel')) {
+            return 'christmas';
+        } elseif (str_contains($titleLower, 'tết') || str_contains($titleLower, 'lì xì') || str_contains($titleLower, 'năm mới') || str_contains($tagLower, 'tết') || str_contains($tagLower, 'năm mới')) {
+            return 'tet';
+        } elseif (str_contains($titleLower, 'quốc tế phụ nữ') || str_contains($titleLower, '8/3') || str_contains($tagLower, 'phụ nữ') || str_contains($tagLower, '8/3')) {
+            return 'womens_day';
+        } elseif (str_contains($titleLower, 'hè') || str_contains($titleLower, 'summer') || str_contains($tagLower, 'mùa hè') || str_contains($tagLower, 'summer')) {
+            return 'summer';
+        }
+
+        return 'none';
+    }
+
     public function products()
     {
         return $this->belongsToMany(Product::class, 'event_product');

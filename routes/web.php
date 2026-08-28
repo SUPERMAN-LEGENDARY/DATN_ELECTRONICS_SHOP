@@ -271,6 +271,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
     Route::prefix('su-kien')->name('events.')->group(function () {
         Route::get('/',                          [AdminEventController::class, 'index'])->name('index');
         Route::get('/them',                      [AdminEventController::class, 'create'])->name('create');
+        Route::post('/',                         [AdminEventController::class, 'store'])->name('store');
         Route::get('/thung-rac',                 [AdminEventController::class, 'trash'])->name('trash');
         Route::patch('/khoi-phuc-tat-ca',        [AdminEventController::class, 'restoreAll'])->name('restore-all');
         Route::delete('/don-thung-rac',          [AdminEventController::class, 'emptyTrash'])->name('empty-trash');

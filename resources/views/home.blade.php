@@ -1,4 +1,7 @@
 @extends('layouts.app')
+@php
+    $topGlobalEvent = \App\Models\Event::active()->ongoing()->ordered()->first();
+@endphp
 @section('title', 'ElectronicShop - Trang chủ')
 
 @push('styles')
@@ -164,8 +167,9 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     object-position: center center;
+    background: #f7f7f7; /* Soft background in case of aspect ratio mismatch */
 }
 /* Ken Burns nhẹ khi slide active */
 /* Banner ảnh không được zoom vì zoom sẽ làm crop và phá tỷ lệ ảnh gốc. */
@@ -374,7 +378,7 @@
 /* ============================================================
    6. EVENT CARDS
    ============================================================ */
-.sm-events { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.sm-events { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
 .sm-event {
     position: relative; min-height: 230px; border-radius: var(--sm-radius);
     overflow: hidden; display: flex; align-items: flex-end;
@@ -401,6 +405,70 @@
 }
 .sm-event-title { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 21px; line-height: 1.2; letter-spacing: -.02em; }
 .sm-event-offer { font-size: 13.5px; opacity: .88; margin-top: 6px; }
+
+/* Event card v2 — kiểu ảnh trên, info dưới */
+.sm-event-v2 {
+    display: flex; flex-direction: column;
+    border-radius: 14px; overflow: hidden;
+    background: var(--sm-surface);
+    box-shadow: 0 2px 12px rgba(0,0,0,.07);
+    text-decoration: none; color: inherit;
+    transition: transform .3s var(--sm-ease), box-shadow .3s var(--sm-ease);
+}
+.sm-event-v2:hover { transform: translateY(-5px); box-shadow: 0 14px 36px rgba(0,0,0,.13); }
+.sm-event-v2__thumb {
+    position: relative; width: 100%;
+    height: 200px;          /* chiều cao cố định nhỏ gọn */
+    overflow: hidden; flex-shrink: 0;
+    background: #1e293b;
+}
+.sm-event-v2__thumb img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform .55s var(--sm-ease);
+    display: block;
+}
+.sm-event-v2:hover .sm-event-v2__thumb img { transform: scale(1.04); }
+.sm-event-v2__placeholder {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #1e293b, #334155);
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(16px, 2.5vw, 24px); font-weight: 900;
+    color: rgba(255,255,255,.12); font-family: 'Manrope', sans-serif;
+    text-transform: uppercase; text-align: center; padding: 0 16px;
+}
+.sm-event-v2__badge {
+    position: absolute; top: 10px; left: 10px;
+    font-size: 10px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; padding: 3px 9px; border-radius: 4px;
+    background: rgba(0,0,0,.55); color: #fff;
+    backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.2);
+}
+.sm-event-v2__body {
+    padding: 12px 14px 10px; display: flex; flex-direction: column; gap: 4px; flex: 1;
+}
+.sm-event-v2__title {
+    font-size: 14px; font-weight: 700; line-height: 1.35;
+    color: var(--sm-black);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.sm-event-v2__offer { font-size: 12px; color: var(--sm-muted); line-height: 1.4; }
+.sm-event-v2__footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 9px; margin-top: auto; border-top: 1px solid var(--sm-line);
+    gap: 8px;
+}
+.sm-event-v2__cd {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 12px; color: var(--sm-muted);
+}
+.sm-event-v2__cd i { font-size: 12px; }
+.sm-event-v2__cd-wrap { font-size: 12px; color: var(--sm-muted); }
+.sm-event-v2__cta {
+    font-size: 12.5px; font-weight: 600; color: #2563eb;
+    display: flex; align-items: center; gap: 3px; white-space: nowrap; flex-shrink: 0;
+}
+.sm-event-v2__cta i { font-size: 11px; transition: transform .2s; }
+.sm-event-v2:hover .sm-event-v2__cta i { transform: translateX(3px); }
 
 /* ============================================================
    7. BRAND TICKER (cuộn ngang + kéo)
@@ -511,40 +579,56 @@
 .sm-stars { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12.5px; color: #ffb400; letter-spacing: 1px; }
 .sm-stars span { color: #8c8c8c; letter-spacing: 0; }
 .sm-product-buy {
-    margin-top: 16px; opacity: 0; transform: translateY(8px);
-    transition: all .35s var(--sm-ease);
+    margin-top: 16px;
 }
-.sm-product:hover .sm-product-buy { opacity: 1; transform: translateY(0); }
-@media (hover: none) { .sm-product-buy { opacity: 1; transform: none; } }
+/* Hover removed to keep buttons always visible */
+/* Media removed */
 
 .sm-empty { grid-column: 1/-1; padding: 60px 20px; text-align: center; color: var(--sm-gray); }
+
+
 
 /* ============================================================
    9. PROMO CARDS
    ============================================================ */
 .sm-promos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .sm-promo {
-    position: relative; overflow: hidden; border-radius: var(--sm-radius);
-    min-height: 360px; padding: 32px; display: flex; flex-direction: column;
+    position: relative; border-radius: var(--sm-radius);
+    min-height: 220px; display: flex; flex-direction: row; align-items: center; justify-content: space-between;
     background: var(--sm-surface);
     transition: transform .45s var(--sm-ease), box-shadow .45s var(--sm-ease);
+    overflow: hidden;
+    transform: translateZ(0); 
+    padding: 24px 16px 24px 24px;
+    gap: 12px;
 }
-.sm-promo:hover { transform: translateY(-6px); box-shadow: 0 22px 48px rgba(0,0,0,.12); }
+.sm-promo:hover { transform: translateY(-6px) translateZ(0); box-shadow: 0 22px 48px rgba(0,0,0,.12); }
 .sm-promo--dark { background: var(--sm-black); }
 .sm-promo--dark .sm-promo-tag { color: #7fbaff; }
 .sm-promo--dark h3, .sm-promo--dark .sm-promo-sub { color: #fff; }
+.sm-promo-content { padding: 0; flex: 1; z-index: 2; }
 .sm-promo-tag { font-size: 11.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--sm-blue); margin-bottom: 10px; }
-.sm-promo h3 { font-size: clamp(20px, 2vw, 28px); line-height: 1.1; margin: 0 0 6px; }
+.sm-promo h3 { font-size: clamp(18px, 2vw, 24px); line-height: 1.2; margin: 0 0 6px; }
 .sm-promo-sub { font-size: 13px; color: var(--sm-gray); margin-bottom: 20px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.sm-promo .sm-btn { align-self: flex-start; position: relative; z-index: 2; }
-.sm-promo img {
-    position: absolute; right: -5%; bottom: -2%;
-    width: 60%; max-width: 280px; object-fit: contain;
-    transition: transform .7s var(--sm-ease);
-    pointer-events: none;
+.sm-promo .sm-btn { align-self: flex-start; }
+.sm-promo-media {
+    position: relative;
+    width: 45%; max-width: 150px;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    flex-shrink: 0;
 }
-.sm-promo:hover img { transform: scale(1.08) translateY(-8px) rotate(-2deg); }
-
+.sm-promo-media img {
+    max-width: 100%; max-height: 100%;
+    object-fit: contain; /* Đảm bảo không bị cắt mất hình */
+    border-radius: 12px; /* Bo tròn góc ảnh theo yêu cầu */
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08); /* Đổ bóng nhẹ giúp các ảnh liền khối trông đẹp và chuyên nghiệp hơn */
+    transition: transform .7s var(--sm-ease);
+}
+.sm-promo:hover .sm-promo-media img { transform: scale(1.08); }
 /* ============================================================
    10. NEWS
    ============================================================ */
@@ -652,13 +736,7 @@
 /* ============================================================
    14. 3D TILT + RIPPLE (hiệu ứng nghiêng 3D & gợn sóng khi tương tác)
    ============================================================ */
-.sm-product,
-.sm-news-card,
-.sm-event,
-.sm-promo {
-    will-change: transform;
-    transform-style: preserve-3d;
-}
+.sm-product, .sm-news-card, .sm-event { will-change: transform; transform-style: preserve-3d; }
 .ripple-wave {
     position: absolute;
     border-radius: 50%;
@@ -674,7 +752,8 @@
    15. RESPONSIVE
    ============================================================ */
 @media (max-width: 1100px) {
-    .sm-products { grid-template-columns: repeat(3, 1fr); }
+    .sm-products, .sm-skeleton-grid { grid-template-columns: repeat(3, 1fr); }
+
     .sm-specs { grid-template-columns: repeat(2, 1fr); }
     .sm-trust { grid-template-columns: repeat(2, 1fr); }
     .sm-trust-item:nth-child(odd) { border-left: none; }
@@ -693,13 +772,13 @@
 }
 @media (max-width: 1024px) {
     .sm-promos { grid-template-columns: repeat(2, 1fr); gap: 14px; }
-    .sm-promo { min-height: 340px; }
+    .sm-promo { min-height: 220px; flex-direction: column; text-align: center; } .sm-promo-content { align-items: center; } .sm-promo .sm-btn { align-self: center; }
 }
 
 @media (max-width: 640px) {
-    .sm-products { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .sm-products, .sm-skeleton-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
     .sm-promos { grid-template-columns: 1fr; gap: 12px; }
-    .sm-promo { min-height: 280px; padding: 24px; }
+    .sm-promo { min-height: 220px; padding: 24px; flex-direction: column; text-align: center; }
     .sm-news { grid-template-columns: 1fr; }
     .sm-trust { grid-template-columns: 1fr; }
     .sm-trust-item { border-left: none !important; border-top: 1px solid var(--sm-line); }
@@ -912,27 +991,39 @@
 
             <div class="sm-events sm-stagger">
                 @foreach($events as $event)
-                <a href="{{ $event->button_link ?: '#' }}" class="sm-event"
-                   style="background:{{ $event->bg_color ?: '#111111' }};color:{{ $event->text_color ?: '#fff' }}">
-                    @if($event->image)
-                    <img src="{{ $event->image }}" alt="{{ $event->title }}" loading="lazy">
-                    @endif
-                    <div class="sm-event-body">
+                <a href="{{ $event->button_link ?: '#' }}" class="sm-event-v2 theme-{{ $event->theme_effect }}">
+                    {{-- Ảnh phía trên --}}
+                    <div class="sm-event-v2__thumb">
+                        @if($event->image)
+                            <img src="{{ $event->image }}" alt="{{ $event->title }}" loading="lazy">
+                        @else
+                            <div class="sm-event-v2__placeholder">{{ $event->title }}</div>
+                        @endif
                         @if($event->tag)
-                        <div class="sm-event-tag">{{ $event->tag }}</div>
+                            <div class="sm-event-v2__badge">{{ $event->tag }}</div>
                         @endif
-                        <div class="sm-event-title">{{ $event->title }}</div>
+                    </div>
+                    {{-- Info phía dưới --}}
+                    <div class="sm-event-v2__body">
+                        <div class="sm-event-v2__title">{{ $event->title }}</div>
                         @if($event->offer_text)
-                        <div class="sm-event-offer">{{ $event->offer_text }}</div>
+                        <div class="sm-event-v2__offer">{{ $event->offer_text }}</div>
                         @endif
-                        @if($event->end_date && $event->end_date > now())
-                        <div class="sm-event-countdown" data-end="{{ $event->end_date->format('Y-m-d\TH:i:s') }}" style="margin-top: 16px; font-weight: 700; font-family: monospace; font-size: 14px; display: flex; gap: 6px;">
-                            <span style="background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">--N</span>
-                            <span style="background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">--G</span>
-                            <span style="background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">--P</span>
-                            <span style="background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">--S</span>
+                        <div class="sm-event-v2__footer">
+                            <div class="sm-event-v2__cd">
+                                <i class="bi bi-clock"></i>
+                                @if($event->end_date && $event->end_date > now())
+                                @php $daysLeft = (int) now()->diffInDays($event->end_date, false); @endphp
+                                <span class="sm-event-v2__cd-wrap"
+                                      data-end="{{ $event->end_date->format('Y-m-d\TH:i:s') }}">
+                                    Còn lại {{ max(0, $daysLeft) }} ngày
+                                </span>
+                                @else
+                                <span>Đang diễn ra</span>
+                                @endif
+                            </div>
+                            <div class="sm-event-v2__cta">Xem chi tiết <i class="bi bi-chevron-right"></i></div>
                         </div>
-                        @endif
                     </div>
                 </a>
                 @endforeach
@@ -1066,36 +1157,85 @@
                     <h2 class="sm-h3">Gợi ý dành riêng cho bạn</h2>
                 </div>
             </div>
-            <div class="sm-products sm-stagger">
-                @foreach($suggestedProducts as $product)
-                <a href="{{ route('products.show', ['slug' => $product->slug, 'from' => 'suggestion', 'via' => 'homepage']) }}" class="sm-product">
-                    <div class="sm-product-media">
-                        @auth
-                        <button type="button" class="sm-wish sm-wish-ajax {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'active' : '' }}"
-                            data-product-id="{{ $product->id }}"
-                            data-url="{{ route('wishlist.toggle', $product->id) }}"
-                            aria-label="Yêu thích">
-                            <i class="bi {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'bi-heart-fill' : 'bi-heart' }}"></i>
-                        </button>
-                        @else
-                        <a href="{{ route('login') }}" class="sm-wish" aria-label="Yêu thích" onclick="event.stopPropagation()">
-                            <i class="bi bi-heart"></i>
-                        </a>
-                        @endauth
-                        @if($product->first_image)
-                        <img src="{{ $product->first_image }}" alt="{{ $product->name }}" loading="lazy">
-                        @else
-                        <div class="sm-product-ph"><i class="bi bi-image"></i></div>
+            <!-- Skeleton Container 1 -->
+            <div class="sm-skeleton-container" data-target="real-products-1">
+                <div class="sm-skeleton-grid" style="--cols: 5">
+                    @for($i = 0; $i < 5; $i++)
+                    <div class="sm-skeleton-card">
+                        <div class="sm-skel-img sm-skel-shimmer"></div>
+                        <div class="sm-skel-line sm-skel-shimmer"></div>
+                        <div class="sm-skel-line sm-skel-shimmer"></div>
+                        <div class="sm-skel-line short sm-skel-shimmer"></div>
+                        <div class="sm-skel-line price sm-skel-shimmer"></div>
+                    </div>
+                    @endfor
+                </div>
+            </div>
+
+            <div id="real-products-1" style="display:none;">
+                <div class="sm-products sm-stagger">
+                    @foreach($suggestedProducts as $product)
+                    <a href="{{ route('products.show', ['slug' => $product->slug, 'from' => 'suggestion', 'via' => 'homepage']) }}" class="sm-product {{ $product->getActiveEvent() ? 'theme-'.$product->getActiveEvent()->theme_effect : '' }}">
+                        @php
+                            $discount = 0;
+                            if(isset($product->discount_percent) && $product->discount_percent > 0) {
+                                $discount = $product->discount_percent;
+                            } elseif(isset($product->sale_price) && $product->sale_price > 0 && $product->price > 0) {
+                                $discount = round((1 - $product->sale_price / $product->price) * 100);
+                            }
+                        @endphp
+                        @if($discount > 0)
+                            <div class="sm-product-ribbon"><span>GIẢM {{ $discount }}%</span></div>
                         @endif
-                    </div>
-                    <div class="sm-product-brand">{{ $product->brand->name ?? '' }}</div>
-                    <div class="sm-product-name">{{ $product->name }}</div>
-                    <div class="sm-product-price">{{ number_format($product->sale_price > 0 ? $product->sale_price : $product->price) }}đ</div>
-                    <div class="sm-product-buy">
-                        <span class="sm-btn sm-btn--dark sm-btn--sm">Xem chi tiết</span>
-                    </div>
-                </a>
-                @endforeach
+
+                        
+                        @php
+                            $cardEvent = $product->getActiveEvent();
+                        @endphp
+                        @if($cardEvent)
+                            <div class="sm-product-event-tree">
+                                @if($cardEvent->theme_effect == 'christmas') 🎄
+                                @elseif($cardEvent->theme_effect == 'tet') 🏮
+                                @elseif($cardEvent->theme_effect == 'womens_day') 🌸
+                                @elseif($cardEvent->theme_effect == 'summer') 🌴
+                                @endif
+                            </div>
+                            <div class="sm-product-event-banner"><div class="marquee-wrap"><div class="marquee-inner">✨ {{ mb_strtoupper($cardEvent->title, "UTF-8") }} ✨</div></div></div>
+                        @endif
+
+
+                        <div class="sm-product-media">
+                            @auth
+                            <button type="button" class="sm-wish sm-wish-ajax {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'active' : '' }}"
+                                data-product-id="{{ $product->id }}"
+                                data-url="{{ route('wishlist.toggle', $product->id) }}"
+                                aria-label="Yêu thích">
+                                <i class="bi {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'bi-heart-fill' : 'bi-heart' }}"></i>
+                            </button>
+                            @else
+                            <a href="{{ route('login') }}" class="sm-wish" aria-label="Yêu thích" onclick="event.stopPropagation()">
+                                <i class="bi bi-heart"></i>
+                            </a>
+                            @endauth
+                            @if($product->first_image)
+                            <img src="{{ $product->first_image }}" alt="{{ $product->name }}" loading="lazy">
+                            @else
+                            <div class="sm-product-ph"><i class="bi bi-image"></i></div>
+                            @endif
+                        </div>
+                        <div class="sm-product-brand">{{ $product->brand->name ?? '' }}</div>
+                        <div class="sm-product-name">{{ $product->name }}</div>
+                        <div class="sm-product-price">{{ number_format($product->sale_price > 0 ? $product->sale_price : $product->price) }}đ</div>
+                        <div class="sm-product-buy">
+                            
+                            <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
+                                <span class="sm-btn sm-btn--dark sm-btn--sm" style="width:100%; border-radius:30px;">Mua ngay</span>
+                                <span class="sm-btn sm-btn--light sm-btn--sm" style="width:100%; border:1px solid #121212; border-radius:30px; background:#f7f7f7; color:#121212 !important;">Tìm hiểu thêm</span>
+                            </div>
+                        </div>
+                    </a>
+                    @endforeach
+                </div>
             </div>
         </div>
     </section>
@@ -1115,18 +1255,62 @@
                 <a href="{{ route('products.index') }}" class="sm-link">Xem tất cả <i class="bi bi-arrow-right"></i></a>
             </div>
 
-            <div class="sm-products sm-stagger">
-                @forelse($newProducts as $product)
-                <a href="{{ route('products.show', $product->slug) }}" class="sm-product">
-                    <div class="sm-product-media">
-                        @auth
-                        <button type="button" class="sm-wish sm-wish-ajax {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'active' : '' }}"
-                            data-product-id="{{ $product->id }}"
-                            data-url="{{ route('wishlist.toggle', $product->id) }}"
-                            aria-label="Yêu thích">
-                            <i class="bi {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'bi-heart-fill' : 'bi-heart' }}"></i>
-                        </button>
-                        @else
+            <!-- Skeleton Container 2 -->
+            <div class="sm-skeleton-container" data-target="real-products-2">
+                <div class="sm-skeleton-grid" style="--cols: 5">
+                    @for($i = 0; $i < 5; $i++)
+                    <div class="sm-skeleton-card">
+                        <div class="sm-skel-img sm-skel-shimmer"></div>
+                        <div class="sm-skel-line sm-skel-shimmer"></div>
+                        <div class="sm-skel-line sm-skel-shimmer"></div>
+                        <div class="sm-skel-line short sm-skel-shimmer"></div>
+                        <div class="sm-skel-line price sm-skel-shimmer"></div>
+                    </div>
+                    @endfor
+                </div>
+            </div>
+
+            <div id="real-products-2" style="display:none;">
+                <div class="sm-products sm-stagger">
+                    @forelse($newProducts as $product)
+                    <a href="{{ route('products.show', $product->slug) }}" class="sm-product {{ $product->getActiveEvent() ? 'theme-'.$product->getActiveEvent()->theme_effect : '' }}">
+                        @php
+                            $discount = 0;
+                            if(isset($product->discount_percent) && $product->discount_percent > 0) {
+                                $discount = $product->discount_percent;
+                            } elseif(isset($product->sale_price) && $product->sale_price > 0 && $product->price > 0) {
+                                $discount = round((1 - $product->sale_price / $product->price) * 100);
+                            }
+                        @endphp
+                        @if($discount > 0)
+                            <div class="sm-product-ribbon"><span>GIẢM {{ $discount }}%</span></div>
+                        @endif
+
+                        
+                        @php
+                            $cardEvent = $product->getActiveEvent();
+                        @endphp
+                        @if($cardEvent)
+                            <div class="sm-product-event-tree">
+                                @if($cardEvent->theme_effect == 'christmas') 🎄
+                                @elseif($cardEvent->theme_effect == 'tet') 🏮
+                                @elseif($cardEvent->theme_effect == 'womens_day') 🌸
+                                @elseif($cardEvent->theme_effect == 'summer') 🌴
+                                @endif
+                            </div>
+                            <div class="sm-product-event-banner"><div class="marquee-wrap"><div class="marquee-inner">✨ {{ mb_strtoupper($cardEvent->title, "UTF-8") }} ✨</div></div></div>
+                        @endif
+
+
+                        <div class="sm-product-media">
+                            @auth
+                            <button type="button" class="sm-wish sm-wish-ajax {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'active' : '' }}"
+                                data-product-id="{{ $product->id }}"
+                                data-url="{{ route('wishlist.toggle', $product->id) }}"
+                                aria-label="Yêu thích">
+                                <i class="bi {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'bi-heart-fill' : 'bi-heart' }}"></i>
+                            </button>
+                            @else
                             <button
                                 type="button"
                                 class="sm-wish"
@@ -1134,26 +1318,31 @@
                                 onclick="event.stopPropagation();window.location='{{ route('login') }}'">
                                 <i class="bi bi-heart"></i>
                             </button>
-                        @endauth
-                        @if($product->first_image)
-                        <img src="{{ $product->first_image }}" alt="{{ $product->name }}" loading="lazy">
-                        @else
-                        <div class="sm-product-ph"><i class="bi bi-image"></i></div>
-                        @endif
-                    </div>
-                    <div class="sm-product-brand">{{ $product->brand->name ?? '' }}</div>
-                    <div class="sm-product-name">{{ $product->name }}</div>
-                    <div class="sm-product-price">{{ number_format($product->price) }}đ</div>
-                    <div class="sm-stars">
-                        ★★★★★ <span>({{ $product->reviews_count ?? 0 }})</span>
-                    </div>
-                    <div class="sm-product-buy">
-                        <span class="sm-btn sm-btn--dark sm-btn--sm">Xem chi tiết</span>
-                    </div>
-                </a>
-                @empty
-                <div class="sm-empty">Chưa có sản phẩm nào.</div>
-                @endforelse
+                            @endauth
+                            @if($product->first_image)
+                            <img src="{{ $product->first_image }}" alt="{{ $product->name }}" loading="lazy">
+                            @else
+                            <div class="sm-product-ph"><i class="bi bi-image"></i></div>
+                            @endif
+                        </div>
+                        <div class="sm-product-brand">{{ $product->brand->name ?? '' }}</div>
+                        <div class="sm-product-name">{{ $product->name }}</div>
+                        <div class="sm-product-price">{{ number_format($product->price) }}đ</div>
+                        <div class="sm-stars">
+                            ★★★★★ <span>({{ $product->reviews_count ?? 0 }})</span>
+                        </div>
+                        <div class="sm-product-buy">
+                            
+                            <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
+                                <span class="sm-btn sm-btn--dark sm-btn--sm" style="width:100%; border-radius:30px;">Mua ngay</span>
+                                <span class="sm-btn sm-btn--light sm-btn--sm" style="width:100%; border:1px solid #121212; border-radius:30px; background:#f7f7f7; color:#121212 !important;">Tìm hiểu thêm</span>
+                            </div>
+                        </div>
+                    </a>
+                    @empty
+                    <div class="sm-empty">Chưa có sản phẩm nào.</div>
+                    @endforelse
+                </div>
             </div>
         </div>
     </section>
@@ -1165,25 +1354,37 @@
         <div class="sm-wrap">
             <div class="sm-promos sm-stagger">
                 <div class="sm-promo">
-                    <div class="sm-promo-tag">Thế giới Apple</div>
-                    <h3>Giảm đến 4 triệu</h3>
-                    <div class="sm-promo-sub">Ưu đãi có hạn cho iPhone, iPad và Mac.</div>
-                    <a href="{{ route('products.index') }}" class="sm-btn sm-btn--dark sm-btn--sm">Săn ngay</a>
-                    <img src="{{ asset('images/promo-apple.png') }}" alt="Ưu đãi thế giới Apple" loading="lazy">
+                    <div class="sm-promo-content">
+                        <div class="sm-promo-tag">Thế giới Apple</div>
+                        <h3>Giảm đến 4 triệu</h3>
+                        <div class="sm-promo-sub">Ưu đãi có hạn cho iPhone, iPad và Mac.</div>
+                        <a href="{{ route('products.index') }}" class="sm-btn sm-btn--dark sm-btn--sm">Săn ngay</a>
+                    </div>
+                    <div class="sm-promo-media">
+                        <img src="{{ asset('images/promo-apple.png') }}" alt="Ưu đãi thế giới Apple" loading="lazy">
+                    </div>
                 </div>
                 <div class="sm-promo sm-promo--dark">
-                    <div class="sm-promo-tag">Samsung Store</div>
-                    <h3>Thu cũ đổi mới</h3>
-                    <div class="sm-promo-sub" style="color:rgba(255,255,255,.68)">Trợ giá thêm đến 3 triệu khi lên đời.</div>
-                    <a href="{{ route('products.index') }}" class="sm-btn sm-btn--primary sm-btn--sm">Xem thêm</a>
-                    <img src="{{ asset('images/promo-samsung.png') }}" alt="Thu cũ đổi mới Samsung" loading="lazy">
+                    <div class="sm-promo-content">
+                        <div class="sm-promo-tag">Samsung Store</div>
+                        <h3>Thu cũ đổi mới</h3>
+                        <div class="sm-promo-sub" style="color:rgba(255,255,255,.68)">Trợ giá thêm đến 3 triệu khi lên đời.</div>
+                        <a href="{{ route('products.index') }}" class="sm-btn sm-btn--primary sm-btn--sm">Xem thêm</a>
+                    </div>
+                    <div class="sm-promo-media">
+                        <img src="{{ asset('images/promo-samsung.png') }}" alt="Thu cũ đổi mới Samsung" loading="lazy">
+                    </div>
                 </div>
                 <div class="sm-promo">
-                    <div class="sm-promo-tag">Bảo hành chính hãng</div>
-                    <h3>An tâm 12 tháng</h3>
-                    <div class="sm-promo-sub">Đổi mới trong 30 ngày nếu có lỗi nhà sản xuất.</div>
-                    <a href="#sm-faq" class="sm-btn sm-btn--dark sm-btn--sm">Xem chi tiết</a>
-                    <img src="{{ asset('images/promo-baohanh.png') }}" alt="Bảo hành chính hãng" loading="lazy">
+                    <div class="sm-promo-content">
+                        <div class="sm-promo-tag">Bảo hành chính hãng</div>
+                        <h3>An tâm 12 tháng</h3>
+                        <div class="sm-promo-sub">Đổi mới trong 30 ngày nếu có lỗi nhà sản xuất.</div>
+                        <a href="#sm-faq" class="sm-btn sm-btn--dark sm-btn--sm">Xem chi tiết</a>
+                    </div>
+                    <div class="sm-promo-media">
+                        <img src="{{ asset('images/promo-baohanh.png') }}" alt="Bảo hành chính hãng" loading="lazy">
+                    </div>
                 </div>
             </div>
         </div>
@@ -1323,6 +1524,36 @@
                     `;
                 });
             }, 1000);
+        }
+
+        // Countdown v2 cho event cards mới
+        const cdWraps = document.querySelectorAll('.sm-event-v2__cd-wrap');
+        if (cdWraps.length > 0) {
+            function tickV2() {
+                const now = Date.now();
+                cdWraps.forEach(wrap => {
+                    const end = new Date(wrap.dataset.end).getTime();
+                    const diff = end - now;
+                    if (diff < 0) {
+                        wrap.innerHTML = "<span style='color:var(--sm-muted)'>Đã kết thúc</span>";
+                        return;
+                    }
+                    const vals = {
+                        d: Math.floor(diff / 86400000),
+                        h: Math.floor((diff % 86400000) / 3600000),
+                        m: Math.floor((diff % 3600000) / 60000),
+                        s: Math.floor((diff % 60000) / 1000)
+                    };
+                    const labels = { d:'N', h:'G', m:'P', s:'S' };
+                    wrap.querySelectorAll('.sm-event-v2__cd-box').forEach(box => {
+                        const u = box.dataset.u;
+                        const v = vals[u];
+                        box.textContent = (u === 'd' ? v : String(v).padStart(2,'0')) + labels[u];
+                    });
+                });
+            }
+            tickV2();
+            setInterval(tickV2, 1000);
         }
     });
 

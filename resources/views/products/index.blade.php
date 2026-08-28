@@ -1,4 +1,7 @@
 @extends('layouts.app')
+@php
+    $topGlobalEvent = \App\Models\Event::active()->ongoing()->ordered()->first();
+@endphp
 @section('title', 'Tất cả sản phẩm - ElectronicShop')
 @php $showSearch = true; @endphp
 
@@ -793,12 +796,26 @@ body {
             <a href="{{ route('products.index') }}" class="cta cta--black">Xem tất cả sản phẩm</a>
         </div>
     @else
-    <div class="grid-4 stagger-children" id="productsGrid">
-        @foreach($products as $product)
-        <div class="product-card">
-            @if($product->discount_percent > 0)
-                <span class="badge-tag">Giảm {{ $product->discount_percent }}%</span>
-            @endif
+    <!-- Skeleton Container -->
+    <div class="sm-skeleton-container" data-target="real-products-list">
+        <div class="sm-skeleton-grid">
+            @for($i = 0; $i < 8; $i++)
+            <div class="sm-skeleton-card">
+                <div class="sm-skel-img sm-skel-shimmer"></div>
+                <div class="sm-skel-line sm-skel-shimmer"></div>
+                <div class="sm-skel-line sm-skel-shimmer"></div>
+                <div class="sm-skel-line short sm-skel-shimmer"></div>
+                <div class="sm-skel-line price sm-skel-shimmer"></div>
+            </div>
+            @endfor
+        </div>
+    </div>
+
+    <div id="real-products-list" style="display:none;">
+        <div class="grid-4 stagger-children" id="productsGrid">
+            @foreach($products as $product)
+        <div class="product-card {{ $product->getActiveEvent() ? 'theme-'.$product->getActiveEvent()->theme_effect : '' }}">
+            
             @auth
             <button class="wish wish-btn {{ auth()->user()->wishlists->contains('product_id', $product->id) ? 'active' : '' }}"
                 data-product-id="{{ $product->id }}"
@@ -813,7 +830,36 @@ body {
             </a>
             @endauth
 
-            <a href="{{ route('products.show', $product->slug) }}" class="product-card-img" tabindex="-1" aria-hidden="true">
+            
+                        @php
+                            $discount = 0;
+                            if(isset($product->discount_percent) && $product->discount_percent > 0) {
+                                $discount = $product->discount_percent;
+                            } elseif(isset($product->sale_price) && $product->sale_price > 0 && $product->price > 0) {
+                                $discount = round((1 - $product->sale_price / $product->price) * 100);
+                            }
+                        @endphp
+                        @if($discount > 0)
+                            <div class="sm-product-ribbon"><span>GIẢM {{ $discount }}%</span></div>
+                        @endif
+
+                        
+                        @php
+                            $cardEvent = $product->getActiveEvent();
+                        @endphp
+                        @if($cardEvent)
+                            <div class="sm-product-event-tree">
+                                @if($cardEvent->theme_effect == 'christmas') 🎄
+                                @elseif($cardEvent->theme_effect == 'tet') 🏮
+                                @elseif($cardEvent->theme_effect == 'womens_day') 🌸
+                                @elseif($cardEvent->theme_effect == 'summer') 🌴
+                                @endif
+                            </div>
+                            <div class="sm-product-event-banner"><div class="marquee-wrap"><div class="marquee-inner">✨ {{ mb_strtoupper($cardEvent->title, "UTF-8") }} ✨</div></div></div>
+                        @endif
+
+
+<a href="{{ route('products.show', $product->slug) }}" class="product-card-img" tabindex="-1" aria-hidden="true">
                 @if($product->first_image)
                     <img
     src="{{ $product->first_image }}"
@@ -888,6 +934,7 @@ body {
         </nav>
     </div>
     @endif
+    </div>
     @endif
 
 </div><!-- /.products-page -->

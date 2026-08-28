@@ -256,7 +256,7 @@ body {
 /* ============================================================
    VARIANT OPTIONS — Samsung bordered selector cards
    ============================================================ */
-#variantSelector { display: flex; flex-direction: column; gap: 24px; margin-bottom: 8px; }
+#variantSelector { display: flex; flex-direction: row; flex-wrap: wrap; gap: 20px 32px; margin-bottom: 16px; } .option-group { flex: 0 1 auto; }
 
 .option-group { margin: 0; }
 .option-label { font-size: 14px; color: var(--sam-muted); margin-bottom: 10px; }
@@ -367,15 +367,15 @@ body {
 
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
-.tab-panel-inner { padding: 0; }
+.tab-panel-inner { padding: 32px 0; }
 
 /* ============================================================
    DESCRIPTION (CKEditor content)
    ============================================================ */
-.product-description-content :where(h1,h2,h3,h4) { font-family: var(--sam-head); color: var(--sam-black); margin: 24px 0 12px; font-weight: 700; }
-.product-description-content p { margin: 0 0 14px; }
-.product-description-content ul, .product-description-content ol { margin: 0 0 14px 22px; }
-.product-description-content img { max-width: 100%; border-radius: 12px; margin: 14px 0; }
+.product-description-content :where(h1,h2,h3,h4) { font-family: var(--sam-head); color: var(--sam-black); margin: 28px 0 14px; font-weight: 700; }
+.product-description-content p { margin: 0 0 20px; }
+.product-description-content ul, .product-description-content ol { margin: 0 0 20px 22px; }
+.product-description-content img { max-width: 100%; border-radius: 12px; margin: 16px 0; }
 .product-description-content table { border-collapse: collapse; margin: 14px 0; }
 .product-description-content table td, .product-description-content table th { border: 1px solid var(--sam-line); padding: 8px 12px; }
 .product-description-content a { color: var(--sam-blue); }
@@ -385,10 +385,10 @@ body {
 /* ============================================================
    SPECS TABLE
    ============================================================ */
-.specs-table { width: 100%; border-collapse: collapse; font-size: 14px; max-width: 900px; }
-.specs-table td { padding: 14px 16px; border-bottom: 1px solid var(--sam-line); vertical-align: top; }
+.specs-table { width: 100%; border-collapse: collapse; font-size: 14px; max-width: 100%; margin: 0 auto; }
+.specs-table td { padding: 16px 20px; border-bottom: 1px solid var(--sam-line); vertical-align: top; }
 .specs-table tr:first-child td { border-top: 1px solid var(--sam-line); }
-.specs-table td:first-child { color: var(--sam-muted); width: 240px; font-weight: 400; }
+.specs-table td:first-child { color: var(--sam-muted); width: 30%; font-weight: 400; }
 .specs-table td:last-child { color: var(--sam-black); font-weight: 500; }
 
 /* ============================================================
@@ -593,7 +593,7 @@ body {
         <div class="gallery reveal-left">
             <div class="gallery-main">
                 @if($product->discount_percent > 0)
-                    <span class="discount-tag">Giảm {{ $product->discount_percent }}%</span>
+                    <div class="sm-product-ribbon"><span>GIẢM {{ $product->discount_percent }}%</span></div>
                 @endif
                 @if($galleryImages->isNotEmpty())
                     <img src="{{ $galleryImages->first() }}" alt="{{ $product->name }}" id="mainImg">
@@ -634,40 +634,86 @@ body {
             @php
                 $activeEvent = $product->getActiveEvent();
             @endphp
+            @php
+                $activeEvent = $product->getActiveEvent();
+            @endphp
             @if($activeEvent && $activeEvent->end_date && $activeEvent->end_date > now())
-            <div style="background: linear-gradient(90deg, var(--sam-sale), #ff4b4b); color: #fff; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <strong style="font-size: 16px; display: block;">{{ $activeEvent->title }}</strong>
-                    <span style="font-size: 13px; opacity: 0.9;">{{ $activeEvent->offer_text ?? 'Kết thúc trong:' }}</span>
+                @php
+                    $theme = $activeEvent->theme ?? 'default';
+                    $leftBg = '#ef4444';
+                    $rightBg = 'linear-gradient(90deg, #f59e0b, #ea580c)';
+                    if ($theme == 'summer') { $leftBg = '#f59e0b'; $rightBg = 'linear-gradient(90deg, #10b981, #059669)'; }
+                    if ($theme == 'womens_day') { $leftBg = '#ec4899'; $rightBg = 'linear-gradient(90deg, #8b5cf6, #6366f1)'; }
+                @endphp
+                
+                <div class="shopee-flash-sale-banner" style="display: flex; border-radius: 8px; margin-bottom: 24px; position: relative;">
+                    <!-- LEFT SIDE: PRICE -->
+                    <div style="flex: 1; background: {{ $leftBg }}; padding: 12px 16px 12px 20px; color: #fff; border-top-left-radius: 8px; border-bottom-left-radius: 8px;">
+                        @if($product->has_price_range)
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                                <span id="pricePctDisplay" style="display:none; background: #fff; color: {{ $leftBg }}; font-size: 13px; font-weight: 800; padding: 2px 6px; border-radius: 4px;"></span>
+                                <span id="priceDisplay" style="font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Từ {{ number_format($product->min_price) }}đ</span>
+                            </div>
+                            <div id="priceOldDisplay" style="display:none; font-size: 15px; text-decoration: line-through; opacity: 0.8;"></div>
+                        @else
+                            @php
+                                $discountedPrice = $product->price;
+                                if ($product->discount_percent > 0) {
+                                    $discountedPrice = $product->price * (1 - $product->discount_percent / 100);
+                                }
+                            @endphp
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                                @if($product->discount_percent > 0)
+                                    <span id="pricePctDisplay" style="background: #fff; color: {{ $leftBg }}; font-size: 13px; font-weight: 800; padding: 3px 8px; border-radius: 4px;">-{{ $product->discount_percent }}%</span>
+                                @else
+                                    <span id="pricePctDisplay" style="display:none; background: #fff; color: {{ $leftBg }}; font-size: 13px; font-weight: 800; padding: 3px 8px; border-radius: 4px;"></span>
+                                @endif
+                                <span id="priceDisplay" style="font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">{{ number_format($discountedPrice) }}đ</span>
+                            </div>
+                            
+                            @if($product->discount_percent > 0)
+                                <div id="priceOldDisplay" style="font-size: 15px; text-decoration: line-through; opacity: 0.8;">{{ number_format($product->price) }}đ</div>
+                            @else
+                                <div id="priceOldDisplay" style="display:none; font-size: 15px; text-decoration: line-through; opacity: 0.8;"></div>
+                            @endif
+                        @endif
+                    </div>
+                    
+                    <!-- RIGHT SIDE: COUNTDOWN -->
+                    <div style="background: {{ $rightBg }}; padding: 12px 20px 12px 30px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; border-top-right-radius: 8px; border-bottom-right-radius: 8px; clip-path: polygon(15px 0, 100% 0, 100% 100%, 0 100%); margin-left: -15px; z-index: 2;">
+                        <div style="font-size: 16px; font-weight: 800; color: #fff; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
+                            <i class="fas fa-bolt" style="font-size: 20px;"></i> {{ $activeEvent->title }}
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; color: #fff; font-size: 14px;">
+                            <span style="opacity: 0.9;">Kết thúc sau</span>
+                            <span class="product-countdown" data-end="{{ $activeEvent->end_date->format('Y-m-d\TH:i:s') }}" style="font-weight: 700; font-family: monospace; font-size: 15px; letter-spacing: 1px;">00:00:00</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="product-countdown" data-end="{{ $activeEvent->end_date->format('Y-m-d\TH:i:s') }}" style="font-family: monospace; font-size: 18px; font-weight: bold; background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 6px;">
-                    --:--:--
-                </div>
-            </div>
-            @endif
-
-            <div class="price-block" id="priceBlock">
-                @if($product->has_price_range)
-                    <span class="price-current" id="priceDisplay">Từ {{ number_format($product->min_price) }}đ</span>
-                    <span class="price-old" id="priceOldDisplay" style="display:none"></span>
-                    <span class="price-pct" id="pricePctDisplay" style="display:none"></span>
-                @else
-                    @php
-                        $discountedPrice = $product->price;
-                        if ($product->discount_percent > 0) {
-                            $discountedPrice = $product->price * (1 - $product->discount_percent / 100);
-                        }
-                    @endphp
-                    <span class="price-current" id="priceDisplay">{{ number_format($discountedPrice) }}đ</span>
-                    @if($product->discount_percent > 0)
-                        <span class="price-old" id="priceOldDisplay">{{ number_format($product->price) }}đ</span>
-                        <span class="price-pct" id="pricePctDisplay">-{{ $product->discount_percent }}%</span>
-                    @else
+            @else
+                <div class="price-block" id="priceBlock">
+                    @if($product->has_price_range)
+                        <span class="price-current" id="priceDisplay">Từ {{ number_format($product->min_price) }}đ</span>
                         <span class="price-old" id="priceOldDisplay" style="display:none"></span>
                         <span class="price-pct" id="pricePctDisplay" style="display:none"></span>
+                    @else
+                        @php
+                            $discountedPrice = $product->price;
+                            if ($product->discount_percent > 0) {
+                                $discountedPrice = $product->price * (1 - $product->discount_percent / 100);
+                            }
+                        @endphp
+                        <span class="price-current" id="priceDisplay">{{ number_format($discountedPrice) }}đ</span>
+                        @if($product->discount_percent > 0)
+                            <span class="price-old" id="priceOldDisplay">{{ number_format($product->price) }}đ</span>
+                            <span class="price-pct" id="pricePctDisplay">-{{ $product->discount_percent }}%</span>
+                        @else
+                            <span class="price-old" id="priceOldDisplay" style="display:none"></span>
+                            <span class="price-pct" id="pricePctDisplay" style="display:none"></span>
+                        @endif
                     @endif
-                @endif
-            </div>
+                </div>
+            @endif
 
             <div id="stockDisplay" style="margin:12px 0 28px">
                 @if($product->stock > 0)
@@ -782,7 +828,7 @@ body {
                      chứa sẵn thẻ HTML (đoạn văn, danh sách, in đậm...). Nội dung này đã
                      được làm sạch (purify) phía server khi lưu ở admin, nên hiển thị
                      trực tiếp ở đây mà không escape để giữ định dạng. --}}
-                <div class="product-description-content" style="font-size:15px;line-height:1.75;color:#333;max-width:800px">
+                <div class="product-description-content" style="font-size:15px;line-height:1.85;color:#333;">
                     {!! $product->description !!}
                 </div>
             @else

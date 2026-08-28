@@ -67,6 +67,173 @@
 
         ::selection { background: var(--sm-black); color: #fff; }
 
+        
+        /* ===== TOP EVENT BANNER ===== */
+        .sm-top-event-banner {
+            width: 100%;
+            padding: 8px 15px;
+            text-align: center;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 501; /* above sticky header if needed, or pushes it down */
+        }
+        .sm-top-event-banner a.inner {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+            text-decoration: none;
+            font-family: 'Manrope', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 0.02em;
+        }
+        .sm-top-event-banner__dot {
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            display: inline-block;
+            animation: smPulse 1.5s infinite;
+        }
+        @keyframes smPulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(255, 255, 255, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
+                                                /* ===== NEW PRODUCT CARD EVENT STYLES ===== */
+        .sm-product, .product-card {
+            overflow: hidden !important;
+            padding-bottom: 55px !important;
+            transition: all 0.3s ease;
+        }
+        
+        /* Event-specific Card Glows */
+        .sm-product.theme-christmas, .product-card.theme-christmas { border: 2px solid #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
+        .sm-product.theme-tet, .product-card.theme-tet { border: 2px solid #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
+        .sm-product.theme-womens_day, .product-card.theme-womens_day { border: 2px solid #ec4899; box-shadow: 0 0 20px rgba(236, 72, 153, 0.3); }
+        .sm-product.theme-summer, .product-card.theme-summer { border: 2px solid #eab308; box-shadow: 0 0 20px rgba(234, 179, 8, 0.3); }
+
+        .sm-product:hover, .product-card:hover { transform: translateY(-4px); }
+        
+        /* 1. Ribbon Text Seesaw & Blink - EXTREME */
+        @keyframes seesawExtreme {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(15deg) scale(1.2); }
+            75% { transform: rotate(-15deg) scale(1.2); }
+        }
+        @keyframes textBlinkExtreme {
+            0%, 100% { color: #fff; text-shadow: 0 0 5px #fff; }
+            50% { color: #ffe600; text-shadow: 0 0 20px #ffe600, 0 0 30px #ff0000; }
+        }
+
+        .sm-product-ribbon {
+            position: absolute;
+            top: 15px;
+            left: -35px;
+            width: 130px;
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            font-size: 12px;
+            font-weight: 900;
+            padding: 4px 0;
+            transform: rotate(-45deg);
+            border-top: 2px solid #ffe600;
+            border-bottom: 2px solid #ffe600;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            z-index: 10;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        .sm-product-ribbon span {
+            display: inline-block;
+            animation: seesawExtreme 0.5s ease-in-out infinite, textBlinkExtreme 1s infinite;
+        }
+
+        /* 2. Bloom Animation for Decor - EXTREME */
+        @keyframes bloomExtreme {
+            0%, 100% { transform: scale(0.8) rotate(-10deg); }
+            50% { transform: scale(1.4) rotate(10deg); }
+        }
+
+        .sm-product-event-tree {
+            position: absolute;
+            bottom: -2px;
+            left: 0px;
+            font-size: 55px;
+            z-index: 20;
+            line-height: 1;
+            pointer-events: none;
+            filter: drop-shadow(4px 6px 8px rgba(0,0,0,0.6));
+            animation: bloomExtreme 1.5s ease-in-out infinite;
+            transform-origin: center center;
+        }
+
+        /* 3. CLEAN FLAT RIBBON & SMART MARQUEE */
+        .sm-product-event-banner {
+            position: absolute;
+            bottom: 12px;
+            left: 20px; /* Behind flower */
+            right: 15px; 
+            height: 28px;
+            background: #e11d48; /* Solid clean crimson */
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            z-index: 15;
+            pointer-events: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            /* Swallowtail cut on the right */
+            clip-path: polygon(10px 0, 100% 0, calc(100% - 12px) 50%, 100% 100%, 0 100%);
+            /* Unroll animation */
+            animation: carpetUnrollWidth 1s cubic-bezier(0.1, 0.9, 0.2, 1) 0.5s both;
+        }
+
+        @keyframes carpetUnrollWidth {
+            0% { max-width: 0; opacity: 0; }
+            10% { opacity: 1; }
+            100% { max-width: 100%; opacity: 1; }
+        }
+
+        .marquee-wrap {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            /* Fade edges for smooth scroll entry/exit */
+            -webkit-mask-image: linear-gradient(to right, transparent, black 15px, black calc(100% - 25px), transparent);
+            mask-image: linear-gradient(to right, transparent, black 15px, black calc(100% - 25px), transparent);
+        }
+
+        .marquee-inner {
+            white-space: nowrap;
+            padding-left: 25px; /* Clear the flower emoji */
+            padding-right: 15px;
+            display: inline-block;
+        }
+
+        /* Active marquee scrolling state applied by JS */
+        .marquee-inner.is-scrolling {
+            display: flex;
+            width: max-content;
+            padding-right: 0;
+            animation: marqueeContinuous 8s linear infinite;
+        }
+
+        @keyframes marqueeContinuous {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Banner specific colors */
+        .theme-womens_day .sm-product-event-banner { background: #ec4899; }
+        .theme-summer .sm-product-event-banner { background: #f59e0b; color: #fff; }
+        .theme-christmas .sm-product-event-banner, .theme-tet .sm-product-event-banner { background: #e11d48; }
         /* ===== Scrollbar (mảnh, kiểu Samsung) ===== */
         ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { background: #f2f2f2; }
@@ -277,9 +444,9 @@
         }
         .notif-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px 12px; border-bottom: 1px solid #f0f0f0; }
         .notif-header h4 { font-size: 15px; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 7px; }
-        .notif-header h4 i { color: #3b82f6; }
-        .notif-mark-all { font-size: 12px; font-weight: 600; color: #3b82f6; border: none; background: none; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background .2s; }
-        .notif-mark-all:hover { background: #eff6ff; }
+        .notif-header h4 i { color: #1e293b; }
+        .notif-mark-all { font-size: 12px; font-weight: 600; color: #1e293b; border: none; background: none; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background .2s; }
+        .notif-mark-all:hover { background: #f1f5f9; }
         .notif-list { max-height: 380px; overflow-y: auto; scrollbar-width: thin; }
         .notif-item { display: flex; gap: 12px; align-items: flex-start; padding: 13px 18px; cursor: pointer; transition: background .18s; border-bottom: 1px solid #f8fafc; position: relative; }
         .notif-item:hover { background: #f8fafc; }
@@ -297,7 +464,7 @@
         .notif-empty i { font-size: 36px; margin-bottom: 10px; display: block; }
         .notif-empty p { font-size: 13px; margin: 0; }
         .notif-footer { padding: 10px 18px; border-top: 1px solid #f0f0f0; text-align: center; }
-        .notif-footer a { font-size: 13px; font-weight: 600; color: #3b82f6; }
+        .notif-footer a { font-size: 13px; font-weight: 600; color: #1e293b; }
         .notif-footer a:hover { text-decoration: underline; }
 
         /* Menu hamburger (mobile) */
@@ -509,9 +676,50 @@
         }
         .sm-drawer .close { align-self: flex-end; border: none; background: transparent; font-size: 22px; margin-bottom: 10px; cursor: pointer; }
 
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
-            html { scroll-behavior: auto; }
+        /* prefers-reduced-motion completely removed */
+
+        /* Skeleton Loading Effect (Global) */
+        .sm-skeleton-grid {
+            display: grid; grid-template-columns: repeat(var(--cols, 4), 1fr); gap: 18px;
+        }
+        .sm-skeleton-card {
+            background: var(--sm-surface); border-radius: var(--sm-radius);
+            padding: 16px; border: 1px solid var(--sm-line);
+        }
+        .sm-skel-img {
+            width: 100%; aspect-ratio: 1/1; background: #e2e8f0;
+            border-radius: 8px; margin-bottom: 24px; position: relative; overflow: hidden;
+        }
+        .sm-skel-img::before {
+            content: 'ELECTRONIC SHOP';
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 15px;
+            color: rgba(0, 0, 0, 0.08); text-transform: uppercase; letter-spacing: 1px;
+            z-index: 0;
+        }
+        .sm-skel-line {
+            height: 12px; background: #e2e8f0; border-radius: 4px;
+            margin-bottom: 12px; position: relative; overflow: hidden;
+        }
+        .sm-skel-line.short { width: 65%; }
+        .sm-skel-line.price { height: 16px; width: 45%; margin-top: 20px; }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .sm-skel-shimmer::after {
+            content: ''; position: absolute; inset: 0; z-index: 1;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+            animation: shimmer 1.2s infinite;
+        }
+        
+        @media (max-width: 1100px) {
+            .sm-skeleton-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 640px) {
+            .sm-skeleton-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
         }
     </style>
 
@@ -519,7 +727,19 @@
     @stack('styles')
 </head>
 
-<body>
+@php
+    $topGlobalEvent = \App\Models\Event::active()->ongoing()->ordered()->first();
+@endphp
+<body class="{{ $topGlobalEvent ? 'theme-' . $topGlobalEvent->theme_effect : '' }}">
+    @if($topGlobalEvent)
+    <div class="sm-top-event-banner" style="background-color: {{ $topGlobalEvent->bg_color ?? '#d0021b' }};">
+        <a href="{{ $topGlobalEvent->button_link ?: '#' }}" class="inner">
+            <span class="sm-top-event-banner__dot"></span>
+            <span class="sm-top-event-banner__text">{{ $topGlobalEvent->title }}</span>
+        </a>
+    </div>
+    @endif
+
 
     {{-- ===== UTILITY BAR ===== --}}
     <div class="sm-utility">
@@ -857,6 +1077,26 @@
         setInterval(() => fetchNotifications(true), 60000);
     })();
     @endauth
+    
+    // Global Skeleton Loading
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            document.querySelectorAll('.sm-skeleton-container').forEach(skel => {
+                const targetId = skel.dataset.target;
+                const targetEl = document.getElementById(targetId);
+                if(targetEl) {
+                    skel.style.display = 'none';
+                    targetEl.style.display = 'block';
+                    
+                    // Trigger scroll reveal for newly visible items if sr exists
+                    const newReveals = targetEl.querySelectorAll('.sm-stagger');
+                    if(newReveals.length > 0 && typeof window.sr !== 'undefined' && window.sr.update) {
+                        window.sr.update();
+                    }
+                }
+            });
+        }, 800);
+    });
     </script>
 
     {{-- Page Specific Scripts --}}
@@ -864,5 +1104,20 @@
 
     {{-- Floating Chatbot Widget --}}
     <x-chatbot-widget />
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Smart Marquee for long event names
+    document.querySelectorAll('.marquee-wrap').forEach(wrap => {
+        const inner = wrap.querySelector('.marquee-inner');
+        if (inner) { // Force all event names to scroll
+            inner.classList.add('is-scrolling');
+            // Duplicate content for seamless infinite scrolling
+            inner.innerHTML = `<span>${inner.innerHTML}</span><span style="padding-left:30px">${inner.innerHTML}</span>`;
+        }
+    });
+});
+</script>
+
 </body>
 </html>
