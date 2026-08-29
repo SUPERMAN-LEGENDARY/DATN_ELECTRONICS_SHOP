@@ -18,7 +18,7 @@ class ChatbotController extends Controller
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
 
-        $sessionToken = $request->session()->getId();
+        $sessionToken = $request->input('session_token') ?: $request->session()->getId();
 
         $result = $chatService->handle($sessionToken, $request->input('message'));
 

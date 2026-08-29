@@ -52,4 +52,9 @@ return [
     )))),
     'model' => env('GEMINI_MODEL', 'gemini-2.0-flash'),
 ],
+
+'groq' => [
+    'keys'  => array_filter(array_map('trim', explode(',', env('GROQ_API_KEYS', '')))),
+    'model' => env('GROQ_MODEL', 'llama-3.3-70b-versatile'),
+],
 ];
