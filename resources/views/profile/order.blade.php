@@ -266,6 +266,29 @@
 .btn-review:hover { box-shadow: 0 4px 12px rgba(245,158,11,.35); }
 
 /* ============================================================
+   BACK BUTTON
+   ============================================================ */
+.orders-toprow {
+    display: flex; align-items: center; margin-bottom: 18px;
+}
+.btn-back-profile {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 18px; border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid #ebebeb;
+    color: #000; font-weight: 700; font-size: 13.5px;
+    text-decoration: none;
+    transition: background .2s, transform .18s, box-shadow .2s, border-color .2s;
+    box-shadow: 0 2px 10px rgba(0,0,0,.03);
+}
+.btn-back-profile:hover {
+    background: #f4f4f4; color: #000;
+    border-color: #d0d0d0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0,0,0,.06);
+}
+
+/* ============================================================
    EMPTY STATE
    ============================================================ */
 .orders-empty {
@@ -284,10 +307,10 @@
 .orders-empty h4 { font-size: 20px; font-weight: 700; color: #000000; margin-bottom: 10px; }
 .orders-empty p  { color: #555555; font-size: 15px; margin-bottom: 24px; }
 .btn-shop-now {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 12px 28px; border-radius: 30px;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 16px; border-radius: 10px;
     background: #000000;
-    color: #ffffff; font-weight: 600; font-size: 14px;
+    color: #ffffff; font-weight: 600; font-size: 12.5px;
     text-decoration: none;
     box-shadow: 0 4px 14px rgba(0,0,0,.15);
     transition: all .2s;
@@ -354,6 +377,12 @@
             <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
         </div>
         @endif
+
+        <div class="orders-toprow reveal">
+            <a href="{{ route('profile') }}" class="btn-back-profile">
+                <i class="fas fa-arrow-left"></i> Quay lại Hồ sơ
+            </a>
+        </div>
 
         <h2 class="orders-title reveal">
             <i class="fas fa-box"></i> Đơn mua

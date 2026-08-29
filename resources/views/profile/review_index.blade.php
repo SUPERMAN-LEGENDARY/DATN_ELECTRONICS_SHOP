@@ -58,6 +58,7 @@ body {
     color: #000; font-weight: 700; font-size: 13.5px;
     text-decoration: none;
     transition: background .2s, transform .18s, box-shadow .2s, border-color .2s;
+    box-shadow: 0 2px 10px rgba(0,0,0,.03);
 }
 .btn-back-profile:hover {
     background: #f4f4f4; color: #000;

@@ -233,6 +233,29 @@ body {
 /* ============================================================
    EMPTY STATE
    ============================================================ */
+/* ============================================================
+   BACK BUTTON
+   ============================================================ */
+.wishlist-toprow {
+    display: flex; align-items: center; margin-bottom: 18px;
+}
+.btn-back-profile {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 18px; border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid #ebebeb;
+    color: #000; font-weight: 700; font-size: 13.5px;
+    text-decoration: none;
+    transition: background .2s, transform .18s, box-shadow .2s, border-color .2s;
+    box-shadow: 0 2px 10px rgba(0,0,0,.03);
+}
+.btn-back-profile:hover {
+    background: #f4f4f4; color: #000;
+    border-color: #d0d0d0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0,0,0,.06);
+}
+
 .empty-wishlist {
     text-align: center;
     padding: 60px 20px;
@@ -254,13 +277,13 @@ body {
 .empty-wishlist a {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 28px;
-    border-radius: 24px; /* Pill shape */
+    gap: 6px;
+    padding: 7px 16px;
+    border-radius: 10px; /* match btn-shop-now */
     background: #000000;
     color: #ffffff;
-    font-weight: 700;
-    font-size: 14.5px;
+    font-weight: 600;
+    font-size: 12.5px;
     text-decoration: none;
     transition: background .2s, transform .15s, box-shadow .2s;
 }
@@ -352,6 +375,12 @@ body {
         {{-- ===== MAIN CONTENT ===== --}}
         <main>
             <div class="content-card reveal">
+
+                <div class="wishlist-toprow reveal">
+                    <a href="{{ route('profile') }}" class="btn-back-profile">
+                        <i class="fas fa-arrow-left"></i> Quay lại Hồ sơ
+                    </a>
+                </div>
 
                 <h1>
                     <i class="fas fa-heart"></i>

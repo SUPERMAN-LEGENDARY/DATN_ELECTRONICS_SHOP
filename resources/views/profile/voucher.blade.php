@@ -372,6 +372,29 @@ body {
     /* ---- Pagination: smaller tap targets, allow wrap ---- */
     .pagination-wrap .pagination { flex-wrap: wrap; justify-content: center; }
     .pagination-wrap .pagination .page-link { padding: 6px 11px; font-size: 13px; }
+/* ============================================================
+   BACK BUTTON
+   ============================================================ */
+.voucher-toprow {
+    display: flex; align-items: center; margin-bottom: 24px;
+}
+.btn-back-profile {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 18px; border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid #ebebeb;
+    color: #000; font-weight: 700; font-size: 13.5px;
+    text-decoration: none;
+    transition: background .2s, transform .18s, box-shadow .2s, border-color .2s;
+    box-shadow: 0 2px 10px rgba(0,0,0,.03);
+}
+.btn-back-profile:hover {
+    background: #f4f4f4; color: #000;
+    border-color: #d0d0d0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0,0,0,.06);
+}
+
 }
 </style>
 @endpush
@@ -397,6 +420,12 @@ body {
     @endif
 
     <div class="voucher-page reveal">
+            {{-- Back to profile --}}
+            <div class="voucher-toprow">
+                <a href="{{ route('profile') }}" class="btn-back-profile">
+                    <i class="fas fa-arrow-left"></i> Quay lại Hồ sơ
+                </a>
+            </div>
 
             {{-- Title + Search --}}
             <div class="voucher-title">
