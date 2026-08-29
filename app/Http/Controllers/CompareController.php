@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attribute;
 use App\Models\Product;
+use App\Models\Review;
 
 class CompareController extends Controller
 {
@@ -14,9 +15,21 @@ class CompareController extends Controller
     {
         $ids = session('compare', []);
 
-        $products = Product::with(['attributes.attribute', 'category', 'brand'])
+        $products = Product::with(['attributes.attribute', 'category', 'brand', 'reviews'])
             ->whereIn('id', $ids)
             ->get()
+            ->map(function ($product) {
+                // Tính điểm đánh giá trung bình
+                $rating = $product->reviews->avg('rating') ?? 0;
+                $product->rating = round($rating * 20); // Chuyển từ 0-5 sao sang 0-100%
+                
+                // Nếu không có review, gán điểm mặc định 75%
+                if ($product->reviews->count() == 0) {
+                    $product->rating = 75;
+                }
+                
+                return $product;
+            })
             ->sortBy(function ($product) use ($ids) {
                 return array_search($product->id, $ids);
             });

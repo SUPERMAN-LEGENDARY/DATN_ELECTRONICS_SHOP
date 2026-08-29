@@ -36,13 +36,15 @@
         background-color: #f5f5f5;
     }
 
-    /* Lớp phủ trắng trong suốt nằm trên ảnh */
+    /* Lớp phủ: trong suốt ở trên (ảnh rõ nét), tối dần nhẹ ở đáy để chữ trắng nổi bật */
 .news-hero::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: rgba(255, 255, 255, 0.20);
-    backdrop-filter: blur(1px);
+    background: linear-gradient(to bottom,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0) 40%,
+        rgba(0, 0, 0, 0.55) 100%);
     z-index: 0;
 }
 
@@ -59,12 +61,13 @@
         font-size: clamp(36px, 6vw, 72px);
         font-weight: 700;
         letter-spacing: -3px;
+        color: #fff;
     }
 
     .news-hero p {
         max-width: 620px;
         margin: 22px auto 0;
-        color: #555;
+        color: #e5e5e5;
         font-size: 18px;
         line-height: 1.6;
     }
@@ -85,6 +88,8 @@
         font-size: 15px;
         outline: none;
         transition: border-color 0.2s;
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
     }
 
     .samsung-search input:focus {
