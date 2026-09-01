@@ -373,6 +373,72 @@ body {
     .pagination-wrap .pagination { flex-wrap: wrap; justify-content: center; }
     .pagination-wrap .pagination .page-link { padding: 6px 11px; font-size: 13px; }
 }
+
+/* ============================================================
+   BACK BUTTON - Đồng bộ trang Đơn mua
+   ============================================================ */
+.voucher-toprow {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 42px;
+    margin-bottom: 18px;
+}
+
+.btn-back-profile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 42px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    color: #2563b8;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color .2s ease, transform .2s ease;
+}
+
+.btn-back-profile i {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.btn-back-profile:hover,
+.btn-back-profile:focus,
+.btn-back-profile:active {
+    background: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    color: #174ea6;
+}
+
+.btn-back-profile:hover {
+    transform: translateX(-3px);
+}
+
+@media (max-width: 576px) {
+    .voucher-toprow {
+        height: 40px;
+        margin-bottom: 16px;
+    }
+
+    .btn-back-profile {
+        height: 40px;
+        font-size: 14px;
+    }
+
+    .btn-back-profile i {
+        font-size: 16px;
+    }
+}
 </style>
 @endpush
 
@@ -395,6 +461,14 @@ body {
         <i class="fas fa-check-circle"></i> {{ session('success') }}
     </div>
     @endif
+
+    {{-- Back to profile --}}
+            <div class="voucher-toprow">
+                <a href="{{ route('profile') }}" class="btn-back-profile">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Hồ sơ</span>
+                </a>
+            </div>
 
     <div class="voucher-page reveal">
 

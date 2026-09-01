@@ -300,6 +300,112 @@ body {
 }
 
 /* ============================================================
+   BADGE BEST — Đề xuất tốt nhất (viền vàng, glow)
+   ============================================================ */
+.rating-badge-item.badge-best {
+    border: 2px solid #f0c14b;
+    box-shadow: 0 4px 18px rgba(240,193,75,.18), 0 0 0 3px rgba(240,193,75,.08);
+    position: relative;
+    overflow: hidden;
+}
+.rating-badge-item.badge-best:hover {
+    box-shadow: 0 12px 32px rgba(240,193,75,.22), 0 0 0 3px rgba(240,193,75,.12);
+}
+
+/* Ribbon */
+.ai-badge-ribbon {
+    position: absolute;
+    top: 14px; right: -30px;
+    background: linear-gradient(135deg, #f0c14b 0%, #e6a817 100%);
+    color: #000;
+    font-size: 11px; font-weight: 800;
+    padding: 4px 36px;
+    transform: rotate(35deg);
+    letter-spacing: .3px;
+    box-shadow: 0 2px 8px rgba(240,193,75,.3);
+    z-index: 5;
+}
+.ai-badge-ribbon i {
+    font-size: 10px;
+    margin-right: 3px;
+}
+
+/* Value badge pill */
+.top-badge-pill.value {
+    background: #e8f5e9;
+    border-color: #c8e6c9;
+}
+.top-badge-pill.value i {
+    color: #2e7d32;
+}
+.top-badge-pill.value span {
+    color: #2e7d32;
+}
+
+/* ============================================================
+   SCORE BARS — thanh bar 4 tiêu chí
+   ============================================================ */
+.score-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 14px;
+    background: #fafafa;
+    border-radius: 10px;
+    border: 1px solid #f0f0f0;
+}
+
+.score-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.score-bar-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #666;
+    min-width: 74px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.score-bar-label i {
+    font-size: 10px;
+    color: #999;
+    width: 14px;
+    text-align: center;
+}
+
+.score-bar-track {
+    flex: 1;
+    height: 7px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.score-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width .8s cubic-bezier(.16,1,.3,1);
+}
+
+.spec-fill    { background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); }
+.review-fill  { background: linear-gradient(90deg, #f6d365 0%, #fda085 100%); }
+.price-fill   { background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%); }
+.pop-fill     { background: linear-gradient(90deg, #fa709a 0%, #fee140 100%); }
+
+.score-bar-value {
+    font-size: 11px;
+    font-weight: 700;
+    color: #333;
+    min-width: 24px;
+    text-align: right;
+}
+
+/* ============================================================
    COMPARE HEADER — product cards
    ============================================================ */
 .compare-header {
@@ -666,7 +772,7 @@ body {
             </table>
         </div>
 
-        {{-- ===== RATING BADGES BELOW TABLE ===== --}}
+        {{-- ===== AI GỢI Ý — ĐA TIÊU CHÍ ===== --}}
         @if($products->count() > 0)
         @php
             // So sánh từng thông số giữa các sản phẩm để tìm ra
@@ -685,9 +791,6 @@ body {
                     )->value;
 
                     if ($rawValue !== null) {
-                        // Chuẩn hóa: TB -> nhân 1024 để so cùng đơn vị GB, rồi lấy TẤT CẢ
-                        // các số xuất hiện trong chuỗi, dùng số LỚN NHẤT để so sánh
-                        // (vd "1-120Hz" -> 120, "256GB/512GB/1TB" -> 1024)
                         $normalized = preg_replace_callback(
                             '/([\d.,]+)\s*TB/i',
                             fn ($m) => ((float) str_replace(',', '.', $m[1]) * 1024) . 'GB',
@@ -706,12 +809,10 @@ body {
                     }
                 }
 
-                // Cần ít nhất 2 sản phẩm có giá trị số để so sánh
                 if (count($numericValues) >= 2) {
                     $maxVal  = max(array_column($numericValues, 'num'));
                     $winners = array_filter($numericValues, fn($v) => $v['num'] == $maxVal);
 
-                    // Chỉ tính "vượt trội" khi đúng 1 sản phẩm đạt giá trị cao nhất (không hòa)
                     if (count($winners) === 1) {
                         $winnerId = array_key_first($winners);
                         $highlights[$winnerId][] = [
@@ -729,47 +830,92 @@ body {
                 </div>
                 <div>
                     <h3 class="ai-suggest-title">AI gợi ý cho bạn</h3>
-                    <p class="ai-suggest-desc">Dựa trên nhu cầu và sở thích, đây là sản phẩm phù hợp nhất với bạn.</p>
+                    <p class="ai-suggest-desc">Phân tích dựa trên thông số kỹ thuật, đánh giá người dùng, giá cả và độ phổ biến.</p>
                 </div>
             </div>
             <div class="rating-badges-grid">
                 @foreach($products as $product)
-                <div class="rating-badge-item">
+                <div class="rating-badge-item {{ $product->ai_badge === 'best' ? 'badge-best' : '' }}">
+
+                    {{-- Badge phân cấp --}}
+                    @if($product->ai_badge === 'best')
+                        <div class="ai-badge-ribbon">
+                            <i class="fas fa-trophy"></i> {{ $product->ai_badge_label }}
+                        </div>
+                    @endif
+
                     <div class="rating-badge-top">
-                        <div class="rating-circle-small {{ $product->rating >= 85 ? 'excellent' : ($product->rating >= 75 ? 'good' : 'fair') }}">
-                            <div class="rating-percent-small">{{ intval($product->rating) }}%</div>
+                        <div class="rating-circle-small {{ $product->ai_score >= 75 ? 'excellent' : ($product->ai_score >= 50 ? 'good' : 'fair') }}">
+                            <div class="rating-percent-small">{{ intval($product->ai_score) }}%</div>
                         </div>
                         <div class="rating-label-top">
-                            @if($product->rating == $products->max('rating'))
+                            @if($product->ai_badge === 'best')
                                 <div class="top-badge-pill best">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span>Phù hợp nhất</span>
+                                    <i class="fas fa-trophy"></i>
+                                    <span>{{ $product->ai_badge_label }}</span>
+                                </div>
+                            @elseif($product->ai_badge === 'value')
+                                <div class="top-badge-pill value">
+                                    <i class="fas fa-tags"></i>
+                                    <span>{{ $product->ai_badge_label }}</span>
                                 </div>
                             @else
                                 <div class="top-badge-pill">
                                     <i class="fas fa-check-circle"></i>
-                                    <span>Phù hợp với bạn</span>
+                                    <span>{{ $product->ai_badge_label }}</span>
                                 </div>
                             @endif
                         </div>
                     </div>
+
                     <div class="rating-badge-desc">
                         <p class="desc-title">{{ $product->name }}</p>
+
+                        {{-- Thanh bar so sánh 4 tiêu chí --}}
+                        <div class="score-bars">
+                            <div class="score-bar-row">
+                                <span class="score-bar-label"><i class="fas fa-microchip"></i> Thông số</span>
+                                <div class="score-bar-track">
+                                    <div class="score-bar-fill spec-fill" style="width: {{ $product->ai_spec_score }}%"></div>
+                                </div>
+                                <span class="score-bar-value">{{ $product->ai_spec_score }}</span>
+                            </div>
+                            <div class="score-bar-row">
+                                <span class="score-bar-label"><i class="fas fa-star"></i> Đánh giá</span>
+                                <div class="score-bar-track">
+                                    <div class="score-bar-fill review-fill" style="width: {{ $product->ai_review_score }}%"></div>
+                                </div>
+                                <span class="score-bar-value">{{ $product->ai_review_score }}</span>
+                            </div>
+                            <div class="score-bar-row">
+                                <span class="score-bar-label"><i class="fas fa-tags"></i> Giá cả</span>
+                                <div class="score-bar-track">
+                                    <div class="score-bar-fill price-fill" style="width: {{ $product->ai_price_score }}%"></div>
+                                </div>
+                                <span class="score-bar-value">{{ $product->ai_price_score }}</span>
+                            </div>
+                            <div class="score-bar-row">
+                                <span class="score-bar-label"><i class="fas fa-fire"></i> Phổ biến</span>
+                                <div class="score-bar-track">
+                                    <div class="score-bar-fill pop-fill" style="width: {{ $product->ai_popularity_score }}%"></div>
+                                </div>
+                                <span class="score-bar-value">{{ $product->ai_popularity_score }}</span>
+                            </div>
+                        </div>
+
+                        {{-- Lý do gợi ý --}}
                         <ul class="desc-list">
-                            @php $productHighlights = array_slice($highlights[$product->id], 0, 3); @endphp
-                            @if(count($productHighlights) > 0)
-                                @foreach($productHighlights as $h)
-                                <li><i class="fas fa-circle-check"></i> {{ $h['label'] }} vượt trội: {{ $h['value'] }}</li>
+                            @if(!empty($product->ai_reasons))
+                                @foreach($product->ai_reasons as $reason)
+                                <li><i class="{{ $reason['icon'] }}"></i> {{ $reason['text'] }}</li>
                                 @endforeach
-                            @elseif($product->attributes->count() > 0)
-                                @foreach($product->attributes->take(3) as $attr)
-                                <li><i class="fas fa-circle-check"></i> {{ $attr->attribute->name ?? '' }}: {{ $attr->value }}</li>
-                                @endforeach
-                            @else
-                                <li><i class="fas fa-circle-check"></i> Camera chất lượng cao</li>
-                                <li><i class="fas fa-circle-check"></i> Pin lâu dài</li>
-                                <li><i class="fas fa-circle-check"></i> Màn hình sắc nét</li>
                             @endif
+
+                            {{-- Thêm highlight thông số vượt trội (nếu có) --}}
+                            @php $productHighlights = array_slice($highlights[$product->id] ?? [], 0, 2); @endphp
+                            @foreach($productHighlights as $h)
+                            <li><i class="fas fa-circle-check"></i> {{ $h['label'] }}: {{ $h['value'] }}</li>
+                            @endforeach
                         </ul>
                     </div>
                 </div>
@@ -870,6 +1016,22 @@ document.addEventListener('DOMContentLoaded', function () {
     /* ---- Diff badge pulse ---- */
     document.querySelectorAll('.diff').forEach((cell, i) => {
         cell.style.animationDelay = (i * .05) + 's';
+    });
+
+    /* ---- Score bar animation on scroll into view ---- */
+    const scoreBars = document.querySelectorAll('.score-bar-fill');
+    scoreBars.forEach(bar => {
+        const targetWidth = bar.style.width;
+        bar.style.width = '0%';
+        const barObserver = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    setTimeout(() => { bar.style.width = targetWidth; }, 150);
+                    barObserver.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.2 });
+        barObserver.observe(bar);
     });
 
 })();

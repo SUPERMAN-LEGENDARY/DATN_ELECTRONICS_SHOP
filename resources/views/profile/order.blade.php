@@ -4,100 +4,265 @@
 @push('styles')
 <style>
 /* ============================================================
-   PAGE BACKGROUND — đồng bộ nền trắng phẳng như /profile
-   ============================================================ */
-
-/* ============================================================
-   SCROLL REVEAL
-   ============================================================ */
-.reveal {
-    opacity: 0; transform: translateY(26px);
-    transition: opacity .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1);
-}
-.reveal.revealed { opacity: 1; transform: translateY(0); }
-
-.stagger-orders > * {
-    opacity: 0; transform: translateY(22px);
-    transition: opacity .55s cubic-bezier(.16,1,.3,1), transform .55s cubic-bezier(.16,1,.3,1);
-}
-.stagger-orders.revealed > *:nth-child(1)  { opacity:1; transform:none; transition-delay:.04s; }
-.stagger-orders.revealed > *:nth-child(2)  { opacity:1; transform:none; transition-delay:.09s; }
-.stagger-orders.revealed > *:nth-child(3)  { opacity:1; transform:none; transition-delay:.14s; }
-.stagger-orders.revealed > *:nth-child(4)  { opacity:1; transform:none; transition-delay:.19s; }
-.stagger-orders.revealed > *:nth-child(n+5){ opacity:1; transform:none; transition-delay:.24s; }
-
-/* ripple */
-.ripple-wave {
-    position: absolute; border-radius: 50%;
-    background: rgba(0,0,0,.1);
-    transform: scale(0); animation: rippleOut .6s linear;
-    pointer-events: none; z-index: 10;
-}
-@keyframes rippleOut { to { transform:scale(4); opacity:0; } }
-
-/* ============================================================
-   PAGE WRAPPER — 1 cột, đồng bộ /profile
-   ============================================================ */
+   PAGE BACKGROUND
+============================================================ */
 .orders-page {
     padding: 32px 0 60px;
 }
+
 .orders-container {
-    max-width: 980px; margin: 0 auto; padding: 0 16px;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+/* ============================================================
+   SCROLL REVEAL
+============================================================ */
+.reveal {
+    opacity: 0;
+    transform: translateY(26px);
+    transition:
+        opacity .6s cubic-bezier(.16,1,.3,1),
+        transform .6s cubic-bezier(.16,1,.3,1);
+}
+
+.reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.stagger-orders > * {
+    opacity: 0;
+    transform: translateY(22px);
+    transition:
+        opacity .55s cubic-bezier(.16,1,.3,1),
+        transform .55s cubic-bezier(.16,1,.3,1);
+}
+
+.stagger-orders.revealed > *:nth-child(1) {
+    opacity: 1;
+    transform: none;
+    transition-delay: .04s;
+}
+
+.stagger-orders.revealed > *:nth-child(2) {
+    opacity: 1;
+    transform: none;
+    transition-delay: .09s;
+}
+
+.stagger-orders.revealed > *:nth-child(3) {
+    opacity: 1;
+    transform: none;
+    transition-delay: .14s;
+}
+
+.stagger-orders.revealed > *:nth-child(4) {
+    opacity: 1;
+    transform: none;
+    transition-delay: .19s;
+}
+
+.stagger-orders.revealed > *:nth-child(n+5) {
+    opacity: 1;
+    transform: none;
+    transition-delay: .24s;
+}
+
+/* ============================================================
+   RIPPLE
+============================================================ */
+.ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, .1);
+    transform: scale(0);
+    animation: rippleOut .6s linear;
+    pointer-events: none;
+    z-index: 10;
+}
+
+@keyframes rippleOut {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
 }
 
 /* ============================================================
    ALERTS
-   ============================================================ */
+============================================================ */
 .alert-box {
-    display: flex; align-items: center; gap: 8px;
-    padding: 14px 18px; border-radius: 12px;
-    margin-bottom: 20px; font-weight: 600; font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-weight: 600;
+    font-size: 14px;
     animation: alertIn .4s cubic-bezier(.16,1,.3,1);
 }
-@keyframes alertIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:none; } }
-.alert-success { background: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
-.alert-error   { background: #fce8e6; color: #d93025; border: 1px solid #fad2cf; }
+
+@keyframes alertIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.alert-success {
+    background: #e6f4ea;
+    color: #137333;
+    border: 1px solid #ceead6;
+}
+
+.alert-error {
+    background: #fce8e6;
+    color: #d93025;
+    border: 1px solid #fad2cf;
+}
 
 /* ============================================================
-   PAGE TITLE
-   ============================================================ */
-.orders-title {
-    font-size: 22px; font-weight: 700; color: #000000;
+   PAGE TITLE + BACK BUTTON
+============================================================ */
+.orders-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
     margin-bottom: 24px;
-    display: flex; align-items: center; gap: 12px;
 }
+
+/* Tiêu đề Đơn mua */
+.orders-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+
+    font-size: 22px;
+    font-weight: 700;
+    color: #000000;
+}
+
+/* Icon tiêu đề */
 .orders-title i {
-    width: 42px; height: 42px; border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
     background: #f4f4f4;
-    color: #000000; font-size: 16px;
-    display: flex; align-items: center; justify-content: center;
+    color: #000000;
+    font-size: 16px;
+}
+
+/* Nút quay lại Hồ sơ - căn ngang với Đơn mua */
+.btn-back-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    flex-shrink: 0;
+
+    padding: 0;
+    min-height: 42px;
+
+    background: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+
+    color: #2563b8;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+
+    transition: color .2s ease, transform .2s ease;
+}
+
+.btn-back-profile i {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.btn-back-profile:hover,
+.btn-back-profile:focus,
+.btn-back-profile:active {
+    background: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    color: #174ea6;
+}
+
+.btn-back-profile:hover {
+    transform: translateX(-3px);
 }
 
 /* ============================================================
    STATUS TABS
-   ============================================================ */
+============================================================ */
 .order-tabs {
-    display: flex; flex-wrap: wrap; gap: 0;
-    list-style: none; margin: 0 0 24px; padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+
+    list-style: none;
+    margin: 0 0 24px;
+    padding: 0;
+
     background: #ffffff;
     border: 1px solid #e5e5e5;
-    border-radius: 16px; overflow: hidden;
+    border-radius: 16px;
+    overflow: hidden;
+
     box-shadow: 0 2px 10px rgba(0,0,0,.02);
 }
-.order-tabs li { flex: 1; min-width: 100px; }
+
+.order-tabs li {
+    flex: 1;
+    min-width: 100px;
+}
 
 .order-tabs a {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 6px; padding: 14px 8px;
-    font-size: 13.5px; font-weight: 600; color: #555555;
-    text-decoration: none; text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+    padding: 14px 8px;
+
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #555555;
+
+    text-decoration: none;
+    text-align: center;
+
     border-bottom: 3px solid transparent;
+
     transition: all .2s;
 }
+
 .order-tabs a:hover {
     background: #fafafa;
     color: #000000;
 }
+
 .order-tabs a.active {
     background: #ffffff;
     color: #000000;
@@ -106,13 +271,20 @@
 }
 
 .tab-count {
+    min-width: 24px;
+    padding: 2px 10px;
+
     background: #f4f4f4;
-    border-radius: 20px; padding: 2px 10px;
-    font-size: 12px; font-weight: 700;
+    border-radius: 20px;
+
     color: #333333;
-    min-width: 24px; text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+
     transition: all .2s;
 }
+
 .order-tabs a.active .tab-count {
     background: #000000;
     color: #ffffff;
@@ -120,207 +292,438 @@
 
 /* ============================================================
    SEARCH BOX
-   ============================================================ */
+============================================================ */
 .search-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 16px 20px;
+    margin-bottom: 24px;
+
     background: #ffffff;
     border: 1px solid #e5e5e5;
-    border-radius: 16px; padding: 16px 20px;
-    margin-bottom: 24px;
+    border-radius: 16px;
+
     box-shadow: 0 2px 10px rgba(0,0,0,.02);
-    display: flex; gap: 12px; align-items: center;
 }
+
 .search-box .search-icon {
-    color: #999999; font-size: 16px; flex-shrink: 0;
+    color: #999999;
+    font-size: 16px;
+    flex-shrink: 0;
 }
+
 .search-box input {
-    flex: 1; border: 1px solid #cccccc;
-    border-radius: 12px; padding: 12px 16px;
-    font-size: 14.5px; outline: none;
-    background: #fafafa; color: #000000;
+    flex: 1;
+
+    padding: 12px 16px;
+
+    border: 1px solid #cccccc;
+    border-radius: 12px;
+    outline: none;
+
+    background: #fafafa;
+    color: #000000;
+    font-size: 14.5px;
+
     transition: all .2s;
 }
-.search-box input::placeholder { color: #999999; }
+
+.search-box input::placeholder {
+    color: #999999;
+}
+
 .search-box input:focus {
     border-color: #000000;
     background: #ffffff;
     box-shadow: 0 0 0 1px #000000;
 }
+
 .btn-search {
-    padding: 12px 24px; border: none; border-radius: 30px;
+    padding: 12px 24px;
+
+    border: none;
+    border-radius: 30px;
+
     background: #000000;
-    color: #ffffff; font-weight: 600; font-size: 14px;
-    cursor: pointer; white-space: nowrap;
+    color: #ffffff;
+
+    font-weight: 600;
+    font-size: 14px;
+
+    cursor: pointer;
+    white-space: nowrap;
+
     transition: all .2s;
+
     box-shadow: 0 4px 14px rgba(0,0,0,.15);
 }
-.btn-search:hover { background: #333333; transform: translateY(-1px); }
+
+.btn-search:hover {
+    background: #333333;
+    transform: translateY(-1px);
+}
 
 /* ============================================================
    ORDER CARD
-   ============================================================ */
+============================================================ */
 .order-card {
+    position: relative;
+
+    margin-bottom: 20px;
+
     background: #ffffff;
     border: 1px solid #e5e5e5;
-    border-radius: 20px; overflow: hidden;
+    border-radius: 20px;
+    overflow: hidden;
+
     box-shadow: 0 2px 10px rgba(0,0,0,.02);
-    margin-bottom: 20px;
-    transition: transform .25s ease, box-shadow .25s, border-color .25s;
-    position: relative;
+
+    transition:
+        transform .25s ease,
+        box-shadow .25s,
+        border-color .25s;
 }
+
 .order-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 10px 30px rgba(0,0,0,.06);
     border-color: #dcdcdc;
 }
 
-/* Card header */
+/* ============================================================
+   CARD HEADER
+============================================================ */
 .order-card-header {
-    display: flex; justify-content: space-between; align-items: center;
-    flex-wrap: wrap; gap: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 10px;
+
     padding: 18px 24px 14px;
+
     border-bottom: 1px solid #eeeeee;
 }
-.order-id { font-weight: 700; font-size: 15px; color: #000000; }
-.order-id span { color: #555555; }
-.order-date { font-size: 13px; color: #777777; margin-top: 4px; }
 
-/* Card body */
+.order-id {
+    font-weight: 700;
+    font-size: 15px;
+    color: #000000;
+}
+
+.order-id span {
+    color: #555555;
+}
+
+.order-date {
+    margin-top: 4px;
+
+    color: #777777;
+    font-size: 13px;
+}
+
+/* ============================================================
+   CARD BODY
+============================================================ */
 .order-card-body {
     display: grid;
     grid-template-columns: 1fr auto auto;
-    gap: 24px; align-items: center;
+    align-items: center;
+
+    gap: 24px;
     padding: 20px 24px;
 }
-@media (max-width: 768px) {
-    .order-card-body { grid-template-columns: 1fr; }
+
+/* ============================================================
+   PRODUCT PREVIEW
+============================================================ */
+.order-product {
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
 
-/* Product preview */
-.order-product { display: flex; align-items: center; gap: 16px; }
 .order-product img,
 .order-product .no-img {
-    width: 84px; height: 84px; flex-shrink: 0;
-    border-radius: 12px; object-fit: contain;
+    width: 84px;
+    height: 84px;
+    flex-shrink: 0;
+
+    padding: 6px;
+    box-sizing: border-box;
+
     border: 1px solid #e5e5e5;
+    border-radius: 12px;
+
+    object-fit: contain;
     background: #f8f9fa;
-    padding: 6px; box-sizing: border-box;
+
     transition: transform .3s ease;
 }
-.order-card:hover .order-product img { transform: scale(1.05); }
+
+.order-card:hover .order-product img {
+    transform: scale(1.05);
+}
+
 .order-product .no-img {
-    display: flex; align-items: center; justify-content: center;
-    color: #cccccc; font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #cccccc;
+    font-size: 24px;
 }
-.order-product-name { font-size: 15px; font-weight: 600; color: #000000; margin-bottom: 6px; line-height: 1.4; }
-.order-product-qty  { font-size: 14px; color: #555555; }
-.order-product-more { font-size: 13px; color: #777777; font-style: italic; margin-left: 4px; }
 
-/* Total */
-.order-total-cell { text-align: center; min-width: 140px; }
-.order-total-label { font-size: 13px; color: #777777; margin-bottom: 6px; }
-.order-total-amount { font-size: 20px; font-weight: 700; color: #000000; }
+.order-product-name {
+    margin-bottom: 6px;
 
-/* Actions */
-.order-actions { display: flex; flex-direction: column; gap: 10px; min-width: 150px; }
+    font-size: 15px;
+    font-weight: 600;
+    color: #000000;
+    line-height: 1.4;
+}
+
+.order-product-qty {
+    font-size: 14px;
+    color: #555555;
+}
+
+.order-product-more {
+    margin-left: 4px;
+
+    color: #777777;
+    font-size: 13px;
+    font-style: italic;
+}
 
 /* ============================================================
-   STATUS BADGES - Clean UI Colors
-   ============================================================ */
-.status-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 14px; border-radius: 20px;
-    font-size: 12.5px; font-weight: 600;
+   TOTAL
+============================================================ */
+.order-total-cell {
+    min-width: 140px;
+    text-align: center;
 }
-.badge-warning   { background: #fef7e0; color: #b06000; border: 1px solid #fce8b2; }
-.badge-info      { background: #e8f0fe; color: #1967d2; border: 1px solid #d2e3fc; }
-.badge-primary   { background: #e3f2fd; color: #0066cc; border: 1px solid #bbdefb; }
-.badge-success   { background: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
-.badge-danger    { background: #fce8e6; color: #d93025; border: 1px solid #fad2cf; }
-.badge-secondary { background: #f1f3f4; color: #5f6368; border: 1px solid #dadce0; }
+
+.order-total-label {
+    margin-bottom: 6px;
+
+    color: #777777;
+    font-size: 13px;
+}
+
+.order-total-amount {
+    color: #000000;
+    font-size: 20px;
+    font-weight: 700;
+}
 
 /* ============================================================
-   ACTION BUTTONS
-   ============================================================ */
+   ACTIONS
+============================================================ */
+.order-actions {
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+    min-width: 150px;
+}
+
 .btn-action {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    width: 100%; padding: 10px 16px; border-radius: 30px; /* Bo tròn viên thuốc */
-    font-size: 13.5px; font-weight: 600; cursor: pointer;
+    position: relative;
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    padding: 10px 16px;
+
+    border: none;
+    border-radius: 30px;
+
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+
+    cursor: pointer;
+    text-decoration: none;
+
     transition: all .2s ease;
-    text-decoration: none; border: none; font-family: inherit;
-    position: relative; overflow: hidden;
 }
 
-.btn-detail   { background: #f8f9fa; color: #333333; border: 1px solid #cccccc; }
-.btn-detail:hover { background: #ffffff; color: #000000; border-color: #000000; }
+.btn-detail {
+    background: #f8f9fa;
+    color: #333333;
+    border: 1px solid #cccccc;
+}
 
-.btn-cancel   { background: transparent; color: #d93025; border: 1px solid #fad2cf; }
-.btn-cancel:hover { background: #d93025; color: #ffffff; }
+.btn-detail:hover {
+    background: #ffffff;
+    color: #000000;
+    border-color: #000000;
+}
 
-.btn-received { background: #137333; color: #ffffff; }
-.btn-received:hover { background: #0d5c27; box-shadow: 0 4px 12px rgba(19,115,51,.2); }
+.btn-cancel {
+    background: transparent;
+    color: #d93025;
+    border: 1px solid #fad2cf;
+}
 
-.btn-reorder  { background: #000000; color: #ffffff; }
-.btn-reorder:hover { background: #333333; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+.btn-cancel:hover {
+    background: #d93025;
+    color: #ffffff;
+}
 
-.btn-review   { background: linear-gradient(135deg,#d97706,#f59e0b); color: #ffffff; }
-.btn-review:hover { box-shadow: 0 4px 12px rgba(245,158,11,.35); }
+.btn-received {
+    background: #137333;
+    color: #ffffff;
+}
+
+.btn-received:hover {
+    background: #0d5c27;
+    box-shadow: 0 4px 12px rgba(19,115,51,.2);
+}
+
+.btn-reorder {
+    background: #000000;
+    color: #ffffff;
+}
+
+.btn-reorder:hover {
+    background: #333333;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+}
+
+.btn-review {
+    background: linear-gradient(135deg, #d97706, #f59e0b);
+    color: #ffffff;
+}
+
+.btn-review:hover {
+    box-shadow: 0 4px 12px rgba(245,158,11,.35);
+}
 
 /* ============================================================
    EMPTY STATE
-   ============================================================ */
+============================================================ */
 .orders-empty {
+    padding: 70px 20px;
+
+    text-align: center;
+
     background: #ffffff;
     border: 1px solid #e5e5e5;
-    border-radius: 20px; padding: 70px 20px;
-    text-align: center;
+    border-radius: 20px;
+
     box-shadow: 0 2px 10px rgba(0,0,0,.02);
 }
-.orders-empty i {
-    font-size: 64px; display: block; margin-bottom: 20px;
+
+.orders-empty > i {
+    display: block;
+    margin-bottom: 20px;
+
     color: #cccccc;
-    animation: emptyFloat 3s ease-in-out infinite;
+    font-size: 64px;
 }
-@keyframes emptyFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-.orders-empty h4 { font-size: 20px; font-weight: 700; color: #000000; margin-bottom: 10px; }
-.orders-empty p  { color: #555555; font-size: 15px; margin-bottom: 24px; }
+
+.orders-empty h4 {
+    margin-bottom: 10px;
+
+    color: #000000;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.orders-empty p {
+    margin-bottom: 24px;
+
+    color: #555555;
+    font-size: 15px;
+}
+
 .btn-shop-now {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 12px 28px; border-radius: 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 12px 24px;
+
+    border-radius: 30px;
+
     background: #000000;
-    color: #ffffff; font-weight: 600; font-size: 14px;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 600;
+
     text-decoration: none;
+
     box-shadow: 0 4px 14px rgba(0,0,0,.15);
-    transition: all .2s;
+
+    transition:
+        background .2s,
+        transform .2s;
 }
-.btn-shop-now:hover { background: #333333; transform: translateY(-2px); color: #ffffff; }
+
+.btn-shop-now:hover {
+    background: #333333;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.btn-shop-now i {
+    display: inline;
+    margin-bottom: 0;
+
+    color: #ffffff;
+    font-size: 14px;
+}
 
 /* ============================================================
    PAGINATION
-   ============================================================ */
-.pagination-wrap { margin-top: 24px; }
+============================================================ */
+.pagination-wrap {
+    margin-top: 24px;
+}
+
 .pagination-wrap .pagination .page-link {
-    border: 1px solid #e5e5e5 !important;
-    color: #333333 !important;
-    background: #ffffff !important;
-    border-radius: 10px !important;
     margin: 0 4px;
-    font-weight: 600; font-size: 14px;
+
+    border: 1px solid #e5e5e5 !important;
+    border-radius: 10px !important;
+
+    background: #ffffff !important;
+    color: #333333 !important;
+
+    font-size: 14px;
+    font-weight: 600;
+
     transition: all .2s;
+
     box-shadow: none !important;
 }
+
 .pagination-wrap .pagination .page-link:hover,
 .pagination-wrap .pagination .page-link:focus {
     background: #f4f4f4 !important;
     color: #000000 !important;
     border-color: #cccccc !important;
+
     box-shadow: none !important;
 }
+
 .pagination-wrap .pagination .page-item.active .page-link {
     background: #000000 !important;
     border-color: #000000 !important;
     color: #ffffff !important;
+
     box-shadow: 0 4px 10px rgba(0,0,0,.15) !important;
 }
+
 .pagination-wrap .pagination .page-item.disabled .page-link {
     color: #bbbbbb !important;
     background: #ffffff !important;
@@ -329,11 +732,78 @@
 
 /* ============================================================
    RESPONSIVE
-   ============================================================ */
+============================================================ */
 @media (max-width: 768px) {
-    .order-total-cell { text-align: left; }
-    .order-actions    { flex-direction: row; flex-wrap: wrap; }
-    .btn-action       { flex: 1; min-width: 130px; }
+    .order-card-body {
+        grid-template-columns: 1fr;
+    }
+
+    .order-total-cell {
+        text-align: left;
+    }
+
+    .order-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        flex: 1;
+        min-width: 130px;
+    }
+}
+
+@media (max-width: 576px) {
+    .orders-page {
+        padding: 24px 0 45px;
+    }
+
+    .orders-container {
+        padding: 0 12px;
+    }
+
+    .orders-title {
+        font-size: 20px;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .orders-title i {
+        width: 40px;
+        height: 40px;
+    }
+
+    .orders-header {
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .btn-back-profile {
+        min-height: 40px;
+        font-size: 14px;
+    }
+
+    .btn-back-profile i {
+        font-size: 16px;
+    }
+
+    .order-card-header,
+    .order-card-body {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .search-box {
+        padding: 12px;
+    }
+
+    .search-box input {
+        min-width: 0;
+    }
+
+    .btn-search {
+        padding: 12px 16px;
+    }
 }
 </style>
 @endpush
@@ -355,9 +825,17 @@
         </div>
         @endif
 
-        <h2 class="orders-title reveal">
-            <i class="fas fa-box"></i> Đơn mua
-        </h2>
+        <div class="orders-header reveal">
+    <h2 class="orders-title">
+        <i class="fas fa-box"></i>
+        <span>Đơn mua</span>
+    </h2>
+
+    <a href="{{ route('profile') }}" class="btn-back-profile">
+        <i class="fas fa-arrow-left"></i>
+        <span>Hồ sơ</span>
+    </a>
+</div>
 
         {{-- ===== TABS ===== --}}
         <ul class="order-tabs reveal">

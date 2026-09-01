@@ -233,12 +233,62 @@ body {
 /* ============================================================
    EMPTY STATE
    ============================================================ */
+/* ============================================================
+   BACK BUTTON — Giống trang Đơn mua
+   ============================================================ */
+.wishlist-toprow {
+    max-width: 900px;
+    margin: 0 auto 18px;
+
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 42px;
+}
+
+.btn-back-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    padding: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+
+    color: #2563eb;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+
+    transition: color .2s ease;
+}
+
+.btn-back-profile i {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.btn-back-profile:hover,
+.btn-back-profile:focus,
+.btn-back-profile:active {
+    background: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    color: #1d4ed8;
+    text-decoration: none;
+}
+
 .empty-wishlist {
     text-align: center;
     padding: 60px 20px;
     color: #555555;
 }
-.empty-wishlist i {
+.empty-wishlist > i {
     font-size: 56px;
     color: #d1d5db;
     margin-bottom: 18px;
@@ -255,20 +305,24 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 12px 28px;
-    border-radius: 24px; /* Pill shape */
+    padding: 14px 32px;
+    border-radius: 30px; /* Capsule shape, match btn-explore */
     background: #000000;
     color: #ffffff;
     font-weight: 700;
-    font-size: 14.5px;
+    font-size: 14px;
     text-decoration: none;
-    transition: background .2s, transform .15s, box-shadow .2s;
+    transition: background .2s, transform .18s;
+}
+.empty-wishlist a i {
+    font-size: 14px;
+    color: #ffffff;
+    margin-bottom: 0;
+    display: inline;
 }
 .empty-wishlist a:hover { 
     background: #333333; 
     color: #ffffff; 
-    transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(0,0,0,.15);
 }
 
 /* ============================================================
@@ -326,9 +380,15 @@ body {
 .wl-toast.error i { color: #ef4444; }
 
 @media (max-width: 600px) {
+    .wishlist-toprow {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
     .wishlist-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
     .content-card { padding: 20px 16px; }
     .wl-btn-view { font-size: 12px; padding: 7px 8px; }
+    .empty-wishlist a { padding: 11px 24px; font-size: 13px; }
 }
 </style>
 @endpush
@@ -338,13 +398,8 @@ body {
 
 <div class="profile-page-wrap">
 
-    {{-- Breadcrumb --}}
-    <div class="breadcrumb-row reveal">
-        <a href="{{ route('home') }}">Trang chủ</a>
-        <span class="mx-2">/</span>
-        <a href="{{ route('profile.account') }}">Tài khoản</a>
-        <span class="mx-2">/</span>
-        <span>Yêu thích</span>
+    <div class="wishlist-toprow reveal">
+        <a href="{{ route('profile') }}" class="btn-back-profile"> <i class="fas fa-arrow-left"></i> Hồ sơ </a>
     </div>
 
     <div class="profile-layout">
@@ -454,6 +509,7 @@ body {
         </main>
 
     </div>
+
 </div>
 
 {{-- Toast --}}

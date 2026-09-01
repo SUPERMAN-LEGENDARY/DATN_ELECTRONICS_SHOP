@@ -45,25 +45,59 @@ body {
 }
 
 /* ============================================================
-   BACK BUTTON
+   BACK BUTTON — Giống trang Đơn mua
    ============================================================ */
 .myreviews-toprow {
-    display: flex; align-items: center; margin-bottom: 18px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 42px;
+    margin-bottom: 18px;
 }
+
 .btn-back-profile {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 9px 18px; border-radius: 10px;
-    background: #ffffff;
-    border: 1px solid #ebebeb;
-    color: #000; font-weight: 700; font-size: 13.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 42px;
+    padding: 0;
+
+    background: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+
+    color: #2563b8;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1;
+
     text-decoration: none;
-    transition: background .2s, transform .18s, box-shadow .2s, border-color .2s;
+    white-space: nowrap;
+
+    transition: color .2s ease, transform .2s ease;
 }
+
+.btn-back-profile i {
+    font-size: 18px;
+    line-height: 1;
+}
+
 .btn-back-profile:hover {
-    background: #f4f4f4; color: #000;
-    border-color: #d0d0d0;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(0,0,0,.06);
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #174ea6;
+    transform: translateX(-3px);
+}
+
+.btn-back-profile:focus,
+.btn-back-profile:active {
+    background: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    color: #174ea6;
 }
 
 /* ============================================================
@@ -239,8 +273,20 @@ body {
     .myreviews-page { padding: 20px 0 50px; }
     .myreviews-container { padding: 0 12px; gap: 16px; }
 
-    .myreviews-toprow { margin-bottom: 12px; }
-    .btn-back-profile { padding: 8px 14px; font-size: 12.5px; }
+    .myreviews-toprow {
+        height: 40px;
+        margin-bottom: 12px;
+    }
+
+    .btn-back-profile {
+        height: 40px;
+        padding: 0;
+        font-size: 14px;
+    }
+
+    .btn-back-profile i {
+        font-size: 16px;
+    }
 
     .myreviews-card { border-radius: 16px; }
     .myreviews-card-header { padding: 16px 18px; }
@@ -290,7 +336,7 @@ body {
         {{-- Back to profile --}}
         <div class="myreviews-toprow">
             <a href="{{ route('profile') }}" class="btn-back-profile">
-                <i class="fas fa-arrow-left"></i> Quay lại Hồ sơ
+                <i class="fas fa-arrow-left"></i> Hồ sơ
             </a>
         </div>
 
