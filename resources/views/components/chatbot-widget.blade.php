@@ -1107,7 +1107,7 @@
 
         products.forEach(p => {
             const item = document.createElement('a');
-            item.href = `/products/${p.slug}`;
+            item.href = `{{ url('san-pham') }}/${p.slug}`;
             item.className = 'ai-product-item';
 
             const displayPrice = p.has_price_range ? p.min_price : p.price;

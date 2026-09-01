@@ -579,9 +579,91 @@ ClassicEditor
     });
 
 // Đồng bộ nội dung CKEditor vào textarea gốc trước khi form được gửi đi
-document.getElementById('productForm').addEventListener('submit', function () {
+document.getElementById('productForm').addEventListener('submit', function (e) {
     if (descriptionEditor) {
         document.querySelector('#description').value = descriptionEditor.getData();
+    }
+
+    // ── Validate lại tất cả ảnh ngay khi submit ──
+    let hasImageError = false;
+
+    // 1) Ảnh đại diện sản phẩm
+    const thumbInput = document.getElementById('thumbnailInput');
+    if (thumbInput && thumbInput.files[0]) {
+        const err = validateImageFile(thumbInput.files[0]);
+        if (err) {
+            setImageError('thumbnail-client-error', err);
+            thumbInput.value = '';
+            hasImageError = true;
+        }
+    }
+
+    // 2) Album ảnh sản phẩm
+    const imageInput = document.getElementById('imageInput');
+    if (imageInput && imageInput.files.length) {
+        if (imageInput.files.length > MAX_ALBUM_IMAGES) {
+            setImageError('images-client-error', `Chỉ được chọn tối đa ${MAX_ALBUM_IMAGES} ảnh (bạn đang chọn ${imageInput.files.length}).`);
+            imageInput.value = '';
+            hasImageError = true;
+        } else {
+            for (const file of Array.from(imageInput.files)) {
+                const err = validateImageFile(file);
+                if (err) {
+                    setImageError('images-client-error', err);
+                    imageInput.value = '';
+                    hasImageError = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    // 3) Ảnh đại diện & album của từng biến thể
+    document.querySelectorAll('.variant-thumb-input').forEach(input => {
+        if (!input.files[0]) return;
+        const idx = input.dataset.vidx;
+        const err = validateImageFile(input.files[0]);
+        if (err) {
+            setImageError('vThumbError-' + idx, err);
+            input.value = '';
+            hasImageError = true;
+        }
+    });
+
+    document.querySelectorAll('.variant-images-input').forEach(input => {
+        if (!input.files.length) return;
+        const idx = input.dataset.vidx;
+        const files = Array.from(input.files);
+        if (files.length > MAX_ALBUM_IMAGES) {
+            setImageError('vImagesError-' + idx, `Chỉ được chọn tối đa ${MAX_ALBUM_IMAGES} ảnh (bạn đang chọn ${files.length}).`);
+            input.value = '';
+            hasImageError = true;
+            return;
+        }
+        for (const file of files) {
+            const err = validateImageFile(file);
+            if (err) {
+                setImageError('vImagesError-' + idx, err);
+                input.value = '';
+                hasImageError = true;
+                break;
+            }
+        }
+    });
+
+    // 4) Kiểm tra nếu có lỗi đang hiển thị ở bất kỳ ô ảnh nào → chặn submit
+    const errorIds = ['thumbnail-client-error', 'images-client-error'];
+    document.querySelectorAll('[id^="vThumbError-"], [id^="vImagesError-"]').forEach(el => errorIds.push(el.id));
+    const hasVisibleError = errorIds.some(id => {
+        const el = document.getElementById(id);
+        return el && el.textContent.trim() !== '';
+    });
+
+    if (hasImageError || hasVisibleError) {
+        e.preventDefault();
+        // Cuộn lên phần hình ảnh đầu tiên bị lỗi
+        const firstError = document.querySelector('.error:not(:empty), [id$="-client-error"]:not(:empty)');
+        firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 });
 
