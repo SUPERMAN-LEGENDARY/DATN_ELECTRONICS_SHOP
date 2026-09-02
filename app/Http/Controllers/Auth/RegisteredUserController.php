@@ -41,8 +41,6 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
-
-        return redirect(route('home'));
+        return redirect()->route('login')->with('status', 'Đăng ký thành công! Vui lòng đăng nhập.');
     }
 }
