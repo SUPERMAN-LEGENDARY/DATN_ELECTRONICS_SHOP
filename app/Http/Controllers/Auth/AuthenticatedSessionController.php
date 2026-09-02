@@ -44,11 +44,18 @@ class AuthenticatedSessionController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
+        $user = Auth::user();
+        $redirectUrl = '/login';
+        
+        if ($user && in_array($user->role, ['admin', 'staff'])) {
+            $redirectUrl = '/admin/login';
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        return redirect($redirectUrl);
     }
 }

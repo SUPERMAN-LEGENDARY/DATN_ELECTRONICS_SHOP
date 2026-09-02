@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Đăng nhập – ElectronicShop</title>
+    <title>Đăng nhập Quản trị - ElectronicShop</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
     <!-- Font Awesome -->
@@ -1147,11 +1147,9 @@ input::-webkit-credentials-auto-fill-button {
                 </a>
 
 
-                <h1>Đăng nhập</h1>
+                <h1>Đăng nhập Quản trị</h1>
 
-                <p>
-                    Đăng nhập vào tài khoản của bạn
-                </p>
+                <p>Dành riêng cho Ban quản trị và Nhân viên</p>
 
             </header>
 
@@ -1267,16 +1265,7 @@ input::-webkit-credentials-auto-fill-button {
                         @enderror
 
 
-                        <div class="forgot-link">
-
-                            <a
-                                href="{{ route('password.request') }}">
-
-                                Quên mật khẩu?
-
-                            </a>
-
-                        </div>
+                        
 
                     </div>
 
@@ -1334,15 +1323,7 @@ input::-webkit-credentials-auto-fill-button {
                  FOOTER
             ================================================== -->
 
-            <footer class="auth-footer">
-
-                Chưa có tài khoản?
-
-                <a href="{{ route('register') }}">
-                    Đăng ký ngay
-                </a>
-
-            </footer>
+            
 
         </section>
 

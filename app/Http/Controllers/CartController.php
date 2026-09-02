@@ -103,7 +103,7 @@ class CartController extends Controller
         $request->validate([
             'product_id' => 'required|exists:products,id,deleted_at,NULL',
             'variant_id' => 'nullable|exists:product_variants,id',
-            'quantity'   => 'integer|min:1|max:99',
+            'quantity'   => 'integer|min:1|max:5',
         ]);
 
         $productId = (int) $request->product_id;
@@ -123,10 +123,13 @@ class CartController extends Controller
         $key  = $this->makeKey($productId, $variantId);
         $cart = $this->getCart();
 
+        $newQty = ($cart[$key]['quantity'] ?? 0) + $qty;
+        if ($newQty > 5) $newQty = 5;
+
         $cart[$key] = [
             'product_id' => $productId,
             'variant_id' => $variantId,
-            'quantity'   => ($cart[$key]['quantity'] ?? 0) + $qty,
+            'quantity'   => $newQty,
         ];
 
         $this->saveCart($cart);
@@ -134,7 +137,7 @@ class CartController extends Controller
         // ── Ghi log hành vi: khách thêm sản phẩm vào giỏ ─────────
         BehaviorLogger::log($productId, 'add_to_cart');
 
-        return redirect()->route('cart.index')->with('success', 'Đã thêm vào giỏ hàng!');
+        if ($request->wantsJson() || $request->ajax()) { return response()->json(['success' => true, 'message' => 'Đã thêm vào giỏ hàng', 'cart_count' => count($cart)]); } return redirect()->route('cart.index')->with('success', 'Đã thêm vào giỏ hàng!');
     }
 
     // ─── Mua ngay (thêm rồi redirect sang giỏ) ───────────────────
@@ -177,7 +180,7 @@ class CartController extends Controller
     // ─── Cập nhật số lượng ───────────────────────────────────────
     public function update(Request $request, string $key)
     {
-        $request->validate(['quantity' => 'required|integer|min:1|max:99']);
+        $request->validate(['quantity' => 'required|integer|min:1|max:5']);
 
         $cart = $this->getCart();
         if (isset($cart[$key])) {

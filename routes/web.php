@@ -424,3 +424,5 @@ Route::post('/lien-he', [ContactController::class, 'send'])->name('contact.send'
 Route::post('/dang-ky-nhan-tin', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 
 require __DIR__ . '/auth.php';
+// Admin Login (Sử dụng chung xử lý đăng nhập với web, nhưng giao diện riêng)
+Route::view('/admin/login', 'admin.auth.login')->name('admin.login')->middleware('guest');

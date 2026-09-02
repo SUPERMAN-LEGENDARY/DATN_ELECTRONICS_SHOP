@@ -225,7 +225,13 @@
             <div class="items-container">
                 @foreach($order->items as $item)
                 <div class="item-row">
-                    <span>{{ $item->product_name }} <span style="color:var(--samsung-gray-mid)">× {{ $item->quantity }}</span></span>
+                    <span>
+        {{ $item->product_name }}
+        @if($item->variant_attributes_text)
+            <span style="font-size: 12px; color: #555; background: #eee; padding: 2px 6px; border-radius: 4px; margin: 0 4px; display: inline-block;">{{ $item->variant_attributes_text }}</span>
+        @endif
+        <span style="color:var(--samsung-gray-mid)"> × {{ $item->quantity }}</span>
+    </span>
                     <span>{{ number_format($item->total_price) }}đ</span>
                 </div>
                 @endforeach

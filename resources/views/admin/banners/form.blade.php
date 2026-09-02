@@ -816,19 +816,19 @@
                 <div class="step-label">1. Chọn cách tạo banner</div>
                 <div class="method-grid">
                     <label class="method-option active" data-method-option="template">
-                        <input type="radio" name="creation_method" value="template" checked>
+                        <input type="radio" name="creation_method" value="template" {{ old('creation_method', $banner->creation_method ?? 'template') == 'template' ? 'checked' : '' }}>
                         <i class="fas fa-layer-group"></i>
                         <div class="opt-title">Banner từ mẫu</div>
                         <div class="opt-desc">Chọn mẫu có sẵn</div>
                     </label>
                     <label class="method-option" data-method-option="custom">
-                        <input type="radio" name="creation_method" value="custom">
+                        <input type="radio" name="creation_method" value="custom" {{ old('creation_method', $banner->creation_method) == 'custom' ? 'checked' : '' }}>
                         <i class="fas fa-pencil-ruler"></i>
                         <div class="opt-title">Banner thủ công</div>
                         <div class="opt-desc">Tự thiết kế</div>
                     </label>
                     <label class="method-option" data-method-option="upload">
-                        <input type="radio" name="creation_method" value="upload">
+                        <input type="radio" name="creation_method" value="upload" {{ old('creation_method', $banner->creation_method) == 'upload' ? 'checked' : '' }}>
                         <i class="fas fa-upload"></i>
                         <div class="opt-title">Upload banner</div>
                         <div class="opt-desc">Upload ảnh có sẵn</div>
@@ -841,10 +841,10 @@
                 <div class="step-label">2. Chọn loại banner</div>
                 <div class="form-group" style="margin-bottom:0">
                     <select name="banner_type" id="f_banner_type" class="form-control">
-                        <option value="hero">👑 Hero Banner</option>
-                        <option value="promo">🔥 Promo Banner</option>
-                        <option value="category">🏷️ Category Banner</option>
-                        <option value="sidebar">📌 Sidebar Banner</option>
+                        <option value="hero" {{ old('banner_type', $banner->banner_type ?? 'hero') == 'hero' ? 'selected' : '' }}>👑 Hero Banner</option>
+                        <option value="promo" {{ old('banner_type', $banner->banner_type) == 'promo' ? 'selected' : '' }}>🔥 Promo Banner</option>
+                        <option value="category" {{ old('banner_type', $banner->banner_type) == 'category' ? 'selected' : '' }}>🏷️ Category Banner</option>
+                        <option value="sidebar" {{ old('banner_type', $banner->banner_type) == 'sidebar' ? 'selected' : '' }}>📌 Sidebar Banner</option>
                     </select>
                 </div>
             </div>
@@ -857,19 +857,19 @@
                     <div style="flex:1;overflow:hidden">
                         <div class="tpl-page active" data-page="0">
                             <label class="tpl-card active" data-template="samsung_dark">
-                                <input type="radio" name="template" value="samsung_dark" checked>
+                                <input type="radio" name="template" value="samsung_dark" {{ old('template', $banner->template ?? 'samsung_dark') == 'samsung_dark' ? 'checked' : '' }}>
                                 <span class="tpl-check"><i class="fas fa-check"></i></span>
                                 <div class="tpl-thumb tpl-samsung">Galaxy S24 Ultra</div>
                                 <div class="tpl-name">Samsung Dark</div>
                             </label>
                             <label class="tpl-card" data-template="apple_minimal">
-                                <input type="radio" name="template" value="apple_minimal">
+                                <input type="radio" name="template" value="apple_minimal" {{ old('template', $banner->template) == 'apple_minimal' ? 'checked' : '' }}>
                                 <span class="tpl-check"><i class="fas fa-check"></i></span>
                                 <div class="tpl-thumb tpl-apple">iPhone 15 Pro</div>
                                 <div class="tpl-name">Apple Minimal</div>
                             </label>
                             <label class="tpl-card" data-template="xiaomi_orange">
-                                <input type="radio" name="template" value="xiaomi_orange">
+                                <input type="radio" name="template" value="xiaomi_orange" {{ old('template', $banner->template) == 'xiaomi_orange' ? 'checked' : '' }}>
                                 <span class="tpl-check"><i class="fas fa-check"></i></span>
                                 <div class="tpl-thumb tpl-xiaomi">Camera đỉnh cao</div>
                                 <div class="tpl-name">Xiaomi Orange</div>
@@ -877,19 +877,19 @@
                         </div>
                         <div class="tpl-page" data-page="1">
                             <label class="tpl-card" data-template="gaming_rgb">
-                                <input type="radio" name="template" value="gaming_rgb">
+                                <input type="radio" name="template" value="gaming_rgb" {{ old('template', $banner->template) == 'gaming_rgb' ? 'checked' : '' }}>
                                 <span class="tpl-check"><i class="fas fa-check"></i></span>
                                 <div class="tpl-thumb tpl-gaming">Gaming Monster</div>
                                 <div class="tpl-name">Gaming RGB</div>
                             </label>
                             <label class="tpl-card" data-template="flash_sale_red">
-                                <input type="radio" name="template" value="flash_sale_red">
+                                <input type="radio" name="template" value="flash_sale_red" {{ old('template', $banner->template) == 'flash_sale_red' ? 'checked' : '' }}>
                                 <span class="tpl-check"><i class="fas fa-check"></i></span>
                                 <div class="tpl-thumb tpl-flash">FLASH SALE<br>Giảm đến 70%</div>
                                 <div class="tpl-name">Flash Sale Red</div>
                             </label>
                             <label class="tpl-card" data-template="lifestyle_clean">
-                                <input type="radio" name="template" value="lifestyle_clean">
+                                <input type="radio" name="template" value="lifestyle_clean" {{ old('template', $banner->template) == 'lifestyle_clean' ? 'checked' : '' }}>
                                 <span class="tpl-check"><i class="fas fa-check"></i></span>
                                 <div class="tpl-thumb tpl-lifestyle">Lifestyle Clean</div>
                                 <div class="tpl-name">Lifestyle Clean</div>
@@ -923,8 +923,8 @@
                     <div class="form-group" style="margin-bottom:0">
                         <label>Ảnh Desktop *</label>
                         <div class="image-upload-box" id="box_custom_desktop">
-                            <img id="preview_custom_desktop" style="display:none">
-                            <div class="image-upload-placeholder" id="placeholder_custom_desktop">
+                            <img id="preview_custom_desktop" src="{{ $banner->image ?? '' }}" style="display:{{ $banner->image ? 'block' : 'none' }}">
+                            <div class="image-upload-placeholder" id="placeholder_custom_desktop" style="display:{{ $banner->image ? 'none' : 'flex' }}">
                                 <i class="fas fa-image"></i>
                                 <span>Thay đổi</span>
                             </div>
@@ -936,8 +936,8 @@
                     <div class="form-group" style="margin-bottom:0">
                         <label>Ảnh Mobile (tùy chọn)</label>
                         <div class="image-upload-box" id="box_custom_mobile">
-                            <img id="preview_custom_mobile" style="display:none">
-                            <div class="image-upload-placeholder" id="placeholder_custom_mobile">
+                            <img id="preview_custom_mobile" src="{{ $banner->image_mobile ?? '' }}" style="display:{{ $banner->image_mobile ? 'block' : 'none' }}">
+                            <div class="image-upload-placeholder" id="placeholder_custom_mobile" style="display:{{ $banner->image_mobile ? 'none' : 'flex' }}">
                                 <i class="fas fa-image"></i>
                                 <span>Thay đổi</span>
                             </div>
@@ -951,32 +951,32 @@
                 <div class="form-group">
                     <label>Layout</label>
                     <select name="custom_layout" id="f_custom_layout" class="form-control">
-                        <option value="text_left">Text trái - Ảnh phải</option>
-                        <option value="text_right">Text phải - Ảnh trái</option>
-                        <option value="text_center">Text giữa - Ảnh nền</option>
+                        <option value="text_left" {{ old('custom_layout', $banner->layout ?? 'text_left') == 'text_left' ? 'selected' : '' }}>Text trái - Ảnh phải</option>
+                        <option value="text_right" {{ old('custom_layout', $banner->layout) == 'text_right' ? 'selected' : '' }}>Text phải - Ảnh trái</option>
+                        <option value="text_center" {{ old('custom_layout', $banner->layout) == 'text_center' ? 'selected' : '' }}>Text giữa - Ảnh nền</option>
                     </select>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Màu nền</label>
                         <div class="color-field">
-                            <input type="color" id="f_custom_bg" value="#0B1020">
-                            <input type="text" name="custom_bg_color" id="f_custom_bg_text" value="#0B1020">
+                            <input type="color" id="f_custom_bg" value="{{ old('custom_bg_color', $banner->bg_color ?? '#0B1020') }}">
+                            <input type="text" name="custom_bg_color" id="f_custom_bg_text" value="{{ old('custom_bg_color', $banner->bg_color ?? '#0B1020') }}">
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Màu chữ</label>
                         <div class="color-field">
-                            <input type="color" id="f_custom_text" value="#FFFFFF">
-                            <input type="text" name="custom_text_color" id="f_custom_text_text" value="#FFFFFF">
+                            <input type="color" id="f_custom_text" value="{{ old('custom_text_color', $banner->text_color ?? '#FFFFFF') }}">
+                            <input type="text" name="custom_text_color" id="f_custom_text_text" value="{{ old('custom_text_color', $banner->text_color ?? '#FFFFFF') }}">
                         </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Màu nút</label>
                     <div class="color-field" style="max-width:220px">
-                        <input type="color" id="f_custom_btn" value="#2563EB">
-                        <input type="text" name="custom_btn_color" id="f_custom_btn_text" value="#2563EB">
+                        <input type="color" id="f_custom_btn" value="{{ old('custom_btn_color', $banner->btn_color ?? '#2563EB') }}">
+                        <input type="text" name="custom_btn_color" id="f_custom_btn_text" value="{{ old('custom_btn_color', $banner->btn_color ?? '#2563EB') }}">
                     </div>
                 </div>
                 <div class="form-group" style="margin-bottom:0">
@@ -1000,7 +1000,7 @@
                         <button type="button" class="align-btn" data-align="center" title="Căn giữa"><i class="fas fa-align-center"></i></button>
                         <button type="button" class="align-btn" data-align="right" title="Căn phải"><i class="fas fa-align-right"></i></button>
                     </div>
-                    <input type="hidden" name="text_align" id="f_text_align" value="left">
+                    <input type="hidden" name="text_align" id="f_text_align" value="{{ old('text_align', $banner->text_align ?? 'left') }}">
                 </div>
 
                 <div class="form-group">
@@ -1062,11 +1062,17 @@
                         <button type="button" class="mt-btn active" data-media="image">Ảnh</button>
                         <button type="button" class="mt-btn" data-media="video">Video</button>
                     </div>
-                    <input type="hidden" name="media_type" id="f_media_type" value="image">
+                    <input type="hidden" name="media_type" id="f_media_type" value="{{ old('media_type', $banner->media_type ?? 'image') }}">
 
                     <input type="file" name="image" id="f_image" accept="image/*"
-                        class="form-control @error('image') is-invalid @enderror">
-                    @error('image')<div class="invalid-feedback" id="f_image-error">{{ $message }}</div>@enderror
+                          class="form-control @error('image') is-invalid @enderror">
+                      @if($banner->image && $banner->creation_method === 'upload')
+                          <div class="mt-2" id="preview_upload_image">
+                              <img src="{{ $banner->image }}" style="max-height: 120px; border-radius: 8px; border: 1px solid #ddd; padding: 4px;">
+                              <div style="font-size: 11px; color: #666; margin-top: 4px;">Ảnh hiện tại</div>
+                          </div>
+                      @endif
+                      @error('image')<div class="invalid-feedback" id="f_image-error">{{ $message }}</div>@enderror
 
                     <input type="file" name="video" id="f_video" accept="video/mp4,.mp4" style="display:none"
                         class="form-control @error('video') is-invalid @enderror">
@@ -1487,6 +1493,35 @@ Hiệu năng vượt trội.</div>
     bindButtonText();
 
     applyTemplateStyle();
+
+    // Trigger initialization for creation_method so the tabs sync correctly on edit
+    const checkedMethod = document.querySelector('input[name=creation_method]:checked');
+    if (checkedMethod) {
+        checkedMethod.dispatchEvent(new Event('change'));
+    }
+    
+    // Sync UI buttons on load
+    const textAlignVal = document.getElementById('f_text_align').value;
+    const alignBtn = document.querySelector(`.align-btn[data-align="${textAlignVal}"]`);
+    if (alignBtn) alignBtn.click(); // Trigger click to apply classes and sync previews
+
+    const mediaTypeVal = document.getElementById('f_media_type').value;
+    const mediaBtn = document.querySelector(`.mt-btn[data-media="${mediaTypeVal}"]`);
+    if (mediaBtn) mediaBtn.click();
+
+    // Sync template selection visually on load
+    const checkedTemplate = document.querySelector('input[name=template]:checked');
+    if (checkedTemplate) {
+        document.querySelectorAll('.tpl-card').forEach(card => {
+            card.classList.remove('active');
+            if (card.querySelector('input').value === checkedTemplate.value) {
+                card.classList.add('active');
+            }
+        });
+        
+        // Ensure preview logic applies the selected template correctly
+        applyTemplateStyle(); 
+    }
 
     // ---- Banner thủ công: upload ảnh Desktop/Mobile ----
     function bindCustomImageUpload(boxId, inputId, imgId, placeholderId, onLoad) {

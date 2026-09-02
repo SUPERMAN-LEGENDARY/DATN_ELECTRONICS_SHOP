@@ -56,6 +56,11 @@ class Event extends Model
             return 'summer';
         }
 
+        if (str_contains($titleLower, 'flash sale') || str_contains($tagLower, 'flash sale')) {
+            return 'flash_sale';
+        } elseif (str_contains($titleLower, 'quốc khánh') || str_contains($titleLower, '2/9') || str_contains($tagLower, 'quốc khánh')) {
+            return 'national_day';
+        }
         return 'none';
     }
 

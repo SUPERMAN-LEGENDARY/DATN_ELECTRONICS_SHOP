@@ -456,6 +456,7 @@
    MESSAGES & BUBBLES
    ============================================================ */
 #ai-chat-messages {
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -781,13 +782,20 @@
     overflow-x: auto;
     padding: 10px 16px 4px;
     margin: 4px -16px 0;
-    scrollbar-width: none;
+    scrollbar-width: thin;
     -webkit-overflow-scrolling: touch;
     flex-shrink: 0;
-}
+ padding-bottom: 12px;}
 
 #ai-quick-chips::-webkit-scrollbar {
-    display: none;
+    height: 5px;
+}
+#ai-quick-chips::-webkit-scrollbar-track {
+    background: transparent;
+}
+#ai-quick-chips::-webkit-scrollbar-thumb {
+    background: var(--ai-line-dark);
+    border-radius: 4px;
 }
 
 .ai-chip {
@@ -941,6 +949,24 @@
 
     // Session token
     const SESSION_TOKEN_KEY = 'ai_chat_session_token';
+    const CHAT_HISTORY_KEY  = 'ai_chat_history';
+    
+    function saveChatHistory() {
+        if (messages) sessionStorage.setItem(CHAT_HISTORY_KEY, messages.innerHTML);
+    }
+    
+    function loadChatHistory() {
+        const saved = sessionStorage.getItem(CHAT_HISTORY_KEY);
+        if (saved && saved.trim() !== '') {
+            messages.innerHTML = saved;
+            // Only hide chips if the user has actually sent at least one message
+            if (chips && messages.querySelector('.user')) {
+                chips.style.display = 'none';
+            }
+        }
+    }
+    loadChatHistory();
+
     function getSessionToken() {
         let token = localStorage.getItem(SESSION_TOKEN_KEY);
         if (!token) {
@@ -990,6 +1016,7 @@
     function resetChat() {
         messages.innerHTML = '';
         localStorage.removeItem(SESSION_TOKEN_KEY);
+        sessionStorage.removeItem(CHAT_HISTORY_KEY);
         if (chips) chips.style.display = 'flex';
         appendBot('Xin chào! Cuộc trò chuyện đã được làm mới. Em có thể giúp gì cho anh/chị ạ?');
     }
@@ -1057,6 +1084,7 @@
         row.innerHTML = `<div class="ai-msg-bubble">${escapeHtml(text)}</div>`;
         messages.appendChild(row);
         scrollDown();
+        saveChatHistory();
     }
 
     function appendBot(text, products = []) {
@@ -1096,6 +1124,7 @@
                     renderProducts(bubble, products);
                 }
                 scrollDown();
+                saveChatHistory();
             }
         }
         typeChar();
@@ -1108,132 +1137,3 @@
         products.forEach(p => {
             const item = document.createElement('a');
             item.href = `{{ url('san-pham') }}/${p.slug}`;
-            item.className = 'ai-product-item';
-
-            const displayPrice = p.has_price_range ? p.min_price : p.price;
-            const pricePrefix = p.has_price_range ? 'Từ ' : '';
-
-            const thumb = p.thumbnail
-                ? '/storage/' + p.thumbnail.replace(/^\/?storage\//, '')
-                : '/images/no-image.png';
-
-            item.innerHTML = `
-                <img src="${thumb}" alt="${escapeHtml(p.name)}" loading="lazy">
-                <div class="ai-product-info">
-                    <span class="ai-product-name">${escapeHtml(p.name)}</span>
-                    <div class="ai-product-price-row">
-                        <span class="ai-product-price">${pricePrefix}${Math.round(displayPrice).toLocaleString('vi-VN')}đ</span>
-                        ${(!p.has_price_range && p.is_on_sale) ? `<span class="ai-product-list-price">${Math.round(p.list_price).toLocaleString('vi-VN')}đ</span>` : ''}
-                    </div>
-                </div>
-                <span class="ai-product-action-arrow" title="Xem chi tiết">
-                    <i class="fas fa-arrow-right"></i>
-                </span>
-            `;
-            container.appendChild(item);
-        });
-
-        parentBubble.appendChild(container);
-        scrollDown();
-    }
-
-    /* ============================================================
-       DYNAMIC THINKING & STATUS ROTATION (ĐÁNH LỪA THỊ GIÁC)
-       ============================================================ */
-    let typingInterval = null;
-    const typingStages = [
-        { icon: 'fas fa-magnifying-glass', text: 'Đang tìm kiếm thông tin sản phẩm...' },
-        { icon: 'fas fa-microchip', text: 'Đang phân tích & đối chiếu thông số...' },
-        { icon: 'fas fa-pen-fancy', text: 'Trợ lý AI đang soạn câu trả lời...' }
-    ];
-
-    function showTyping() {
-        hideTyping();
-        const row = document.createElement('div');
-        row.className = 'ai-msg-row bot ai-typing-row';
-        row.id = 'ai-typing-row';
-        row.innerHTML = `
-            <div class="ai-bot-msg-icon ai-pulse-anim"><i class="fas fa-robot"></i></div>
-            <div class="ai-thinking-box">
-                <div class="ai-thinking-header">
-                    <span class="ai-thinking-icon"><i class="fas fa-magnifying-glass"></i></span>
-                    <span class="ai-thinking-text">Đang tìm kiếm thông tin sản phẩm...</span>
-                    <span class="ai-thinking-dots">
-                        <span></span><span></span><span></span>
-                    </span>
-                </div>
-                <div class="ai-thinking-bar"><div class="ai-thinking-progress"></div></div>
-            </div>
-        `;
-        messages.appendChild(row);
-        scrollDown();
-
-        let stageIdx = 0;
-        const iconEl = row.querySelector('.ai-thinking-icon i');
-        const textEl = row.querySelector('.ai-thinking-text');
-
-        // Xoay vòng các trạng thái thông minh để tạo cảm giác AI đang xử lý thực tế
-        typingInterval = setInterval(() => {
-            stageIdx = (stageIdx + 1) % typingStages.length;
-            const stage = typingStages[stageIdx];
-            if (textEl && iconEl) {
-                textEl.style.opacity = '0';
-                setTimeout(() => {
-                    iconEl.className = stage.icon;
-                    textEl.textContent = stage.text;
-                    textEl.style.opacity = '1';
-                }, 200);
-            }
-        }, 1600);
-    }
-
-    function hideTyping() {
-        if (typingInterval) {
-            clearInterval(typingInterval);
-            typingInterval = null;
-        }
-        document.getElementById('ai-typing-row')?.remove();
-    }
-
-    /* Submit Form */
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (isSending) return;
-        const text = input.value.trim();
-        if (!text) return;
-
-        if (chips) chips.style.display = 'none';
-
-        appendUser(text);
-        input.value = '';
-        setSendingState(true);
-        showTyping();
-
-        try {
-            const res = await fetch('{{ route('chatbot.send') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({ message: text, session_token: getSessionToken() }),
-            });
-            const data = await res.json();
-            hideTyping();
-
-            if (!res.ok) {
-                appendBot(data.error || 'Có lỗi xảy ra, vui lòng thử lại.');
-                return;
-            }
-            appendBot(data.reply, data.products || []);
-        } catch (err) {
-            hideTyping();
-            appendBot('Không thể kết nối tới máy chủ, vui lòng thử lại sau.');
-        } finally {
-            setSendingState(false);
-            input.focus();
-        }
-    });
-})();
-</script>

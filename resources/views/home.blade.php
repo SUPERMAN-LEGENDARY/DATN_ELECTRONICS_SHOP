@@ -196,7 +196,7 @@
 .sm-slide-desc  { font-size: clamp(14px, 1.2vw, 17px); line-height: 1.6; margin: 0 0 16px; opacity: .82; max-width: 46ch; }
 .sm-slide-price { font-family: 'Manrope', sans-serif; font-size: clamp(18px, 1.8vw, 26px); font-weight: 800; margin-bottom: 22px; }
 .sm-slide-visual { display: flex; justify-content: center; }
-.sm-slide-visual img { max-height: clamp(260px, 34vw, 480px); width: auto; object-fit: contain; filter: drop-shadow(0 30px 60px rgba(0,0,0,.22)); }
+.sm-slide-visual img { max-height: clamp(260px, 34vw, 480px); width: auto; object-fit: contain; filter: drop-shadow(0 30px 60px rgba(0,0,0,.22)); border-radius: 20px; }
 
 .sm-slide-ph {
     display: flex; align-items: center; justify-content: center;
@@ -205,11 +205,50 @@
 }
 
 /* Banner Dynamic Styles */
+  .sm-slide.tpl-samsung_dark { background: #0B1020; color: #fff; }
 .sm-slide.tpl-apple_minimal { background: linear-gradient(120deg,#f7f7f7,#e9e9e9); color:#222; }
 .sm-slide.tpl-xiaomi_orange { background: linear-gradient(120deg,#ff8a2b,#ff5a00); color:#fff; }
 .sm-slide.tpl-gaming_rgb { background: linear-gradient(120deg,#150826,#3a0ca3); color:#fff; }
 .sm-slide.tpl-flash_sale_red { background: linear-gradient(120deg,#7a0000,#c0392b); color:#fff; }
 .sm-slide.tpl-lifestyle_clean { background: linear-gradient(120deg,#e7ddc9,#c9b697); color:#3a2f22; }
+.sm-slide.tpl-national_day { 
+    background: linear-gradient(135deg, #da251d 0%, #a00b05 100%); 
+    color: #ffff00; 
+}
+.sm-slide.tpl-national_day .sm-slide-title {
+    color: #ffff00 !important;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    font-size: clamp(36px, 5vw, 64px) !important;
+}
+.sm-slide.tpl-national_day .sm-slide-label {
+    background: #ffff00;
+    color: #da251d !important;
+    font-weight: 900;
+    padding: 6px 12px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+.sm-slide.tpl-national_day .sm-slide-price {
+    font-size: 48px;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
+    margin: 20px 0;
+}
+.sm-slide.tpl-national_day .sm-btn {
+    background: linear-gradient(90deg, #f59e0b, #d97706) !important;
+    color: #fff !important;
+    border: none !important;
+    font-size: 20px;
+    padding: 15px 40px;
+    border-radius: 50px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    text-transform: uppercase;
+    font-weight: 900;
+}
+
 
 .sm-slide.has-video-bg { background: #000; }
 .sm-slide.has-video-bg .sm-slide-visual { display: none; }
@@ -231,6 +270,10 @@
 .sm-slide-content.layout-text_right { display: flex; justify-content: flex-end; text-align: right; }
 .sm-slide-content.layout-text_right .sm-slide-text { max-width: 60%; width: 100%; }
 .sm-slide-content.layout-text_right .sm-slide-btn { margin-left: auto; }
+  
+  .sm-slide-content.layout-split-right { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center; text-align: right; }
+  .sm-slide-content.layout-split-right .sm-slide-text { order: 2; }
+  .sm-slide-content.layout-split-right .sm-slide-visual { order: 1; justify-content: flex-start; }
 
 .sm-slide-text { position: relative; z-index: 3; }
 .sm-slide-visual { position: relative; z-index: 3; }
@@ -291,18 +334,19 @@
     gap: clamp(24px, 5vw, 80px); align-items: center;
 }
 .sm-showcase-visual {
-    position: relative;
-    aspect-ratio: 4/5;
-    border-radius: var(--sm-radius); overflow: hidden;
-    background: var(--sm-surface);
-    display: flex; align-items: center; justify-content: center;
-}
+      position: relative;
+      aspect-ratio: 4/5;
+      border-radius: 20px;
+      background: #ffffff;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      display: flex; align-items: center; justify-content: center;
+  }
 .sm-showcase-visual img {
-    position: absolute; inset: 0; width: 100%; height: 100%;
-    object-fit: contain; padding: 8%;
-    opacity: 0; transform: scale(.94);
-    transition: opacity .7s var(--sm-ease), transform .7s var(--sm-ease);
-}
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: contain; padding: 0; mix-blend-mode: multiply;
+      opacity: 0; transform: scale(.94);
+      transition: opacity .7s var(--sm-ease), transform .7s var(--sm-ease);
+  }
 .sm-showcase-visual img.on { opacity: 1; transform: scale(1); }
 
 /* Steps xếp chồng, fade in/out */
@@ -578,9 +622,7 @@
 .sm-product-price { font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: -.02em; color: var(--sm-black); }
 .sm-stars { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12.5px; color: #ffb400; letter-spacing: 1px; }
 .sm-stars span { color: #8c8c8c; letter-spacing: 0; }
-.sm-product-buy {
-    margin-top: 16px;
-}
+.sm-product-buy { margin-top: auto; padding-top: 16px; }
 /* Hover removed to keep buttons always visible */
 /* Media removed */
 
@@ -844,12 +886,22 @@
                     $isBgImage = false;
                     $isVisualImage = false;
 
-                    if ($banner->creation_method === 'template' && $banner->template) {
-                        $slideClasses .= 'tpl-' . $banner->template . ' ';
-                        $isVisualImage = true;
+                    if ($banner->creation_method === 'template') {
+                        if ($banner->template) {
+                            $slideClasses .= 'tpl-' . $banner->template . ' ';
+                        } else {
+                            $isBgImage = true; // custom uploaded background template
+                        }
+                        $isVisualImage = false; // Templates never have a visual foreground image
                     } else {
-                        // Custom and Upload default to background image
-                        $isBgImage = true;
+                        // Custom logic based on layout
+                        if ($banner->layout === 'text_center') {
+                            $isBgImage = true;
+                            $isVisualImage = false;
+                        } else {
+                            $isBgImage = false;
+                            $isVisualImage = true;
+                        }
                     }
 
                     // Promo banners ALWAYS show image on the side (visual), not as background
@@ -879,7 +931,12 @@
                     if ($banner->text_align) $textStyle .= 'text-align:'.$banner->text_align.';';
                     
                     // If it has a visual image, it MUST use layout-split (grid 50/50)
-                    $layoutClass = $isVisualImage ? 'layout-split' : ($banner->layout ? 'layout-'.$banner->layout : 'layout-text_left');
+                    if ($isVisualImage) {
+                        $layoutClass = ($banner->layout === 'text_right') ? 'layout-split-right' : 'layout-split';
+                    } else {
+                        $layoutClass = $banner->layout ? 'layout-'.$banner->layout : 'layout-text_left';
+                        
+                    }
                 @endphp
                 <div class="{{ $slideClasses }}" data-slide="{{ $i }}" style="{{ $bgStyle }}">
                     @if($banner->creation_method === 'custom' && $banner->media_type === 'video' && $banner->video)
@@ -896,11 +953,18 @@
                             @if($banner->description)
                             <p class="sm-slide-desc">{{ $banner->description }}</p>
                             @endif
-                            @if($banner->price_text)
+                            @if($banner->price)
+                            <div class="sm-slide-price">
+                                <span>{{ number_format($banner->price, 0, ',', '.') }}đ</span>
+                                @if($banner->compare_price && $banner->compare_price > $banner->price)
+                                <del style="font-size:0.6em; opacity:0.65; margin-left:8px; font-weight:normal;">{{ number_format($banner->compare_price, 0, ',', '.') }}đ</del>
+                                @endif
+                            </div>
+                            @elseif($banner->price_text)
                             <div class="sm-slide-price">{{ $banner->price_text }}</div>
                             @endif
                             @if($banner->button_text)
-                            <a href="{{ $banner->button_link ?: '#' }}" class="sm-btn sm-btn--dark">{{ $banner->button_text }}</a>
+                            <a href="{{ $banner->button_link ?: '#' }}" class="sm-btn sm-btn--dark" style="{{ $banner->btn_color ? 'background-color:'.$banner->btn_color.'; border-color:'.$banner->btn_color.';' : '' }}">{{ $banner->button_text }}</a>
                             @endif
                         </div>
                         <div class="sm-slide-visual">
@@ -1193,13 +1257,23 @@
                             $cardEvent = $product->getActiveEvent();
                         @endphp
                         @if($cardEvent)
+
                             <div class="sm-product-event-tree">
-                                @if($cardEvent->theme_effect == 'christmas') 🎄
-                                @elseif($cardEvent->theme_effect == 'tet') 🏮
-                                @elseif($cardEvent->theme_effect == 'womens_day') 🌸
-                                @elseif($cardEvent->theme_effect == 'summer') 🌴
+                                @if($cardEvent->theme_effect == 'christmas')
+                                    <img src="{{ asset('storage/events/event-icon-christmas.png') }}" alt="Giáng sinh" class="event-theme-icon" onerror="this.style.display='none'">
+                                @elseif($cardEvent->theme_effect == 'tet')
+                                    <img src="{{ asset('storage/events/event-icon-tet.png') }}" alt="Tết" class="event-theme-icon" onerror="this.style.display='none'">
+                                @elseif($cardEvent->theme_effect == 'womens_day')
+                                    <img src="{{ asset('storage/events/event-icon-womens-day.png') }}" alt="Quốc tế phụ nữ" class="event-theme-icon" onerror="this.style.display='none'">
+                                @elseif($cardEvent->theme_effect == 'summer')
+                                    <img src="{{ asset('storage/events/event-icon-summer.png') }}" alt="Mùa hè" class="event-theme-icon" onerror="this.style.display='none'">
+                                @elseif($cardEvent->theme_effect == 'flash_sale')
+                                    <img src="{{ asset('storage/events/event-icon-flash-sale.png') }}" alt="Flash sale" class="event-theme-icon" onerror="this.style.display='none'">
+                                @elseif($cardEvent->theme_effect == 'national_day')
+                                    <img src="{{ asset('storage/events/event-icon-national-day.png') }}" alt="Quốc khánh" class="event-theme-icon" onerror="this.style.display='none'">
                                 @endif
                             </div>
+
                             <div class="sm-product-event-banner"><div class="marquee-wrap"><div class="marquee-inner">✨ {{ mb_strtoupper($cardEvent->title, "UTF-8") }} ✨</div></div></div>
                         @endif
 
@@ -1225,7 +1299,24 @@
                         </div>
                         <div class="sm-product-brand">{{ $product->brand->name ?? '' }}</div>
                         <div class="sm-product-name">{{ $product->name }}</div>
-                        <div class="sm-product-price">{{ number_format($product->sale_price > 0 ? $product->sale_price : $product->price) }}đ</div>
+                        <div class="sm-product-price">
+                            @if($product->has_price_range)
+                                Từ {{ number_format($product->min_price) }}đ
+                                @if($product->discount_percent > 0)
+                                    <span style="font-size: 14px; color: #8c8c8c; text-decoration: line-through; font-weight: normal; margin-left: 8px;">{{ number_format($product->original_min_price) }}đ</span>
+                                @endif
+                            @else
+                                @php
+                                    $finalPrice = $product->discount_percent > 0 ? $product->price * (1 - $product->discount_percent / 100) : ($product->sale_price > 0 ? $product->sale_price : $product->price);
+                                    $originalPrice = $product->price;
+                                    $hasDiscount = $product->discount_percent > 0 || ($product->sale_price > 0 && $product->sale_price < $product->price);
+                                @endphp
+                                {{ number_format($finalPrice) }}đ
+                                @if($hasDiscount)
+                                    <span style="font-size: 14px; color: #8c8c8c; text-decoration: line-through; font-weight: normal; margin-left: 8px;">{{ number_format($originalPrice) }}đ</span>
+                                @endif
+                            @endif
+                        </div>
                         <div class="sm-product-buy">
                             
                             <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
@@ -1292,10 +1383,18 @@
                         @endphp
                         @if($cardEvent)
                             <div class="sm-product-event-tree">
-                                @if($cardEvent->theme_effect == 'christmas') 🎄
-                                @elseif($cardEvent->theme_effect == 'tet') 🏮
-                                @elseif($cardEvent->theme_effect == 'womens_day') 🌸
-                                @elseif($cardEvent->theme_effect == 'summer') 🌴
+                                                                @if($cardEvent->theme_effect == 'christmas')
+                                    <img src="{{ asset('storage/events/event-icon-christmas.png') }}" alt="Giáng sinh" class="event-theme-icon" onerror="this.style.display='none'">
+                                @elseif($cardEvent->theme_effect == 'tet')
+                                    <img src="{{ asset('storage/events/event-icon-tet.png') }}" alt="Tết" class="event-theme-icon" onerror="this.style.display='none'">
+                                @elseif($cardEvent->theme_effect == 'womens_day')
+                                    <img src="{{ asset('storage/events/event-icon-womens-day.png') }}" alt="Quốc tế phụ nữ" class="event-theme-icon" onerror="this.style.display='none'">
+                                @elseif($cardEvent->theme_effect == 'summer')
+                                    <img src="{{ asset('storage/events/event-icon-summer.png') }}" alt="Mùa hè" class="event-theme-icon" onerror="this.style.display='none'">
+                                @elseif($cardEvent->theme_effect == 'flash_sale')
+                                    <img src="{{ asset('storage/events/event-icon-flash-sale.png') }}" alt="Flash sale" class="event-theme-icon" onerror="this.style.display='none'">
+                                @elseif($cardEvent->theme_effect == 'national_day')
+                                    <img src="{{ asset('storage/events/event-icon-national-day.png') }}" alt="Quốc khánh" class="event-theme-icon" onerror="this.style.display='none'">
                                 @endif
                             </div>
                             <div class="sm-product-event-banner"><div class="marquee-wrap"><div class="marquee-inner">✨ {{ mb_strtoupper($cardEvent->title, "UTF-8") }} ✨</div></div></div>
@@ -1327,7 +1426,24 @@
                         </div>
                         <div class="sm-product-brand">{{ $product->brand->name ?? '' }}</div>
                         <div class="sm-product-name">{{ $product->name }}</div>
-                        <div class="sm-product-price">{{ number_format($product->price) }}đ</div>
+                        <div class="sm-product-price">
+                            @if($product->has_price_range)
+                                Từ {{ number_format($product->min_price) }}đ
+                                @if($product->discount_percent > 0)
+                                    <span style="font-size: 14px; color: #8c8c8c; text-decoration: line-through; font-weight: normal; margin-left: 8px;">{{ number_format($product->original_min_price) }}đ</span>
+                                @endif
+                            @else
+                                @php
+                                    $finalPrice = $product->discount_percent > 0 ? $product->price * (1 - $product->discount_percent / 100) : ($product->sale_price > 0 ? $product->sale_price : $product->price);
+                                    $originalPrice = $product->price;
+                                    $hasDiscount = $product->discount_percent > 0 || ($product->sale_price > 0 && $product->sale_price < $product->price);
+                                @endphp
+                                {{ number_format($finalPrice) }}đ
+                                @if($hasDiscount)
+                                    <span style="font-size: 14px; color: #8c8c8c; text-decoration: line-through; font-weight: normal; margin-left: 8px;">{{ number_format($originalPrice) }}đ</span>
+                                @endif
+                            @endif
+                        </div>
                         <div class="sm-stars">
                             ★★★★★ <span>({{ $product->reviews_count ?? 0 }})</span>
                         </div>
@@ -1648,14 +1764,13 @@
         }
         function next() { go(index + 1); }
         function prev() { go(index - 1); }
-        function auto() { clearInterval(timer); if (!reduce) timer = setInterval(next, 6000); }
+        function auto() { clearInterval(timer); timer = setInterval(next, 6000); }
 
         document.getElementById('smSlideNext')?.addEventListener('click', () => { next(); auto(); });
         document.getElementById('smSlidePrev')?.addEventListener('click', () => { prev(); auto(); });
         dots.forEach((d, k) => d.addEventListener('click', () => { go(k); auto(); }));
 
-        root.addEventListener('mouseenter', () => clearInterval(timer));
-        root.addEventListener('mouseleave', auto);
+        // Hover-to-pause removed to ensure it always auto-slides as requested by user
 
         /* Swipe trên mobile */
         let x0 = null;
@@ -1712,7 +1827,7 @@
         if (steps.length <= 1) return;
 
         /* ⏱ CHỈNH THỜI GIAN Ở ĐÂY (mili-giây) — 5000 = 5 giây */
-        const INTERVAL = 3000;
+        const INTERVAL = 4500;
 
         let index = 0, timer = null;
 
@@ -1738,8 +1853,11 @@
         dots.forEach((d, k) => d.addEventListener('click', () => { go(k); startAuto(); }));
 
         // Hover tạm dừng, rời chuột chạy tiếp
-        section.addEventListener('mouseenter', stopAuto);
-        section.addEventListener('mouseleave', startAuto);
+        const stepsContainer = section.querySelector('.sm-showcase-steps');
+        if (stepsContainer) {
+            stepsContainer.addEventListener('mouseenter', stopAuto);
+            stepsContainer.addEventListener('mouseleave', startAuto);
+        }
 
         // Bắt đầu tự chạy
         startAuto();

@@ -315,12 +315,15 @@ body {
 /* Ribbon */
 .ai-badge-ribbon {
     position: absolute;
-    top: 14px; right: -30px;
+    top: 24px;
+    right: -38px;
+    width: 170px;
+    text-align: center;
     background: linear-gradient(135deg, #f0c14b 0%, #e6a817 100%);
     color: #000;
     font-size: 11px; font-weight: 800;
-    padding: 4px 36px;
-    transform: rotate(35deg);
+    padding: 6px 0;
+    transform: rotate(45deg);
     letter-spacing: .3px;
     box-shadow: 0 2px 8px rgba(240,193,75,.3);
     z-index: 5;
@@ -755,11 +758,13 @@ body {
                         <td class="attribute-name">{{ $attribute->name }}</td>
                         @foreach($products as $product)
                         @php
-                            $value = optional(
-                                $product->attributes
-                                    ->where('attribute_id', $attribute->id)
-                                    ->first()
-                            )->value;
+                            $vals = collect();
+                            if ($b = $product->attributes->where('attribute_id', $attribute->id)->first()) $vals->push($b->value);
+                            foreach($product->variants as $v) {
+                                if ($va = $v->variantAttributes->where('attribute_id', $attribute->id)->first()) $vals->push($va->value);
+                            }
+                            $value = $vals->unique()->implode(', ');
+                            if (empty($value)) $value = null;
                         @endphp
                         <td>{{ $value ?? '-' }}</td>
                         @endforeach
@@ -786,9 +791,13 @@ body {
                 $numericValues = [];
 
                 foreach ($products as $p) {
-                    $rawValue = optional(
-                        $p->attributes->where('attribute_id', $attribute->id)->first()
-                    )->value;
+                    $vals = collect();
+                    if ($b = $p->attributes->where('attribute_id', $attribute->id)->first()) $vals->push($b->value);
+                    foreach($p->variants as $v) {
+                        if ($va = $v->variantAttributes->where('attribute_id', $attribute->id)->first()) $vals->push($va->value);
+                    }
+                    $rawValue = $vals->unique()->implode(', ');
+                    if (empty($rawValue)) $rawValue = null;
 
                     if ($rawValue !== null) {
                         $normalized = preg_replace_callback(

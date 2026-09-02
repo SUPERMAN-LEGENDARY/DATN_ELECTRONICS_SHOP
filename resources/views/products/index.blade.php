@@ -469,11 +469,11 @@ body {
     box-sizing: border-box;
     image-rendering: auto;
     transition: none;
-}
+ mix-blend-mode: multiply; }
 
 .product-card:hover .product-card-img img {
     transform: none;
-}
+ mix-blend-mode: multiply; }
 .img-placeholder { color: #c9c9c9; }
 .product-card-img:has(.img-placeholder) {
     display: flex;
@@ -849,10 +849,18 @@ body {
                         @endphp
                         @if($cardEvent)
                             <div class="sm-product-event-tree">
-                                @if($cardEvent->theme_effect == 'christmas') 🎄
-                                @elseif($cardEvent->theme_effect == 'tet') 🏮
-                                @elseif($cardEvent->theme_effect == 'womens_day') 🌸
-                                @elseif($cardEvent->theme_effect == 'summer') 🌴
+                                                                @if($cardEvent->theme_effect == 'christmas')
+                                    <img src="{{ asset('storage/events/event-icon-christmas.png') }}" alt="Giáng sinh" class="event-theme-icon" onerror="this.style.display='none'">
+                                @elseif($cardEvent->theme_effect == 'tet')
+                                    <img src="{{ asset('storage/events/event-icon-tet.png') }}" alt="Tết" class="event-theme-icon" onerror="this.style.display='none'">
+                                @elseif($cardEvent->theme_effect == 'womens_day')
+                                    <img src="{{ asset('storage/events/event-icon-womens-day.png') }}" alt="Quốc tế phụ nữ" class="event-theme-icon" onerror="this.style.display='none'">
+                                @elseif($cardEvent->theme_effect == 'summer')
+                                    <img src="{{ asset('storage/events/event-icon-summer.png') }}" alt="Mùa hè" class="event-theme-icon" onerror="this.style.display='none'">
+                                @elseif($cardEvent->theme_effect == 'flash_sale')
+                                    <img src="{{ asset('storage/events/event-icon-flash-sale.png') }}" alt="Flash sale" class="event-theme-icon" onerror="this.style.display='none'">
+                                @elseif($cardEvent->theme_effect == 'national_day')
+                                    <img src="{{ asset('storage/events/event-icon-national-day.png') }}" alt="Quốc khánh" class="event-theme-icon" onerror="this.style.display='none'">
                                 @endif
                             </div>
                             <div class="sm-product-event-banner"><div class="marquee-wrap"><div class="marquee-inner">✨ {{ mb_strtoupper($cardEvent->title, "UTF-8") }} ✨</div></div></div>
@@ -883,10 +891,18 @@ body {
                 <div>
                     @if($product->has_price_range)
                         <span class="product-card-price">Từ {{ number_format($product->min_price) }}đ</span>
-                    @else
-                        <span class="product-card-price">{{ number_format($product->price) }}đ</span>
                         @if($product->discount_percent > 0)
-                            <span class="price-strike">{{ number_format($product->price) }}đ</span>
+                            <span class="price-strike">{{ number_format($product->original_min_price) }}đ</span>
+                        @endif
+                    @else
+                        @php
+                            $finalPrice = $product->discount_percent > 0 ? $product->price * (1 - $product->discount_percent / 100) : ($product->sale_price > 0 ? $product->sale_price : $product->price);
+                            $originalPrice = $product->price;
+                            $hasDiscount = $product->discount_percent > 0 || ($product->sale_price > 0 && $product->sale_price < $product->price);
+                        @endphp
+                        <span class="product-card-price">{{ number_format($finalPrice) }}đ</span>
+                        @if($hasDiscount)
+                            <span class="price-strike">{{ number_format($originalPrice) }}đ</span>
                         @endif
                     @endif
                 </div>

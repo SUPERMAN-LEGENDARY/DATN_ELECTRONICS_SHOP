@@ -39,4 +39,22 @@ class OrderItem extends Model
     {
         return $this->hasMany(ProductAttribute::class, 'product_id', 'product_id');
     }
+
+    public function getVariantAttributesTextAttribute(): string
+    {
+        if ($this->variant) {
+            return $this->variant->attributes_text;
+        } elseif ($this->product && $this->product->variants->isNotEmpty()) {
+            $variantAttrIds = \App\Models\ProductVariantAttribute::whereIn('variant_id', $this->product->variants->pluck('id'))->pluck('attribute_id')->unique();
+            if ($variantAttrIds->isNotEmpty()) {
+                return (string) \App\Models\ProductAttribute::where('product_id', $this->product->id)
+                    ->whereIn('attribute_id', $variantAttrIds)
+                    ->get()
+                    ->sortBy('attribute_id')
+                    ->pluck('value')
+                    ->implode(' - ');
+            }
+        }
+        return '';
+    }
 }

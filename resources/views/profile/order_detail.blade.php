@@ -694,7 +694,10 @@
                         @else
                         <span class="product-name" style="cursor:default;color:#94a3b8">{{ $item->product_name }}</span>
                         @endif
-                        <div class="product-qty">
+                        @if($item->variant_attributes_text)
+    <div style="font-size: 12px; color: #666; margin: 4px 0;">Phân loại: {{ $item->variant_attributes_text }}</div>
+    @endif
+    <div class="product-qty">
                             <i class="fas fa-times" style="font-size:10px;margin-right:2px"></i>{{ $item->quantity }}
                         </div>
                     </div>

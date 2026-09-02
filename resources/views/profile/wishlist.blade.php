@@ -447,8 +447,19 @@ body {
                                 <div class="wl-card-price">
                                     @if($product->has_price_range)
                                         Từ {{ number_format($product->min_price) }}đ
+                                        @if($product->discount_percent > 0)
+                                            <span style="font-size: 13px; color: #8c8c8c; text-decoration: line-through; font-weight: normal; margin-left: 6px;">{{ number_format($product->original_min_price) }}đ</span>
+                                        @endif
                                     @else
-                                        {{ number_format($product->sale_price) }}đ
+                                        @php
+                                            $finalPrice = $product->discount_percent > 0 ? $product->price * (1 - $product->discount_percent / 100) : ($product->sale_price > 0 ? $product->sale_price : $product->price);
+                                            $originalPrice = $product->price;
+                                            $hasDiscount = $product->discount_percent > 0 || ($product->sale_price > 0 && $product->sale_price < $product->price);
+                                        @endphp
+                                        {{ number_format($finalPrice) }}đ
+                                        @if($hasDiscount)
+                                            <span style="font-size: 13px; color: #8c8c8c; text-decoration: line-through; font-weight: normal; margin-left: 6px;">{{ number_format($originalPrice) }}đ</span>
+                                        @endif
                                     @endif
                                 </div>
 

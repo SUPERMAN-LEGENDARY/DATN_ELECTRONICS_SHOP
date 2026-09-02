@@ -92,6 +92,16 @@ class ProductVariant extends Model
     // ── Helpers ────────────────────────────────────────────────────
 
     /** Giá bán thực tế của biến thể */
+    
+    public function getAttributesTextAttribute(): string
+    {
+        $attrs = $this->variantAttributes->sortBy('attribute_id')->pluck('value')->implode(' - ');
+        if (empty($attrs) && !empty($this->label)) {
+            $attrs = $this->label;
+        }
+        return (string) $attrs;
+    }
+
     public function getFinalPriceAttribute(): float
     {
         return (float) $this->price;

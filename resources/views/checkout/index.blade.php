@@ -685,9 +685,22 @@
                         @endif
                         <div class="product-info">
                             <p class="name">{{ $it['product']->name }}</p>
-                            @if($it['variant'])
-                            <span class="variant-tag">{{ $it['variant']->label }}</span>
-                            @endif
+                            @php
+        $variantText = '';
+        if ($it['variant']) {
+            $variantText = $it['variant']->attributes_text;
+        } elseif ($it['product'] && $it['product']->variants->isNotEmpty()) {
+            $variantAttrIds = \App\Models\ProductVariantAttribute::whereIn('variant_id', $it['product']->variants->pluck('id'))->pluck('attribute_id')->unique();
+            if ($variantAttrIds->isNotEmpty()) {
+                $variantText = (string) \App\Models\ProductAttribute::where('product_id', $it['product']->id)
+                    ->whereIn('attribute_id', $variantAttrIds)
+                    ->get()->sortBy('attribute_id')->pluck('value')->implode(' - ');
+            }
+        }
+    @endphp
+    @if($variantText)
+    <span class="variant-tag">{{ $variantText }}</span>
+    @endif
                             <span class="meta">{{ number_format($it['price']) }}đ × {{ $it['quantity'] }}</span>
                         </div>
                     </div>

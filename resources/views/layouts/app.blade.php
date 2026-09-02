@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#000000">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name', 'ElectronicShop'))</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
     {{-- CSS Dependencies --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -113,10 +114,68 @@
         }
         
         /* Event-specific Card Glows */
+        .event-theme-icon {
+            width: 85px;
+            height: 85px;
+            object-fit: contain;
+            vertical-align: bottom;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
         .sm-product.theme-christmas, .product-card.theme-christmas { border: 2px solid #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
         .sm-product.theme-tet, .product-card.theme-tet { border: 2px solid #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
         .sm-product.theme-womens_day, .product-card.theme-womens_day { border: 2px solid #ec4899; box-shadow: 0 0 20px rgba(236, 72, 153, 0.3); }
         .sm-product.theme-summer, .product-card.theme-summer { border: 2px solid #eab308; box-shadow: 0 0 20px rgba(234, 179, 8, 0.3); }
+        
+        @keyframes nationalDayPulse {
+            0% { box-shadow: 0 0 15px rgba(218, 37, 29, 0.5); border-color: #da251d; }
+            50% { box-shadow: 0 0 35px rgba(255, 255, 0, 0.9), 0 0 15px rgba(255, 255, 0, 0.6) inset; border-color: #ffff00; }
+            100% { box-shadow: 0 0 15px rgba(218, 37, 29, 0.5); border-color: #da251d; }
+        }
+        @keyframes nationalDayBannerAnim {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes nationalFlagWave {
+            0% { transform: rotate(-5deg) translateY(0px) scale(1); }
+            50% { transform: rotate(5deg) translateY(-2px) scale(1.05); }
+            100% { transform: rotate(-5deg) translateY(0px) scale(1); }
+        }
+        
+        .sm-product.theme-national_day, .product-card.theme-national_day { 
+            border: 2px solid #da251d;
+        }
+        .theme-national_day .sm-product-event-banner { 
+            background: linear-gradient(90deg, #da251d, #ff1a1a, #da251d, #ff1a1a);
+            background-size: 200% 200%;
+            animation: nationalDayBannerAnim 2.5s ease infinite;
+            color: #ffff00;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            font-weight: 900;
+            border-bottom: 2px solid #ffff00;
+            letter-spacing: 0.5px;
+        }
+        .theme-national_day .sm-product-event-tree {
+            animation: nationalFlagWave 1.2s infinite ease-in-out;
+        }
+        
+        @keyframes flashPulse {
+            0% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); border-color: #ff0000; }
+            50% { box-shadow: 0 0 35px rgba(255, 204, 0, 0.9), 0 0 15px rgba(255, 204, 0, 0.5) inset; border-color: #ffcc00; }
+            100% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); border-color: #ff0000; }
+        }
+        @keyframes flashStripes {
+            0% { background-position: 0 0; }
+            100% { background-position: 40px 0; }
+        }
+        @keyframes flashIconShake {
+            0% { transform: rotate(-10deg) scale(1); }
+            100% { transform: rotate(10deg) scale(1.1); }
+        }
+        .sm-product.theme-flash_sale, .product-card.theme-flash_sale { 
+            animation: flashPulse 1s infinite alternate; 
+            border: 2px solid #ff0000;
+        }
 
         .sm-product:hover, .product-card:hover { transform: translateY(-4px); }
         
@@ -153,46 +212,21 @@
             animation: seesawExtreme 0.5s ease-in-out infinite, textBlinkExtreme 1s infinite;
         }
 
-        /* 2. Bloom Animation for Decor - EXTREME */
-        @keyframes bloomExtreme {
-            0%, 100% { transform: scale(0.8) rotate(-10deg); }
-            50% { transform: scale(1.4) rotate(10deg); }
+        /* 2. Pulse Animation for Decor */
+        @keyframes pulseGentle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
-
+        
         .sm-product-event-tree {
             position: absolute;
-            bottom: -2px;
-            left: 0px;
-            font-size: 55px;
-            z-index: 20;
-            line-height: 1;
-            pointer-events: none;
-            filter: drop-shadow(4px 6px 8px rgba(0,0,0,0.6));
-            animation: bloomExtreme 1.5s ease-in-out infinite;
-            transform-origin: center center;
+            bottom: -16px;
+            left: 2px;
+            z-index: 30;
+            animation: pulseGentle 1.5s ease-in-out infinite;
         }
 
         /* 3. CLEAN FLAT RIBBON & SMART MARQUEE */
-        .sm-product-event-banner {
-            position: absolute;
-            bottom: 12px;
-            left: 20px; /* Behind flower */
-            right: 15px; 
-            height: 28px;
-            background: #e11d48; /* Solid clean crimson */
-            color: #fff;
-            font-size: 11px;
-            font-weight: 800;
-            z-index: 15;
-            pointer-events: none;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            /* Swallowtail cut on the right */
-            clip-path: polygon(10px 0, 100% 0, calc(100% - 12px) 50%, 100% 100%, 0 100%);
-            /* Unroll animation */
-            animation: carpetUnrollWidth 1s cubic-bezier(0.1, 0.9, 0.2, 1) 0.5s both;
-        }
-
         @keyframes carpetUnrollWidth {
             0% { max-width: 0; opacity: 0; }
             10% { opacity: 1; }
@@ -229,11 +263,49 @@
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
         }
+        
+        .sm-product-event-banner {
+            position: absolute;
+            bottom: 12px;
+            left: 45px; /* Pushed right to avoid covering text */
+            right: 15px; 
+            height: 28px;
+            background: #e11d48; /* Solid clean crimson */
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            z-index: 15;
+            display: flex;
+            align-items: center;
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            overflow: hidden;
+            letter-spacing: 0.5px;
+            /* Straight cut on the left (0 0), Swallowtail cut on the right */
+            clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 50%, 100% 100%, 0 100%);
+            /* Unroll animation */
+            animation: carpetUnrollWidth 1s cubic-bezier(0.1, 0.9, 0.2, 1) 0.5s both;
+        }
 
         /* Banner specific colors */
         .theme-womens_day .sm-product-event-banner { background: #ec4899; }
         .theme-summer .sm-product-event-banner { background: #f59e0b; color: #fff; }
+        .theme-flash_sale .sm-product-event-banner { 
+            background: repeating-linear-gradient(45deg, #ff0000, #ff0000 10px, #ff4500 10px, #ff4500 20px);
+            background-size: 28px 28px;
+            animation: flashStripes 0.6s linear infinite;
+            color: #fff;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            font-weight: 900;
+            border-bottom: 2px solid #ffcc00;
+        }
+        .theme-flash_sale .sm-product-event-tree {
+            animation: flashIconShake 0.3s infinite alternate;
+            filter: drop-shadow(0 0 5px rgba(255,204,0,0.8));
+        }
         .theme-christmas .sm-product-event-banner, .theme-tet .sm-product-event-banner { background: #e11d48; }
+        
         /* ===== Scrollbar (mảnh, kiểu Samsung) ===== */
         ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { background: #f2f2f2; }
@@ -773,9 +845,7 @@
                 <a href="{{ route('cart.index') }}" class="sm-icon-btn" aria-label="Giỏ hàng">
                     <i class="bi bi-cart2"></i>
                     @php $cartCount = session('cart') ? count(session('cart')) : 0; @endphp
-                    @if($cartCount > 0)
-                    <span class="sm-cart-badge">{{ $cartCount }}</span>
-                    @endif
+                    <span class="sm-cart-badge" id="headerCartBadge" style="display: {{ $cartCount > 0 ? 'flex' : 'none' }}">{{ $cartCount }}</span>
                 </a>
 
                 @auth

@@ -70,9 +70,17 @@ class CompareController extends Controller
             $numericValues = [];
 
             foreach ($products as $p) {
-                $rawValue = optional(
-                    $p->attributes->where('attribute_id', $attribute->id)->first()
-                )->value;
+                $values = collect();
+                    if ($baseAttr = $p->attributes->where('attribute_id', $attribute->id)->first()) {
+                        $values->push($baseAttr->value);
+                    }
+                    foreach ($p->variants as $v) {
+                        if ($varAttr = $v->variantAttributes->where('attribute_id', $attribute->id)->first()) {
+                            $values->push($varAttr->value);
+                        }
+                    }
+                    $rawValue = $values->unique()->implode(', ');
+                    if (empty($rawValue)) $rawValue = null;
 
                 if ($rawValue !== null) {
                     // Chuẩn hóa TB -> GB
@@ -96,9 +104,8 @@ class CompareController extends Controller
                 $maxVal = max($numericValues);
                 $winners = array_filter($numericValues, fn($v) => $v == $maxVal);
 
-                if (count($winners) === 1) {
-                    $winnerId = array_key_first($winners);
-                    $specWins[$winnerId]++;
+                foreach ($winners as $id => $val) {
+                    $specWins[$id]++;
                 }
             }
         }
@@ -130,9 +137,7 @@ class CompareController extends Controller
         $priceScores = [];
         foreach ($prices as $id => $price) {
             // Nếu giá bằng nhau → tất cả 100 điểm
-            $priceScores[$id] = $priceRange > 0
-                ? round((1 - ($price - $minPrice) / $priceRange) * 100)
-                : 100;
+            $priceScores[$id] = $price > 0 ? round(($minPrice / $price) * 100) : 100;
         }
 
         // ── 4. ĐIỂM PHỔ BIẾN (popularityScore) ──────────────────
@@ -258,7 +263,8 @@ class CompareController extends Controller
 
             // Nếu không có lý do nào → fallback từ attributes thật
             if (empty($reasons)) {
-                foreach ($p->attributes->take(2) as $attr) {
+                $combinedAttrs = $p->attributes->concat($p->variants->flatMap->variantAttributes)->unique('attribute_id');
+                foreach ($combinedAttrs->take(2) as $attr) {
                     $reasons[] = [
                         'icon'  => 'fas fa-circle-check',
                         'text'  => ($attr->attribute->name ?? '') . ': ' . $attr->value,

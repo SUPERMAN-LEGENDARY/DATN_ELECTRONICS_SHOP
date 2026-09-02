@@ -105,10 +105,12 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 7px 16px;
+    padding: 0 16px;
+    height: 38px;
+    box-sizing: border-box;
     background: var(--sam-white);
     border: 1px solid var(--sam-line);
-    border-radius: 20px;
+    border-radius: 19px;
     font-family: inherit;
     font-size: 13px;
     font-weight: 700;
@@ -120,11 +122,11 @@ body {
 .btn-icon-text:hover { border-color: var(--sam-black); background: var(--sam-gray); }
 
 .btn-wishlist-detail {
-    width: 46px; height: 46px; border-radius: 12px;
-    border: 1.5px solid rgba(239,68,68,.35);
+    width: 38px; height: 38px; box-sizing: border-box; border-radius: 12px;
+    border: 1px solid rgba(239,68,68,.35);
     background: rgba(254,226,226,.5); color: #ef4444;
     display: inline-flex; align-items: center; justify-content: center;
-    font-size: 18px; cursor: pointer;
+    font-size: 15px; cursor: pointer;
     transition: background .2s, transform .15s, border-color .2s; flex-shrink: 0;
 }
 .btn-wishlist-detail:hover { background: rgba(239,68,68,.15); transform: scale(1.07); }
@@ -179,7 +181,7 @@ body {
     max-height: 84%;
     object-fit: contain;
     transition: transform .4s cubic-bezier(.33,0,.3,1), opacity .3s;
-}
+ mix-blend-mode: multiply; }
 .gallery-main:hover img { transform: scale(1.03); }
 
 .discount-tag {
@@ -1370,6 +1372,134 @@ $baseGalleryForJs = $galleryImages->values()->toArray();
             const hoursStr = (d * 24 + h).toString().padStart(2, '0');
             prodCountdown.innerHTML = `${hoursStr}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }, 1000);
+    }
+        // TIKTOK SHOP FLY-TO-CART ANIMATION
+    document.querySelectorAll('form[action*="gio-hang/them"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            // If the user clicked "Mua ngay", let the form submit normally
+            if (e.submitter && (e.submitter.id === 'btnBuyNow' || e.submitter.classList.contains('btn-buy-now'))) return;
+
+            e.preventDefault();
+
+            const btn = form.querySelector('button[type="submit"]');
+            if (btn) {
+                btn.disabled = true;
+                btn.style.opacity = '0.6';
+            }
+
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    playFlyToCartAnimation(data.cart_count, btn);
+                } else {
+                    showToast('Lỗi: ' + (data.message || 'Không thể thêm vào giỏ'), true);
+                    if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+                }
+            })
+            .catch(err => {
+                showToast('Lỗi mạng, vui lòng thử lại!', true);
+                if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+            });
+        });
+    });
+
+    function playFlyToCartAnimation(newCartCount, btnObj) {
+        const mainImg = document.getElementById('mainImg');
+        const cartIconBtn = document.querySelector('a.sm-icon-btn[href*="gio-hang"]');
+        
+        function restoreBtn() {
+            if (btnObj) { btnObj.disabled = false; btnObj.style.opacity = '1'; }
+            else {
+                document.querySelectorAll('form[action*="gio-hang/them"] button[type="submit"]').forEach(b => {
+                    b.disabled = false; b.style.opacity = '1';
+                });
+            }
+        }
+
+        if (!mainImg || !cartIconBtn) {
+            updateCartBadge(newCartCount);
+            showToast('Đã thêm vào giỏ hàng!');
+            restoreBtn();
+            return;
+        }
+
+        const rect = mainImg.getBoundingClientRect();
+        const targetRect = cartIconBtn.getBoundingClientRect();
+        
+        // 1. CHỈNH SỬA CHO HÌNH TRÒN XOE (Square aspect ratio before border-radius)
+        const size = Math.min(rect.width, rect.height);
+        const startX = rect.left + (rect.width - size) / 2;
+        const startY = rect.top + (rect.height - size) / 2;
+
+        const clone = document.createElement('img');
+        clone.src = mainImg.src;
+        clone.style.position = 'fixed';
+        clone.style.top = startY + 'px';
+        clone.style.left = startX + 'px';
+        clone.style.width = size + 'px';
+        clone.style.height = size + 'px';
+        clone.style.objectFit = 'cover';
+        clone.style.borderRadius = '50%';
+        clone.style.zIndex = '99999';
+        clone.style.boxShadow = '0 10px 25px rgba(0,0,0,0.3)';
+        clone.style.pointerEvents = 'none';
+        
+        // 2. TỐC ĐỘ BAY VÀ QUỸ ĐẠO MƯỢT MÀ HƠN (Bay 1.2s thay vì 0.8s)
+        clone.style.transition = 'all 1.2s cubic-bezier(0.25, 1, 0.25, 1)';
+        
+        document.body.appendChild(clone);
+        
+        // Force reflow
+        void clone.offsetWidth;
+        
+        // Animate towards cart icon
+        const targetX = targetRect.left + (targetRect.width / 2) - 15;
+        const targetY = targetRect.top + (targetRect.height / 2) - 15;
+        
+        clone.style.top = targetY + 'px';
+        clone.style.left = targetX + 'px';
+        clone.style.width = '30px';
+        clone.style.height = '30px';
+        clone.style.opacity = '0.5';
+        clone.style.transform = 'scale(0.5) rotate(720deg)'; // Xoay nhiều hơn cho đẹp
+        
+        // When animation ends
+        setTimeout(() => {
+            clone.remove();
+            
+            // Pop the cart icon
+            cartIconBtn.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            cartIconBtn.style.transform = 'scale(1.3)';
+            
+            updateCartBadge(newCartCount);
+            
+            setTimeout(() => {
+                cartIconBtn.style.transform = 'scale(1)';
+            }, 200);
+            
+            showToast('Đã thêm vào giỏ hàng!');
+            
+            // Re-enable button
+            restoreBtn();
+        }, 1200);
+    }
+
+    function updateCartBadge(count) {
+        const badge = document.getElementById('headerCartBadge');
+        if (badge) {
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'flex' : 'none';
+        }
     }
 })();
 </script>

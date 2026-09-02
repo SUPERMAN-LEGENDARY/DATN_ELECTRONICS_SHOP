@@ -941,7 +941,10 @@
                         <div class="order-product-name">
                             {{ $item?->product_name ?? $product?->name }}
                         </div>
-                        <div class="order-product-qty">
+                        @if($item && $item->variant_attributes_text)
+    <div style="font-size: 12px; color: #666; margin-top: 2px; margin-bottom: 4px;">Phân loại: {{ $item->variant_attributes_text }}</div>
+    @endif
+    <div class="order-product-qty">
                             × {{ $item?->quantity }}
                             @if($order->items->count() > 1)
                             <span class="order-product-more">và {{ $order->items->count() - 1 }} sản phẩm khác</span>

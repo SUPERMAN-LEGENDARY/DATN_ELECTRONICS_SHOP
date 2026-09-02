@@ -146,19 +146,24 @@ use HasFactory, SoftDeletes;
                 ->get();
         }
 
+        $isValidPrice = function ($event) {
+            if (is_null($event->min_price)) return true;
+            return $this->price >= $event->min_price;
+        };
+
         // Ưu tiên 1: Event chỉ định đích danh sản phẩm này
         foreach (self::$activeEventsCache as $event) {
-            if ($event->apply_scope === 'select' && $event->products->contains('id', $this->id)) return $event;
+            if ($event->apply_scope === 'select' && $event->products->contains('id', $this->id) && $isValidPrice($event)) return $event;
         }
 
         // Ưu tiên 2: Event áp dụng cho danh mục / thương hiệu của sản phẩm này
         foreach (self::$activeEventsCache as $event) {
-            if ($event->apply_scope === 'category' && ($event->categories->contains('id', $this->category_id) || $event->categories->contains('id', $this->brand_id))) return $event;
+            if ($event->apply_scope === 'category' && ($event->categories->contains('id', $this->category_id) || $event->categories->contains('id', $this->brand_id)) && $isValidPrice($event)) return $event;
         }
 
         // Ưu tiên 3: Event áp dụng cho toàn bộ cửa hàng
         foreach (self::$activeEventsCache as $event) {
-            if ($event->apply_scope === 'all') return $event;
+            if ($event->apply_scope === 'all' && $isValidPrice($event)) return $event;
         }
 
         return null;
@@ -212,21 +217,28 @@ use HasFactory, SoftDeletes;
     public function getMinPriceAttribute(): float
     {
         $prices = collect([(float) $this->price]);
-
         foreach ($this->variants as $variant) {
             if ($variant->is_active && $variant->stock > 0) {
                 $prices->push($variant->final_price);
             }
         }
-
         $min = (float) $prices->min();
-        
         $discountPercent = $this->discount_percent;
         if ($discountPercent > 0) {
             $min = $min * (1 - $discountPercent / 100);
         }
-
         return $min;
+    }
+
+    public function getOriginalMinPriceAttribute(): float
+    {
+        $prices = collect([(float) $this->price]);
+        foreach ($this->variants as $variant) {
+            if ($variant->is_active && $variant->stock > 0) {
+                $prices->push($variant->final_price);
+            }
+        }
+        return (float) $prices->min();
     }
 
     /** Sản phẩm có nhiều mức giá khác nhau (do biến thể) -> nên hiển thị "Từ ..." */

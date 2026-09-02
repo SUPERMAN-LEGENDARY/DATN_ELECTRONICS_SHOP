@@ -184,7 +184,7 @@
     width: 110px;
     height: 110px;
     object-fit: contain;
-}
+ mix-blend-mode: multiply; }
 .product-image-wrap .no-img {
     color: var(--gray-400);
     font-size: 26px;
@@ -435,7 +435,7 @@
         gap: 14px;
     }
     .product-image-wrap { width: 96px; height: 96px; }
-    .product-image-wrap img { width: 80px; height: 80px; }
+    .product-image-wrap img { width: 80px; height: 80px;  mix-blend-mode: multiply; }
 
     .product-right {
         grid-column: 1 / -1;
@@ -493,8 +493,21 @@
             @foreach($products as $item)
             <div class="product-row">
                 <div class="product-image-wrap">
-                    @if($item['product']->first_image)
-                        <img src="{{ $item['product']->first_image }}" alt="{{ $item['product']->name }}">
+                    @php
+                        $img = null;
+                        if (!empty($item['variant'])) {
+                            if (!empty($item['variant']->thumbnail)) {
+                                $img = $item['variant']->thumbnail;
+                            } elseif (!empty($item['variant']->images) && count($item['variant']->images) > 0) {
+                                $img = $item['variant']->images[0];
+                            }
+                        }
+                        if (!$img && !empty($item['product']->first_image)) {
+                            $img = $item['product']->first_image;
+                        }
+                    @endphp
+                    @if($img)
+                        <img src="{{ $img }}" alt="{{ $item['product']->name }}">
                     @else
                         <div class="no-img"><i class="fas fa-image"></i></div>
                     @endif
@@ -506,9 +519,30 @@
                             {{ $item['product']->name }}
                         </a>
                     </h5>
-                    @if($item['variant'])
+                    @php
+                        $attrs = '';
+                        if (!empty($item['variant'])) {
+                            $attrs = $item['variant']->variantAttributes->sortBy('attribute_id')->pluck('value')->implode(' - ');
+                            if (empty($attrs) && !empty($item['variant']->label)) {
+                                $attrs = $item['variant']->label;
+                            }
+                        } else {
+                            if ($item['product']->variants->isNotEmpty()) {
+                                $variantAttrIds = \App\Models\ProductVariantAttribute::whereIn('variant_id', $item['product']->variants->pluck('id'))->pluck('attribute_id')->unique();
+                                if ($variantAttrIds->isNotEmpty()) {
+                                    $attrs = \App\Models\ProductAttribute::where('product_id', $item['product']->id)
+                                        ->whereIn('attribute_id', $variantAttrIds)
+                                        ->get()
+                                        ->sortBy('attribute_id')
+                                        ->pluck('value')
+                                        ->implode(' - ');
+                                }
+                            }
+                        }
+                    @endphp
+                    @if(!empty($attrs))
                     <div class="variant-tag">
-                        {{ $item['variant']->variantAttributes->pluck('value')->implode(' - ') }}
+                        {{ $attrs }}
                     </div>
                     @endif
                     <div class="brand">{{ $item['product']->brand->name ?? 'ElectronicShop' }}</div>
@@ -518,7 +552,7 @@
                         @csrf @method('PATCH')
                         <div class="qty-control">
                             <input type="number" name="quantity" value="{{ $item['quantity'] }}"
-                                   min="1" max="{{ max($item['stock'], 1) }}" class="qty-input"
+                                   min="1" max="{{ min(max($item['stock'], 1), 5) }}" class="qty-input"
                                    onchange="this.form.submit()">
                         </div>
                     </form>

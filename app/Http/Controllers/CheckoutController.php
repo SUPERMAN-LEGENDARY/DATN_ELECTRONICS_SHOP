@@ -432,7 +432,7 @@ class CheckoutController extends Controller
 
         $redirectUrl = route('checkout.momo.return');
         $ipnUrl      = route('checkout.momo.return');
-        $requestType = 'payWithATM';
+        $requestType = 'payWithMethod';
 
         // momo_order_id chỉ để đối soát/log, không dùng để xác định luồng xử lý ở momoReturn().
         session(['momo_order_id' => $orderId]);
