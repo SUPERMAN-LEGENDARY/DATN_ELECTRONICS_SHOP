@@ -456,6 +456,7 @@
    MESSAGES & BUBBLES
    ============================================================ */
 #ai-chat-messages {
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -781,13 +782,20 @@
     overflow-x: auto;
     padding: 10px 16px 4px;
     margin: 4px -16px 0;
-    scrollbar-width: none;
+    scrollbar-width: thin;
     -webkit-overflow-scrolling: touch;
     flex-shrink: 0;
-}
+ padding-bottom: 12px;}
 
 #ai-quick-chips::-webkit-scrollbar {
-    display: none;
+    height: 5px;
+}
+#ai-quick-chips::-webkit-scrollbar-track {
+    background: transparent;
+}
+#ai-quick-chips::-webkit-scrollbar-thumb {
+    background: var(--ai-line-dark);
+    border-radius: 4px;
 }
 
 .ai-chip {
@@ -941,6 +949,24 @@
 
     // Session token
     const SESSION_TOKEN_KEY = 'ai_chat_session_token';
+    const CHAT_HISTORY_KEY  = 'ai_chat_history';
+    
+    function saveChatHistory() {
+        if (messages) sessionStorage.setItem(CHAT_HISTORY_KEY, messages.innerHTML);
+    }
+    
+    function loadChatHistory() {
+        const saved = sessionStorage.getItem(CHAT_HISTORY_KEY);
+        if (saved && saved.trim() !== '') {
+            messages.innerHTML = saved;
+            // Only hide chips if the user has actually sent at least one message
+            if (chips && messages.querySelector('.user')) {
+                chips.style.display = 'none';
+            }
+        }
+    }
+    loadChatHistory();
+
     function getSessionToken() {
         let token = localStorage.getItem(SESSION_TOKEN_KEY);
         if (!token) {
@@ -990,6 +1016,7 @@
     function resetChat() {
         messages.innerHTML = '';
         localStorage.removeItem(SESSION_TOKEN_KEY);
+        sessionStorage.removeItem(CHAT_HISTORY_KEY);
         if (chips) chips.style.display = 'flex';
         appendBot('Xin chào! Cuộc trò chuyện đã được làm mới. Em có thể giúp gì cho anh/chị ạ?');
     }
@@ -1057,6 +1084,7 @@
         row.innerHTML = `<div class="ai-msg-bubble">${escapeHtml(text)}</div>`;
         messages.appendChild(row);
         scrollDown();
+        saveChatHistory();
     }
 
     function appendBot(text, products = []) {
@@ -1096,6 +1124,7 @@
                     renderProducts(bubble, products);
                 }
                 scrollDown();
+                saveChatHistory();
             }
         }
         typeChar();
