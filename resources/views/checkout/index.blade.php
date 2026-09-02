@@ -253,7 +253,8 @@
         color: var(--samsung-gray-dark);
         margin-top: 2px;
     }
-    .pay-option#optMomo i { color: #a50064; } /* Brand MoMo Magenta */
+    .pay-option#optMomo i { color: #a50064; }
+    .pay-option#optVnpay i { color: #005a9e; } /* Brand VNPay Blue */
 
     /* ============================================================
        FORM FIELDS
@@ -659,6 +660,14 @@
                             <div class="option-desc">Thanh toán an toàn & nhanh chóng qua ứng dụng MoMo</div>
                         </div>
                     </label>
+                    <label class="pay-option" id="optVnpay">
+                        <input type="radio" name="payment_method" value="vnpay" onchange="selectPay('vnpay')" style="display:none">
+                        <i class="fas fa-credit-card"></i>
+                        <div class="option-content">
+                            <div class="option-title">Thanh toán qua VNPAY</div>
+                            <div class="option-desc">Thanh toán an toàn qua Cổng VNPAY (Thẻ ATM, Visa, QR Code)</div>
+                        </div>
+                    </label>
                 </div>
 
                 {{-- ─── 3. Ghi chú ─── --}}
@@ -1031,6 +1040,7 @@ function toggleNewAddressForm(show) {
 function selectPay(method) {
     document.getElementById('optCod').classList.toggle('active', method === 'cod');
     document.getElementById('optMomo').classList.toggle('active', method === 'momo');
+    document.getElementById('optVnpay')?.classList.toggle('active', method === 'vnpay');
 }
 
 document.getElementById('optCod')?.addEventListener('click', () => {
@@ -1040,6 +1050,10 @@ document.getElementById('optCod')?.addEventListener('click', () => {
 document.getElementById('optMomo')?.addEventListener('click', () => {
     const r = document.querySelector('input[value=momo]');
     if (r) { r.checked = true; selectPay('momo'); }
+});
+document.getElementById('optVnpay')?.addEventListener('click', () => {
+    const r = document.querySelector('input[value=vnpay]');
+    if (r) { r.checked = true; selectPay('vnpay'); }
 });
 
 /* Form submission spinner */

@@ -180,7 +180,7 @@ class OrderController extends Controller
             'address_province' => 'required_without:address_id|nullable|string|max:100',
             'voucher_id'       => 'nullable|exists:vouchers,id',
             'status'           => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled,returned',
-            'payment_method'   => 'required|in:cod,momo',
+            'payment_method'   => 'required|in:cod,momo,vnpay',
             'payment_status'   => 'required|in:unpaid,paid,refunded',
             'note'             => 'nullable|string|max:500',
             'items'            => 'required|array|min:1',
@@ -340,7 +340,7 @@ class OrderController extends Controller
             'address_id'     => 'required|exists:addresses,id',
             'status' => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled,returned',
             'payment_status' => 'required|in:unpaid,paid,refunded',
-            'payment_method' => 'required|in:cod,momo',
+            'payment_method' => 'required|in:cod,momo,vnpay',
             'voucher_id'     => 'nullable|exists:vouchers,id',
             'note'           => 'nullable|string|max:500',
         ]);

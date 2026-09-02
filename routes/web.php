@@ -199,6 +199,8 @@ Route::prefix('thanh-toan')->name('checkout.')->group(function () {
     //     đúng là chủ đơn hàng (xem CheckoutController::success()).
     Route::get('/momo/return',        [\App\Http\Controllers\CheckoutController::class, 'momoReturn'])->name('momo.return');
     Route::get('/momo/lai/{order}',   [\App\Http\Controllers\CheckoutController::class, 'retryMomoPayment'])->name('momo.retry')->middleware('signed');
+    Route::get('/vnpay/return',       [\App\Http\Controllers\CheckoutController::class, 'vnpayReturn'])->name('vnpay.return');
+    Route::get('/vnpay/lai/{order}',  [\App\Http\Controllers\CheckoutController::class, 'retryVnpayPayment'])->name('vnpay.retry')->middleware('signed');
     Route::get('/thanh-cong/{order}', [\App\Http\Controllers\CheckoutController::class, 'success'])->name('success');
 });
 

@@ -199,7 +199,7 @@ class CheckoutController extends Controller
             'district'       => 'required_without:address_id|nullable|string|max:100',
             'ward'           => 'required_without:address_id|nullable|string|max:100',
             'street'         => 'required_without:address_id|nullable|string|max:255',
-            'payment_method' => 'required|in:cod,momo',
+            'payment_method' => 'required|in:cod,momo,vnpay',
             'voucher_code'   => 'nullable|string|max:50',
             'note'           => 'nullable|string|max:500',
             'save_address'   => 'nullable|boolean',
@@ -261,10 +261,13 @@ class CheckoutController extends Controller
             'cart_keys'       => array_column($items, 'key'),
         ];
 
-        if ($paymentMethod === 'momo') {
-            // Lưu tạm thông tin đơn hàng vào session để tạo đơn sau khi MoMo callback về
+        if ($paymentMethod === 'vnpay') {
             session(['pending_order' => $orderPayload]);
+            return $this->vnpayPayment($total, $orderPayload);
+        }
 
+        if ($paymentMethod === 'momo') {
+            session(['pending_order' => $orderPayload]);
             return $this->momoPayment($total, $orderPayload);
         }
 
@@ -664,5 +667,173 @@ class CheckoutController extends Controller
         $order->load('items', 'address');
 
         return view('checkout.success', compact('order'));
+    }
+    // ==========================================
+    // VNPAY INTEGRATION
+    // ==========================================
+    private function vnpayPaymentRequest(float $amount, string $orderInfo)
+    {
+        $vnp_TmnCode = config('services.vnpay.tmn_code');
+        $vnp_HashSecret = config('services.vnpay.hash_secret');
+        $vnp_Url = config('services.vnpay.url');
+        $vnp_Returnurl = route('checkout.vnpay.return');
+        $vnp_TxnRef = date("YmdHis") . rand(100, 999);
+
+        $vnp_OrderInfo = $orderInfo;
+        $vnp_OrderType = 'other';
+        $vnp_Amount = $amount * 100;
+        $vnp_Locale = 'vn';
+        $vnp_IpAddr = request()->ip();
+
+        $inputData = array(
+            "vnp_Version" => "2.1.0",
+            "vnp_TmnCode" => $vnp_TmnCode,
+            "vnp_Amount" => $vnp_Amount,
+            "vnp_Command" => "pay",
+            "vnp_CreateDate" => date('YmdHis'),
+            "vnp_CurrCode" => "VND",
+            "vnp_IpAddr" => $vnp_IpAddr,
+            "vnp_Locale" => $vnp_Locale,
+            "vnp_OrderInfo" => $vnp_OrderInfo,
+            "vnp_OrderType" => $vnp_OrderType,
+            "vnp_ReturnUrl" => $vnp_Returnurl,
+            "vnp_TxnRef" => $vnp_TxnRef,
+        );
+
+        ksort($inputData);
+        $query = "";
+        $i = 0;
+        $hashdata = "";
+        foreach ($inputData as $key => $value) {
+            if ($i == 1) {
+                $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
+            } else {
+                $hashdata .= urlencode($key) . "=" . urlencode($value);
+                $i = 1;
+            }
+            $query .= urlencode($key) . "=" . urlencode($value) . '&';
+        }
+
+        $vnp_Url = $vnp_Url . "?" . $query;
+        if (isset($vnp_HashSecret)) {
+            $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
+            $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
+        }
+        
+        // session(['vnpay_order_id' => $vnp_TxnRef]);
+
+        return redirect()->away($vnp_Url);
+    }
+
+    private function vnpayPayment(float $amount, array $orderPayload)
+    {
+        return $this->vnpayPaymentRequest($amount, 'Thanh toan don hang ElectronicShop');
+    }
+
+    public function retryVnpayPayment(Request $request, Order $order)
+    {
+        $successUrl = URL::temporarySignedRoute('checkout.success', now()->addMinutes(30), ['order' => $order->id]);
+        if ($order->payment_method !== 'vnpay') {
+            return redirect()->to($successUrl)->with('error', 'Đơn hàng không dùng VNPay.');
+        }
+        if ($order->payment_status === 'paid') {
+            return redirect()->to($successUrl)->with('success', 'Đơn hàng đã thanh toán.');
+        }
+        if (in_array($order->status, ['cancelled', 'returned'])) {
+            return redirect()->to($successUrl)->with('error', 'Đơn hàng đã hủy, không thể thanh toán.');
+        }
+
+        session(['vnpay_retry_order_id' => $order->id]);
+        return $this->vnpayPaymentRequest((float) $order->total, "Thanh toan lai don hang #{$order->id}");
+    }
+
+    public function vnpayReturn(Request $request)
+    {
+        $vnp_HashSecret = config('services.vnpay.hash_secret');
+        $inputData = array();
+        foreach ($_GET as $key => $value) {
+            if (substr($key, 0, 4) == "vnp_") {
+                $inputData[$key] = $value;
+            }
+        }
+        $vnp_SecureHash = $inputData['vnp_SecureHash'];
+        unset($inputData['vnp_SecureHash']);
+        ksort($inputData);
+        $i = 0;
+        $hashData = "";
+        foreach ($inputData as $key => $value) {
+            if ($i == 1) {
+                $hashData = $hashData . '&' . urlencode($key) . "=" . urlencode($value);
+            } else {
+                $hashData = $hashData . urlencode($key) . "=" . urlencode($value);
+                $i = 1;
+            }
+        }
+        $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
+        
+        $isSuccess = ($secureHash == $vnp_SecureHash && $request->input('vnp_ResponseCode') == '00');
+        
+        $retryOrderId = session('vnpay_retry_order_id');
+        if ($retryOrderId) {
+            session()->forget(['vnpay_retry_order_id']);
+            $order = Order::find($retryOrderId);
+            if (!$order) return redirect()->route('home');
+            
+            $successUrl = URL::temporarySignedRoute('checkout.success', now()->addMinutes(30), ['order' => $order->id]);
+            if (!$isSuccess) {
+                return redirect()->to($successUrl)->with('error', 'Thanh toán VNPay thất bại.');
+            }
+            if ($order->payment_status !== 'paid') {
+                DB::transaction(function () use ($order, $request) {
+                    $order->payment_status = 'paid';
+                    $order->save();
+                    $payment = $order->payments()->create([
+                        'gateway' => 'vnpay',
+                        'transaction_id' => $request->input('vnp_TransactionNo'),
+                        'amount' => $order->total,
+                        'status' => 'success',
+                        'paid_at' => now(),
+                    ]);
+                    $this->logPaymentToCsv($order, $payment);
+                });
+                $order->loadMissing('user');
+                $contactEmail = $order->contact_email;
+                if ($contactEmail && !str_ends_with($contactEmail, '@noemail.local')) {
+                    try {
+                        Mail::to($contactEmail)->send(new OrderPaymentConfirmedMail($order));
+                    } catch (\Throwable $e) {
+                        report($e);
+                    }
+                }
+            }
+            return redirect()->to($successUrl)->with('success', 'Thanh toán VNPay thành công!');
+        }
+
+        // TẠO ĐƠN MỚI
+        $orderPayload = session('pending_order');
+        if (!$isSuccess || !$orderPayload) {
+            session()->forget(['pending_order']);
+            return redirect()->route('cart.index')->with('error', 'Thanh toán VNPay thất bại hoặc bị hủy.');
+        }
+
+        [$allItems] = $this->buildCartItems();
+        $items = array_values(array_filter($allItems, fn($it) => in_array($it['key'], $orderPayload['cart_keys'])));
+        
+        if (empty($items)) {
+            session()->forget(['pending_order']);
+            return redirect()->route('cart.index')->with('error', 'Giỏ hàng đã thay đổi.');
+        }
+
+        $order = $this->createOrder($orderPayload, $items, 'paid', [
+            'status' => 'success',
+            'transaction_id' => $request->input('vnp_TransactionNo'),
+            'gateway' => 'vnpay'
+        ]);
+        
+        session()->forget(['pending_order']);
+        if (!$order) return redirect()->route('cart.index')->with('error', 'Lỗi lưu đơn hàng.');
+        $this->clearPurchasedItems($orderPayload['cart_keys']);
+        
+        return redirect()->route('checkout.success', $order->id)->with('success', 'Thanh toán VNPay thành công!');
     }
 }

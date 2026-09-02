@@ -57,4 +57,9 @@ return [
     'keys'  => array_filter(array_map('trim', explode(',', env('GROQ_API_KEYS', '')))),
     'model' => env('GROQ_MODEL', 'llama-3.3-70b-versatile'),
 ],
+    'vnpay' => [
+        'tmn_code' => env('VNPAY_TMN_CODE', 'CGXZLS0Z'),
+        'hash_secret' => env('VNPAY_HASH_SECRET', 'XNBCJFAKAZQSGTARRLGCHVZWCIOIGSHN'),
+        'url' => env('VNPAY_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'),
+    ],
 ];

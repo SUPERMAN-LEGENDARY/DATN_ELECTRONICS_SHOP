@@ -460,6 +460,7 @@
                         <select name="payment_method" id="payment_method" class="form-control @error('payment_method') is-invalid @enderror" required>
                             <option value="cod" {{ old('payment_method') == 'cod' ? 'selected' : '' }}>COD</option>
                             <option value="momo" {{ old('payment_method') == 'momo' ? 'selected' : '' }}>MoMo</option>
+                            <option value="vnpay" {{ old('payment_method') == 'vnpay' ? 'selected' : '' }}>VNPay</option>
                         </select>
                         @error('payment_method')
                             <div class="error">{{ $message }}</div>
