@@ -176,7 +176,7 @@ Route::prefix('gio-hang')->name('cart.')->middleware(\App\Http\Middleware\Custom
     Route::delete('/',            [CartController::class, 'clear'])->name('clear');
 });
 
-Route::post('/chatbot/send', [ChatbotController::class, 'send'])->name('chatbot.send');
+Route::post('/tu-van/gui-tin', [ChatbotController::class, 'send'])->name('chatbot.send');
 // ─── THANH TOÁN (CHECKOUT) ────────────────────────────────────────
 Route::prefix('thanh-toan')->name('checkout.')->group(function () {
 
